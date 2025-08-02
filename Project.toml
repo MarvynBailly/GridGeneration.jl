@@ -1,0 +1,7 @@
+name = "GridGeneration"
+uuid = "a45aac3a-c828-4b24-bd97-84998539262e"
+version = "0.1.0"
+
+
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"

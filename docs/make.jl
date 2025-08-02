@@ -1,11 +1,11 @@
-using Documenter, GridGeneration
+using Documenter
 
 makedocs(
     sitename = "GridGeneration.jl",
     format = Documenter.HTML(),
-    modules  = [GridGeneration],
+    # modules  = [GridGeneration],
 )
 
 deploydocs(
-    repo      = "github.com/MarvynBailly/GridGeneration.git",
+    repo = "github.com/MarvynBailly/GridGeneration.jl.git",
 )

@@ -1,0 +1,3 @@
+var documenterSearchIndex = {"docs":
+[{"location":"#YourPackage.jl-Documentation","page":"YourPackage.jl Documentation","title":"YourPackage.jl Documentation","text":"","category":"section"},{"location":"","page":"YourPackage.jl Documentation","title":"YourPackage.jl Documentation","text":"Welcome to the documentation for YourPackage.jl.","category":"page"},{"location":"#Overview","page":"YourPackage.jl Documentation","title":"Overview","text":"","category":"section"},{"location":"","page":"YourPackage.jl Documentation","title":"YourPackage.jl Documentation","text":"Brief description of your package.","category":"page"}]
+}

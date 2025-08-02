@@ -1,17 +1,7 @@
-```@meta
-CurrentModule = GridGeneration
+# YourPackage.jl Documentation
 
-
-# Grid-Generation.jl Documentation
-
-Welcome to the documentation for Grid-Generation.jl.
+Welcome to the documentation for YourPackage.jl.
 
 ## Overview
 
-Brief description of Grid-Generation package.
-
-## Installation
-
-```julia
-using Pkg
-Pkg.add("Grid-Generation")
+Brief description of your package.
