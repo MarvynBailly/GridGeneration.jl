@@ -3,6 +3,11 @@ Pkg.activate(@__DIR__)
 Pkg.develop(PackageSpec(path=joinpath(@__DIR__, "..")))
 Pkg.instantiate()
 
+try
+    using Revise
+catch
+end
+
 using Documenter
 using GridGeneration
 
