@@ -1,7 +1,3 @@
-```@meta
-CurrentModule = GridGeneration
-```
-
 # GridGeneration.jl Documentation
 
 Welcome to the documentation for GridGeneration.jl
