@@ -1,6 +1,6 @@
-# YourPackage.jl Documentation
+# GridGeneration.jl Documentation
 
-Welcome to the documentation for YourPackage.jl.
+Welcome to the documentation for GridGeneration.jl
 
 ## Overview
 
