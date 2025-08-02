@@ -1,3 +1,11 @@
-using Documenter, Example
+using Documenter, GridGeneration
 
-makedocs(sitename="My Documentation")
+makedocs(
+    sitename = "GridGeneration.jl",
+    format = Documenter.HTML(),
+    modules  = [GridGeneration],
+)
+
+deploydocs(
+    repo      = "github.com/MarvynBailly/GridGeneration.git",
+)

@@ -1,0 +1,8 @@
+.vscode
+
+Manifest.toml
+
+
+# Ignore all build/ and builds/ directories
+build/
+builds/
