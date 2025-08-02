@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = GridGeneration
+
+
 # Grid-Generation.jl Documentation
 
 Welcome to the documentation for Grid-Generation.jl.
