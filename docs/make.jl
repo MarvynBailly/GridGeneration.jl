@@ -24,12 +24,27 @@ makedocs(
     format   = Documenter.HTML(
         prettyurls = !isempty(get(ENV, "CI", "")),  # false locally (Windows), true on CI
     ),
+    
+    
+    
     pages = [
         "Home" => "index.md",
-        "ODE Formulation"        => "pages/ODEFormulation.md",
-        "ODE Numerical Methods"  => "pages/ODENumericalMethods.md",
-        "Distribution of Points" => "pages/DistributionOfPoints.md",
+        "Ordinary Differential Equations" => Any[
+            "ODE Formulation" => "pages/ODEFormulation.md",
+            "ODE Numerical Methods"  => "pages/ODENumericalMethods.md",
+            ],
+        
+        "1D Projection onto 2D" => Any[
+            "Distribution of Points" => "pages/DistributionOfPoints.md",
+        ],
+
+        "Appendix" => Any[
+            "Mathematical Work" => "pages/MathematicalWork.md",
+        ]
     ],
+
+
+
     # Optional quality gates once you’re ready:
     # doctest  = true,
     # checkdocs = :exports,
