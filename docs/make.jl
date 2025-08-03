@@ -47,7 +47,7 @@ makedocs(
 
     # Optional quality gates once you’re ready:
     # doctest  = true,
-    # checkdocs = :exports,
+    checkdocs = :exports,
 )
 
 deploydocs(

@@ -41,7 +41,7 @@ We can rewrite the second order ODE as a system of first order ODEs by letting $
 
 $\begin{cases} 
 u_1' = u_2 = x',\\
-u'_2 = x'' = - \frac{1}{2} \frac{M_x}{M}.
+u'_2 = x'' = - \frac{1}{2} \frac{M_x}{M}x_s^2.
 \end{cases}$
 
 with dirichlet boundary conditions:

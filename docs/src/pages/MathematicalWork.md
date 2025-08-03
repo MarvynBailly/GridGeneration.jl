@@ -63,7 +63,7 @@ To turn the above into a first order system, let $u_1 = x$ and $u_2 = x_s$, then
 
 $\begin{cases} 
 u_1' = u_2 = x',\\
-u'_2 = x'' = - \frac{1}{2} \frac{M_x}{M}.
+u'_2 = x'' = - \frac{1}{2} \frac{M_x}{M} x_s^2.
 \end{cases}$
 
 ### Semi-Analytic Solution
