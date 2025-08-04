@@ -13,7 +13,7 @@ base = 0.05
 
 
 function M_func(x, problem)
-    @global scale, base
+    
     if problem == 1
         return scale 
     elseif problem == 2
@@ -28,7 +28,7 @@ function M_func(x, problem)
 end
 
 function M_u1_func(x, problem)
-    @global scale, base
+    
     if problem == 1
         return 0
     elseif problem == 2
@@ -43,7 +43,7 @@ function M_u1_func(x, problem)
 end
 
 
-problems = [5];
+problems = [1];
 # problem = 3 # 1: uniform, 2: clustering at x=0, 3: clustering at x=1, 4: clustering at x=0.5
 
 
@@ -54,7 +54,7 @@ for problem in problems
 
     N = 500
     x0 = 0.0
-    x1 = 1.0
+    x1 = 4.0
 
     scale = 40000
 
@@ -98,5 +98,5 @@ for problem in problems
             size = (800, 650), legend = :topleft)
 
     display(p4)
-    savefig(p4, imagePath)
+    # savebig(p4, imagePath)
 end
