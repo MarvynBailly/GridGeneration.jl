@@ -114,37 +114,37 @@ Local not shown due to optimal number of points being $\leq 2$.
 ### ODE Solution
 #### Uniform
 ##### Local
-<!-- ![Uniform-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_uniform_local.svg) -->
+\![Uniform-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_uniform_local.svg)
 ##### Nuclear
 ![Uniform-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_uniform_nuclear.svg)
 
 #### Clustering at $x=0$
 ##### Local
-<!-- ![x0-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=0_local.svg) -->
+\![x0-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=0_local.svg) 
 ##### Nuclear
 ![x0-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=0_nuclear.svg)
 
 #### Clustering at $x=1$
 ##### Local
-<!-- ![x1-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=1_local.svg) -->
+\![x1-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=1_local.svg) 
 ##### Nuclear
 ![x1-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=1_nuclear.svg)
 
 ### Final Distribution
 #### Uniform
 ##### Local
-<!-- ![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_uniform_local.svg) -->
+\![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_uniform_local.svg) 
 ##### Nuclear
 ![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_uniform_nuclear.svg)
 
 #### Clustering at $x=0$
 ##### Local
-<!-- ![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=0_local.svg) -->
+\![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=0_local.svg) 
 ##### Nuclear
 ![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=0_nuclear.svg)
 
 #### Clustering at $x=1$
 ##### Local
-<!-- ![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=1_local.svg) -->
+\![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=1_local.svg) 
 ##### Nuclear
 ![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=1_nuclear.svg)
