@@ -34,8 +34,8 @@ makedocs(
             "ODE Numerical Methods"  => "pages/ODENumericalMethods.md",
             ],
         
-        "1D Projection onto 2D" => Any[
-            "Distribution of Points" => "pages/DistributionOfPoints.md",
+        "2D to 1D Reformulation " => Any[
+            "Mapping 2D to 1D" => "pages/Mapping2Dto1D.md",
         ],
 
         "Appendix" => Any[
