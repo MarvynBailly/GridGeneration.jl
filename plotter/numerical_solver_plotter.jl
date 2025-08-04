@@ -7,30 +7,43 @@ using Plots
 folder = "ODENumericalMethods"
 path = "docs/src/assets/images/$folder/"
 
+
+scale = 40000
+base = 0.05
+
+
 function M_func(x, problem)
-    scale = 40000
+    @global scale, base
     if problem == 1
         return scale 
     elseif problem == 2
         return scale * (1 + 15 * (x))^(-2)
     elseif problem == 3
         return scale * (1 + 15 * (1-x))^(-2)
+    elseif problem == 4
+        return scale * exp(-(x - 0.5)^2 / base)
+    elseif problem == 5
+        return scale * (1 + 15 * (x))^(-2) + scale * (1 + 15 * (1-x))^(-2)
     end
 end
 
 function M_u1_func(x, problem)
-    scale = 40000
+    @global scale, base
     if problem == 1
         return 0
     elseif problem == 2
         return -2 * scale * (1 + 15 * (x))^(-3) * (15)
     elseif problem == 3
         return -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
+    elseif problem == 4
+        return scale * exp(-(x - 0.5)^2 / base ) * (-2 * (x - 0.5) / base)
+    elseif problem == 5
+        return -2 * scale * (1 + 15 * (x))^(-3) * (15) + -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
     end
 end
 
 
-problems = [1,2,3];
+problems = [5];
 # problem = 3 # 1: uniform, 2: clustering at x=0, 3: clustering at x=1, 4: clustering at x=0.5
 
 
@@ -39,7 +52,7 @@ problems = [1,2,3];
 for problem in problems
     method = "numeric"
 
-    N = 50
+    N = 500
     x0 = 0.0
     x1 = 1.0
 
@@ -51,6 +64,10 @@ for problem in problems
         name = "x=0"
     elseif problem == 3
         name = "x=1"
+    elseif problem == 4
+        name = "x=0.5"
+    elseif problem == 5
+        name = "edges"
     end
 
     M(x) = M_func(x, problem)
@@ -80,6 +97,6 @@ for problem in problems
             layout = @layout([A{0.001h}; B C; D]),
             size = (800, 650), legend = :topleft)
 
-    # display(p4)
+    display(p4)
     savefig(p4, imagePath)
 end

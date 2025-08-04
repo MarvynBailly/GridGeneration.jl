@@ -67,12 +67,15 @@ sol = GridGeneration.SolveODE(M, M_u1, N, x0, x1);
 
 ## Results
 Let's compare the distribution of points for four different metrics
-- Uniform
-- Clustering at $x=0$
-- Clustering at $x=1$
-- Clustering at $x=0.5$
-  
-Here are the results for the numerical approach
+- Uniform: $M_1(x) = \alpha.$
+- Clustering at $x=0.0$: $M_2(x) =  \frac{\alpha}{(1 + 15x)^2}.$
+- Clustering at $x=1$: $M_3(x) =  \frac{\alpha}{(1 + 15(1-x))^2}.$
+- Clustering at $x=0.5$: $M_4(x) = \alpha \text{exp}\left( \frac{-(x - 0.5)^2}{\eta}\right).$
+- Clustering at the edges: $M_5(x) = M_2(x) + M_3(x).$ 
+
+where $\alpha$ and $\beta$ are parameters.
+
+Here are the results for the numerical approach with $\alpha = 40000$ and $\beta = 0.05$:
 
 ### Uniform
 
@@ -86,3 +89,11 @@ Here are the results for the numerical approach
 
 ![x=1 clustering](../assets/images/ODENumericalMethods/x=1_N50_numeric.svg)
 
+### Clustering Near $x=0.5$
+
+![x=0.5 clustering](../assets/images/ODENumericalMethods/x=0.5_N100_numeric.svg)
+
+
+### Clustering Near Edges 
+
+![edge clustering](../assets/images/ODENumericalMethods/edges_N100_numeric.svg)

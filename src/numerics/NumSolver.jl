@@ -40,11 +40,6 @@ function SolveLinearSystem(M, Mx, N, x0, x1)
 
         du[1] = u2
         du[2] = - (M_u1 * u2^2) / (2 * M)    
-
-        # du[1] = u2
-        # numerator = u1^2 * M_u1 * (3 * sigma^2 * M * u2^2 - 1)
-        # denominator = 2 * M * (sigma^4 * M^2 * u2^4 + 1)
-        # du[2] = numerator / denominator
     end
 
 
