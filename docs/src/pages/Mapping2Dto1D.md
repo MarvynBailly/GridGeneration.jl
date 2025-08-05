@@ -15,19 +15,22 @@ Suppose we wish to solve the grid spacing along a discrete boundary $\Gamma$ giv
 ### Metric Tensor Field
 To find the grid spacing according to the 2D metric tensor $M$, let's compute a new $m$ value to represent the desired metric stretching in $\R$ rather than $\R^2$. Let's define $m_i$ as
 
-$m_i := (\gamma_{i+1} - \gamma_{i-1})^\top \cdot  \begin{pmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{pmatrix}_i \cdot (\gamma_{i+1} - \gamma_{i-1}), \quad i=2,\cdots, n - 1,$
+$m_i := \frac{1}{|\gamma_{i+1} - \gamma_{i-1}|^2}(\gamma_{i+1} - \gamma_{i-1})^\top \cdot  \begin{pmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{pmatrix}_i \cdot (\gamma_{i+1} - \gamma_{i-1}), \quad i=2,\cdots, n - 1,$
 
 and one sided differences for the edges
 
-$m_1 := (\gamma_{2} - \gamma_{1})^\top  \cdot \begin{pmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{pmatrix}_1 \cdot (\gamma_{2} - \gamma_{1}),$
+$m_1 := \frac{1}{|\gamma_{2} - \gamma_{1}|^2}(\gamma_{2} - \gamma_{1})^\top  \cdot \begin{pmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{pmatrix}_1 \cdot (\gamma_{2} - \gamma_{1}),$
 
-$m_n := (\gamma_{n} - \gamma_{n-1})^\top \cdot \begin{pmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{pmatrix}_n \cdot (\gamma_{n} - \gamma_{n-1}).$
+$m_n := \frac{1}{|\gamma_{n} - \gamma_{n-1}|^2}(\gamma_{n} - \gamma_{n-1})^\top \cdot \begin{pmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{pmatrix}_n \cdot (\gamma_{n} - \gamma_{n-1}).$
 
-Let's call this method "local." 
+Let's call this method "local." This is basically a local normalized product between a central difference on $x_i$ and the local $M_i$ tensor.
 
-Another method would be to take $m_i$ as the nuclear norm (the sum of the singular values) of the 2D tensor corresponding with $x_i$. 
 
-$m_i = \|M\|_\star = \text{trace}(\sqrt{M^* M })$.
+#### Don't Do this
+
+Another method would be to take $m_i$ as the nuclear norm (the sum of the singular values ) of the 2D tensor corresponding with $x_i$. We don't want the metric to change value and want it to correspond with the local direction.
+
+
 
 
 ### $x(s)$
@@ -53,26 +56,17 @@ function GetMetricValues(points, getMetric; method = "local")
     n = size(points, 2)
     m_vals = zeros(Float64, n)
     diff = zeros(Float64, 2, n)
+
     diff[:, 2:n-1] = points[:, 3:n] - points[:, 1:n-2]
     diff[:, n] = points[:, n] - points[:, n-1]
     diff[:,1] = points[:, 2] - points[:, 1]
     
     for i in 1:n
-        # get metric value for the points M
-        metricValues = getMetric(points[1, i], points[2, i])
-        M = zeros(Float64, 2, 2)
-        M[1, 1] = metricValues[1]
-        M[2, 2] = metricValues[2]
-        
+        M = getMetric(points[1, i], points[2, i])
         
         localDiff = diff[:, i]
-        if method == "local"
-            m_vals[i] = localDiff' * M * localDiff                        
-        elseif method == "nuclear"
-            m_vals[i] = M[1, 1] + M[2, 2]
-        end
+        m_vals[i] = localDiff' * M * localDiff                        
     end
-
 
     return m_vals
 end
@@ -89,62 +83,27 @@ Let's compare the distribution of points for four different metrics
 - Clustering at $x=0.0$
 - Clustering at $x=1$
 
-### Metric Values
 
-#### Uniform
-##### Local
+### Uniform
+#### Metric Values
 ![Uniform-local](../assets/images/Mapping2Dto1D/metricboundary_uniform_local.svg)
-##### Nuclear
-![Uniform-nuclear](../assets/images/Mapping2Dto1D/metricboundary_uniform_nuclear.svg)
+#### ODE Solution
+![Uniform-local](../assets/images/Mapping2Dto1D/pointsmetric_uniform_local.svg)
+#### Final Distribution
+![Uniform-local](../assets/images/Mapping2Dto1D/result_uniform_local.svg) 
 
-#### Clustering at $x=0$
-##### Local
-![x0-local](../assets/images/Mapping2Dto1D/metricboundary_x=0_local.svg)
-##### Nuclear
-![x0-nuclear](../assets/images/Mapping2Dto1D/metricboundary_x=0_nuclear.svg)
+### $x=0$ Clustering
+#### Metric Values
+![x=0-local](../assets/images/Mapping2Dto1D/metricboundary_x=0_local.svg)
+#### ODE Solution
+![x=0-local](../assets/images/Mapping2Dto1D/pointsmetric_x=0_local.svg)
+#### Final Distribution
+![x=0-local](../assets/images/Mapping2Dto1D/result_x=0_local.svg) 
 
-### Clustering at $x=1$
-##### Local
-![x1-local](../assets/images/Mapping2Dto1D/metricboundary_x=1_local.svg)
-##### Nuclear
-![x1-nuclear](../assets/images/Mapping2Dto1D/metricboundary_x=1_nuclear.svg)
-
-Local not shown due to optimal number of points being $\leq 2$.
-
-### ODE Solution
-#### Uniform
-##### Local
-\![Uniform-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_uniform_local.svg)
-##### Nuclear
-![Uniform-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_uniform_nuclear.svg)
-
-#### Clustering at $x=0$
-##### Local
-\![x0-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=0_local.svg) 
-##### Nuclear
-![x0-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=0_nuclear.svg)
-
-#### Clustering at $x=1$
-##### Local
-\![x1-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=1_local.svg) 
-##### Nuclear
-![x1-nuclear](../assets/images/Mapping2Dto1D/pointsmetric_x=1_nuclear.svg)
-
-### Final Distribution
-#### Uniform
-##### Local
-\![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_uniform_local.svg) 
-##### Nuclear
-![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_uniform_nuclear.svg)
-
-#### Clustering at $x=0$
-##### Local
-\![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=0_local.svg) 
-##### Nuclear
-![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=0_nuclear.svg)
-
-#### Clustering at $x=1$
-##### Local
-\![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=1_local.svg) 
-##### Nuclear
-![Uniform-nuclear](../assets/images/Mapping2Dto1D/result_x=1_nuclear.svg)
+### $x=1$ Clustering
+#### Metric Values
+![x=1-local](../assets/images/Mapping2Dto1D/metricboundary_x=1_local.svg)
+#### ODE Solution
+![x=1-local](../assets/images/Mapping2Dto1D/pointsmetric_x=1_local.svg)
+#### Final Distribution
+![x=1-local](../assets/images/Mapping2Dto1D/result_x=1_local.svg) 

@@ -1,0 +1,7 @@
+docs/build
+
+Manifest.toml
+
+# vscode stuff
+.vscode
+.vscode/*

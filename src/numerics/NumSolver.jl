@@ -66,3 +66,28 @@ function SolveLinearSystem(M, Mx, N, x0, x1)
 
     return sol
 end
+
+
+
+"""
+    ComputeOptimalSpacing(x, M, s)
+Compute the optimal grid spacing based on the metric values `M` at points `x` and spacing `s`.
+"""
+function ComputeOptimalSpacing(x, M, s)
+    @assert length(x) == length(M) == length(s) "x, M, s must have same length"
+    N = length(x)
+    @assert N ≥ 2 "need at least two points"
+
+    numer = 0.0
+    denom = 0.0
+    @inbounds for i in 2:N-1
+        Δs  = s[i+1] - s[i]
+        @assert Δs > 0 "s must be strictly increasing"
+        x_s = (x[i+1] - x[i-1]) / (2*Δs)
+        Mc  = 0.5*(M[i] + M[i+1])          # cell-avg M
+        p   = Mc * x_s^2
+        numer += p * Δs
+        denom += (p^2) * Δs
+    end
+    return sqrt(numer / denom)
+end
