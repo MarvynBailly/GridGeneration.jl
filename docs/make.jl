@@ -36,6 +36,8 @@ makedocs(
         
         "2D to 1D Reformulation " => Any[
             "Mapping 2D to 1D" => "pages/Mapping2Dto1D.md",
+            "Metric Reformulation" => "pages/MetricReformulation.md",
+            "Projecting Points" => "pages/PointProjection.md",
         ],
 
         "Appendix" => Any[
