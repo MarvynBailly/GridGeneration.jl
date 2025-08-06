@@ -18,7 +18,7 @@ function build_interps_linear(xv, Mv)
     return M_of
 end
 
-function InterpolateBoundaryManually(x_spacing, boundary; align = :auto)
+function InterpolateBoundaryManually(x_spacing, boundary)
     # boundary: 2×N (x row, y row)
     x_bnd = collect(boundary[1, :])
     y_bnd = collect(boundary[2, :])
@@ -37,16 +37,6 @@ function InterpolateBoundaryManually(x_spacing, boundary; align = :auto)
 
     # Step 2: map x_spacing to [0, L]
     xs = (x_spacing .- first(x_spacing)) ./ (last(x_spacing) - first(x_spacing)) .* L
-
-    # Step 2.1: decide orientation
-    # If xs starts nearer to L than 0, flip parameterization (s -> L - s).
-    do_flip = align == :reverse ? true :
-              align == :forward ? false :
-              abs(xs[1] - L) < abs(xs[1] - 0)
-
-    if do_flip
-        xs = L .- xs
-    end
 
     # Clamp to [0,L] to avoid tiny numerical overshoots
     @inbounds for j in eachindex(xs)

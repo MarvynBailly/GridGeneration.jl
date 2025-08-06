@@ -99,20 +99,10 @@ boundarySection = airfoil[:, SectionIndices]
 arclength = sum(sqrt.(diff(boundarySection[1, :]).^2 .+ diff(boundarySection[2, :]).^2))
 N = length(boundarySection[1, :])
 
-# boundarySection is 2×N (rows: x,y; columns: points in order)
-x = boundarySection[1, :]
-y = boundarySection[2, :]
 
-# segment lengths (N-1)
-Δx = diff(x)
-Δy = diff(y)
-Δs = sqrt.(Δx.^2 .+ Δy.^2)
 
-xs = [0.0; cumsum(Δs)]   # length N, xs[1]=0, xs[end]=arclength
 
-# normalize 
-xs = xs ./ xs[end]  # now xs is in [0, 1]
-
+xs = Boundary2Dto1D(boundarySection)
 
 # build the metric
 saveFig = true

@@ -60,7 +60,7 @@ end
 
 
 # build the metric
-saveFig = true
+saveFig = false
 method = "local" 
 
 folder = "MetricReformulation/"
@@ -69,14 +69,14 @@ path = "docs/src/assets/images/$folder/"
 
 scale = 40000
 
-problems = [1, 2, 3] # 1: x=0, 2: x=1, 3: uniform
+problems = [1] # 1: x=0, 2: x=1, 3: uniform
 names = ["x=0", "x=1", "uniform"]
 
 initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3)
 
 bottom = initialGrid[:,:,1]
 airfoil = bottom[:, 101:end-100]  
-SectionIndices = 200:10:310
+SectionIndices = 10:10:250
 # SectionIndices = 1:length(airfoil[1, :])
 
 boundarySection = airfoil[:, SectionIndices]

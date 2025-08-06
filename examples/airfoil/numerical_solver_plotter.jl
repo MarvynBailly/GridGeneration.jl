@@ -8,7 +8,7 @@ folder = "ODENumericalMethods"
 path = "docs/src/assets/images/$folder/"
 
 
-scale = 40000
+scale = 1000
 base = 0.05
 
 
@@ -43,7 +43,7 @@ function M_u1_func(x, problem)
 end
 
 
-problems = [1];
+problems = [2];
 # problem = 3 # 1: uniform, 2: clustering at x=0, 3: clustering at x=1, 4: clustering at x=0.5
 
 
@@ -56,7 +56,7 @@ for problem in problems
     x0 = 0.0
     x1 = 4.0
 
-    scale = 40000
+    scale = 1000
 
     if problem == 1
         name = "Uniform"

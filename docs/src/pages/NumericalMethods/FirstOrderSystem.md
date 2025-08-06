@@ -1,11 +1,11 @@
-# ODE Numerical Methods
+# Numerical Methods - First Order System
 We wish to solve the ODE
 
 $\boxed{8 \sigma^4  M^2 x_s^2 x_{ss}  + 4 \sigma^4  M M_x x_s^4 + 4\sigma^2 m^2 M x_{ss} + 2 \sigma^2 m M_x x_s^2  = 0.}$
 
-## Numerical Solver 
-### DifferentialEquations.jl
-Let's use [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/) to try and solve the ODE with low effort.
+We aim to solve the system of first order nonlinear boundary value odes. Let's use [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/) to try and solve the ODE with low effort.
+
+## Formulation
 
 Let $u_1 = x$ and $u_2 = x_s$ to find
 
@@ -18,7 +18,11 @@ with dirichlet boundary conditions:
 
 $u_1(1) = x_1, u_1(0) = x_0.$
 
-We can code this in Julia with the following:
+Mathematical work shown [here](../ODE/MathematicalWork.md).
+
+
+## Numerical Solver 
+We can set up the problem like this
 
 ```julia
 # Spacing ODE
@@ -62,8 +66,6 @@ N = 100
 sol = GridGeneration.SolveODE(M, M_u1, N, x0, x1);
 ``` 
 
-## Semi-Analytical Solution
-
 
 ## Results
 Let's compare the distribution of points for four different metrics
@@ -75,25 +77,25 @@ Let's compare the distribution of points for four different metrics
 
 where $\alpha$ and $\beta$ are parameters.
 
-Here are the results for the numerical approach with $\alpha = 40000$ and $\beta = 0.05$:
+Here are the results for the numerical approach with $\alpha = 40000$ and $\beta = 0.05$. With the last two examples, we are already running into the solver not being able to handel the stiffness of the problem.
 
 ### Uniform
 
-![Uniform](../assets/images/ODENumericalMethods/Uniform_N50_numeric.svg)
+![Uniform](../../assets/images/ODENumericalMethods/Uniform_N50_numeric.svg)
 
 ### Clustering Near $x=0$
 
-![x=0 clustering](../assets/images/ODENumericalMethods/x=0_N50_numeric.svg)
+![x=0 clustering](../../assets/images/ODENumericalMethods/x=0_N50_numeric.svg)
 
 ### Clustering Near $x=1$
 
-![x=1 clustering](../assets/images/ODENumericalMethods/x=1_N50_numeric.svg)
+![x=1 clustering](../../assets/images/ODENumericalMethods/x=1_N50_numeric.svg)
 
 ### Clustering Near $x=0.5$
 
-![x=0.5 clustering](../assets/images/ODENumericalMethods/x=0.5_N100_numeric.svg)
+![x=0.5 clustering](../../assets/images/ODENumericalMethods/x=0.5_N100_numeric.svg)
 
 
 ### Clustering Near Edges 
 
-![edge clustering](../assets/images/ODENumericalMethods/edges_N100_numeric.svg)
+![edge clustering](../../assets/images/ODENumericalMethods/edges_N100_numeric.svg)

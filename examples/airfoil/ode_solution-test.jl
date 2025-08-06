@@ -1,6 +1,6 @@
 include("../../src/GridGeneration.jl")
 include("GetAirfoilGrid.jl")
-include("metric/Metric.jl")
+# include("metric/Metric.jl")
 
 using Plots, MAT, DelimitedFiles
 
@@ -80,6 +80,144 @@ end
 
 
 
+"""
+ Get the optimal solution for the ODE grid spacing problem.
+ This function solves the ODE system for grid spacing and computes the optimal number of points based on the metric values.
+ Then recomputes the solution with the optimal number of points.
+"""
+
+function GetOptimalSolution(m, mx, N, xs; method = "system of odes")
+    m_func = GridGeneration.build_interps_linear(xs, m)
+    mx_func = GridGeneration.build_interps_linear(xs, mx)
+    sol = SolveODE(m_func, mx_func, N, xs[1], xs[end])
+
+
+
+
+
+    return sol, sol
+end
+
+
+
+"""
+    SolveODE(M, Mx, N, x0, x1; method = :numeric, verbose = false)
+
+Numerical solver for the ODE grid spacing problem using DifferentialEquations.jl.
+"""
+function SolveODE(M, Mx, N, x0, x1; method = :numeric, verbose = false)
+    sol = SolveLinearSystem(M, Mx, N, x0, x1)
+
+    return sol
+end
+
+#####################
+# NUMERICAL SOLVER
+#####################
+using DifferentialEquations, BoundaryValueDiffEq
+
+
+# solve First Order System
+function SolveLinearSystem(M, Mx, N, x0, x1)
+    # Define the ODE system
+    function SpacingODE!(du, u, p, s)
+        M_func, M_u1_func, sigma, _, _ = p
+        u1, u2 = u
+
+        M_u1 = M_u1_func(u1)
+        M = M_func(u1)
+
+        du[1] = u2
+        du[2] = - (M_u1 * u2^2) / (2 * M)    
+    end
+
+
+    # Set the boundary conditions
+    function BoundaryConditions!(residual, u, p, s)
+        _, _, _, x0, x1 = p
+        residual[1] = u[1][1] - x0
+        residual[2] = u[end][1] - x1
+    end
+
+    sspan = (0.0, 1.0)
+
+    uGuess(s) = [x0 + s * (x1 - x0), x1 - x0]
+    
+    s_grid = range(0, 1, length=N)
+    sigma = 1/N
+
+    p = (M, Mx, sigma, x0, x1)
+    
+    # scatter!(ptest, xs, m, markershape=:circle, markersize=4, markerstrokewidth=0, c = :black, label="Boundary Values")
+    
+    bvp = BVProblem(SpacingODE!, BoundaryConditions!, uGuess, sspan, p)
+    
+    sol = solve(bvp, Shooting(Tsit5()), saveat=s_grid)
+    
+    return sol
+end
+
+
+
+"""
+    ComputeOptimalSpacing(x, M, s)
+Compute the optimal grid spacing based on the metric values `M` at points `x` and spacing `s`.
+return Ceil(Int, 1 / sigma_opt) as the optimal number of points.
+"""
+function ComputeOptimalNumberofPoints(x, M, s)
+    @assert length(x) == length(M) == length(s) "x, M, s must have same length (x: $(length(x)), M: $(length(M)), s: $(length(s)))"
+    N = length(x)
+    @assert N ≥ 2 "need at least two points"
+
+    numer = 0.0
+    denom = 0.0
+    @inbounds for i in 2:N-1
+        Δs  = s[i+1] - s[i]
+        @assert Δs > 0 "s must be strictly increasing"
+        x_s = (x[i+1] - x[i-1]) / (2*Δs)
+        Mc  = 0.5*(M[i] + M[i+1])          # cell-avg M
+        p   = Mc * x_s^2
+        numer += p * Δs
+        denom += (p^2) * Δs
+    end
+
+    sigma_opt = sqrt(numer / denom)
+    N_opt = ceil(Int, 1 / sigma_opt)
+
+    return N_opt
+end
+
+
+function M_func(x, problem)
+    
+    if problem == 1
+        return scale 
+    elseif problem == 2
+        return scale * (1 + 15 * (x))^(-2)
+    elseif problem == 3
+        return scale * (1 + 15 * (1-x))^(-2)
+    elseif problem == 4
+        return scale * exp(-(x - 0.5)^2 / base)
+    elseif problem == 5
+        return scale * (1 + 15 * (x))^(-2) + scale * (1 + 15 * (1-x))^(-2)
+    end
+end
+
+function M_u1_func(x, problem)
+    
+    if problem == 1
+        return 0
+    elseif problem == 2
+        return -2 * scale * (1 + 15 * (x))^(-3) * (15)
+    elseif problem == 3
+        return -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
+    elseif problem == 4
+        return scale * exp(-(x - 0.5)^2 / base ) * (-2 * (x - 0.5) / base)
+    elseif problem == 5
+        return -2 * scale * (1 + 15 * (x))^(-3) * (15) + -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
+    end
+end
+
 
 #####################
 # SET UP DOMAIN
@@ -89,13 +227,13 @@ initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt"
 
 bottom = initialGrid[:,:,1]
 airfoil = bottom[:, 101:end-100]  
-SectionIndices = 500:550
+SectionIndices = 400:500
 # SectionIndices = 1:length(airfoil[1, :])
 boundarySection = airfoil[:, SectionIndices]
 
 N = length(boundarySection[1, :])
 
-xs = GridGeneration.Boundary2Dto1D(boundarySection)
+# xs = GridGeneration.Boundary2Dto1D(boundarySection)
 
 # build the metric
 saveFig = false
@@ -112,13 +250,33 @@ names = ["x=0", "x=1", "uniform"]
 problem = 1
 name = names[problem]
 
-M_func = (x,y) -> Metric(x, y, scale, problem)
-M_u1_func = (x,y) -> MetricDerivative(x, y, scale, problem)
+# M_func = (x,y) -> Metric(x, y, scale, problem)
+# M_u1_func = (x,y) -> MetricDerivative(x, y, scale, problem)
 
-m = GridGeneration.Get1DMetric(boundarySection, M_func, method = method)
-mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func, method = method)
+# m = GridGeneration.Get1DMetric(boundarySection, M_func, method = method)
+# mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func, method = method)
+xs = range(0, 1, length=N)
 
-sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs)
+m = M_func.(boundarySection[1,:],  problem + 1 )
+mx = M_u1_func.(boundarySection[1,:], problem + 1)
+
+
+
+p = plot(xs, m, title = "1D Metric (method = $method) with $name clustering",
+        xlabel = "s", ylabel = "m(x(s))", label = "m(x(s))",
+        legend = :topright, linewidth=2)
+display(p)
+readline()
+
+
+
+
+
+
+
+
+
+sol_opt, sol = GetOptimalSolution(m, mx, N, xs)
 
 x_sol, x_sol_opt = sol[1, :], sol_opt[1, :]
 

@@ -30,19 +30,21 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Ordinary Differential Equations" => Any[
-            "ODE Formulation" => "pages/ODEFormulation.md",
-            "ODE Numerical Methods"  => "pages/ODENumericalMethods.md",
+            "ODE Formulation" => "pages/ODE/ODEFormulation.md",
+            "Mathematical Work" => "pages/ODE/MathematicalWork.md",
             ],
         
-        "2D to 1D Reformulation " => Any[
-            "Mapping 2D to 1D" => "pages/Mapping2Dto1D.md",
-            "Metric Reformulation" => "pages/MetricReformulation.md",
-            "Projecting Points" => "pages/PointProjection.md",
+        "Numerical Methods" => Any[
+            "First Order System" => "pages/NumericalMethods/FirstOrderSystem.md",
+            "Second Order BVP ODE" => "pages/NumericalMethods/SecondOrderBVP.md",
+            "Semi-Analytical Method" => "pages/NumericalMethods/SemiAnalyticalMethod.md",
         ],
 
-        "Appendix" => Any[
-            "Mathematical Work" => "pages/MathematicalWork.md",
-        ]
+        "2D to 1D Reformulation " => Any[
+            "Mapping 2D to 1D" => "pages/2Dto1D/Mapping2Dto1D.md",
+            "Metric Reformulation" => "pages/2Dto1D/MetricReformulation.md",
+            "Projecting Points" => "pages/2Dto1D/PointProjection.md",
+        ],
     ],
 
 

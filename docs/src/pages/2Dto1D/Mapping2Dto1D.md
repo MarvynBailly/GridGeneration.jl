@@ -7,10 +7,10 @@ $\begin{align*}
 \end{align*}$
 
 we need to reduce the dimension of $x \in \R^2$ and $M \in \R^{2 \times 2}$. This will consistent of four steps:
-- [Convert the 2D metric to 1D](./MetricReformulation.md)
-- [Convert the 2D curve to 1D](./PointProjection.md)
-- [Numerically solve the Spacing ODE](./ODENumericalMethods.md)
-- [Convert 1D distribution of points back to curve](./PointProjection.md)
+- [Convert the 2D metric to 1D](../2Dto1D/MetricReformulation.md)
+- [Convert the 2D curve to 1D](../2Dto1D/PointProjection.md)
+- Numerically solve the Spacing ODE
+- [Convert 1D distribution of points back to curve](../2Dto1D/PointProjection.md)
 
 ## Results
 We look at three metric cases:

@@ -26,10 +26,29 @@ Given points $\{ \gamma_i \}_{i=1}^n$ we can $\{ f(\gamma_i) \}_{i=1}^n$ by
 
 - Computing the local spacing in array `diff`,
 - Accumulate the spacing `sp = cumsum(diff)`,
-- Add zero back in `xi = [0, sp...]`,
+- Add zero back in `xi = [0, sp]`,
 - Normalize `xs = xi / xi[end]`.
 
-Now $\{ \text{xs} \}_{i=1}^n$ is within $[0,1]$ with normalized spacing according to the original boundary spacing. 
+Now $\{ \text{xs} \}_{i=1}^n$ is within $[0,1]$ with normalized spacing according to the original boundary spacing. Algorithmically:
+
+```julia
+function Boundary2Dto1D(boundary)
+    # boundarySection is 2×N (rows: x,y; columns: points in order)
+    x = boundary[1, :]
+    y = boundary[2, :]
+
+    # segment lengths (N-1)
+    Δx = diff(x)
+    Δy = diff(y)
+    Δs = sqrt.(Δx.^2 .+ Δy.^2)
+
+    xs = [0.0; cumsum(Δs)]   # length N, xs[1]=0, xs[end]=arclength
+
+    # normalize 
+    xs = xs ./ xs[end]  # now xs is in [0, 1]
+    return xs
+end
+```
 
 #### Step 2 - Spacing
 Now we get the optimal spacing
@@ -37,6 +56,23 @@ Now we get the optimal spacing
 - Compute non-optimal solution `sol = GridGeneration.SolveODE(M, Mx, N, xs[1], xs[end])`
 - Compute optimal spacing `N_opt = ceil(Int, 1 / GridGeneration.ComputeOptimalSpacing(sol[1, :], M, xs))`
 - Compute optimal solution `sol_opt = GridGeneration.SolveODE(M, Mx, N_opt, xs[1], xs[end])`  
+
+```julia
+function GetOptimalSolution(m, mx, N, xs; method = "system of odes")
+    m_func = GridGeneration.build_interps_linear(xs, m)
+    mx_func = GridGeneration.build_interps_linear(xs, mx)
+
+    if method == "system of odes"
+        sol = GridGeneration.SolveODE(m_func, mx_func, N, xs[1], xs[end])
+        N_opt = GridGeneration.ComputeOptimalNumberofPoints(sol[1, :], m, xs)
+        @info("Optimal number of points: ", N_opt)
+        sol_opt = GridGeneration.SolveODE(m_func, mx_func, N_opt, xs[1], xs[end])
+    end
+
+    return sol_opt, sol
+end
+```
+
 
 #### Step 3 - 1D to 2D
 And finally let's project the points back onto the boundary

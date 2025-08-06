@@ -1,4 +1,30 @@
 """
+ Get the optimal solution for the ODE grid spacing problem.
+ This function solves the ODE system for grid spacing and computes the optimal number of points based on the metric values.
+ Then recomputes the solution with the optimal number of points.
+"""
+
+function GetOptimalSolution(m, mx, N, xs; method = "system of odes")
+    m_func = GridGeneration.build_interps_linear(xs, m)
+    mx_func = GridGeneration.build_interps_linear(xs, mx)
+
+
+    if method == "system of odes"
+        sol = GridGeneration.SolveODE(m_func, mx_func, N, xs[1], xs[end])
+
+        @assert length(sol[1, :]) == N "Solution length ($(length(sol[1, :]))) does not match expected number of points (N = $N)"
+
+        N_opt = GridGeneration.ComputeOptimalNumberofPoints(sol[1, :], m, xs)
+        sol_opt = GridGeneration.SolveODE(m_func, mx_func, N_opt, xs[1], xs[end])
+    end
+    
+    @info("Optimal number of points: ", N_opt)
+    return sol_opt, sol
+end
+
+
+
+"""
     SolveODE(M, Mx, N, x0, x1; method = :numeric, verbose = false)
 
 Numerical solver for the ODE grid spacing problem using DifferentialEquations.jl.
@@ -72,9 +98,10 @@ end
 """
     ComputeOptimalSpacing(x, M, s)
 Compute the optimal grid spacing based on the metric values `M` at points `x` and spacing `s`.
+return Ceil(Int, 1 / sigma_opt) as the optimal number of points.
 """
-function ComputeOptimalSpacing(x, M, s)
-    @assert length(x) == length(M) == length(s) "x, M, s must have same length"
+function ComputeOptimalNumberofPoints(x, M, s)
+    @assert length(x) == length(M) == length(s) "x, M, s must have same length (x: $(length(x)), M: $(length(M)), s: $(length(s)))"
     N = length(x)
     @assert N ≥ 2 "need at least two points"
 
@@ -89,5 +116,9 @@ function ComputeOptimalSpacing(x, M, s)
         numer += p * Δs
         denom += (p^2) * Δs
     end
-    return sqrt(numer / denom)
+
+    sigma_opt = sqrt(numer / denom)
+    N_opt = ceil(Int, 1 / sigma_opt)
+
+    return N_opt
 end

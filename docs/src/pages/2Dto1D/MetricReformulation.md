@@ -65,7 +65,7 @@ Let's refer to the real metric tensor as $M(x(s))$ and the computed 1D metric te
 
 Extracted Boundary $\Gamma$ with discrete boundary points $\gamma_i$, linear interpolates $\Gamma_i$, and computed 1D metric values along it are shown in the following plot. Note that the direction of parametrization $s$ is shown by the red arrow.
 
-![uniform-metricboundary](../assets/images/MetricReformulation/metricboundary_uniform_local.svg)
-![x=0-metricboundary](../assets/images/MetricReformulation/metricboundary_x=0_local.svg)
-![x=1-metricboundary](../assets/images/MetricReformulation/metricboundary_x=1_local.svg)
+![uniform-metricboundary](../../assets/images/MetricReformulation/metricboundary_uniform_local.svg)
+![x=0-metricboundary](../../assets/images/MetricReformulation/metricboundary_x=0_local.svg)
+![x=1-metricboundary](../../assets/images/MetricReformulation/metricboundary_x=1_local.svg)
 
