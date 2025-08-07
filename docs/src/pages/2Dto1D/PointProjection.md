@@ -82,3 +82,53 @@ And finally let's project the points back onto the boundary
   - determine `i` such that $x \in [\text{xs}_i, \text{xs}_{i+1}]$
   - compute $\eta = \frac{|x - \text{xs}_i|}{|\text{xs}_{i+1} - \text{xs}_i|}$
   - Interpolate `x` onto $\Gamma_i$ according to $\eta$
+
+The algorithm for this can be pretty straightforward if we assert that the incoming `xs` is increasing. We have already taken care of that. Let's also add clamping to the edges to make sure that the start and ending points don't move.
+
+```julia
+function ProjectBoundary1Dto2D(boundary, points, xs)
+    projectedPoints = zeros(2, length(xs))
+    for (i, pnt) in enumrate(points)
+        intervalIndex = FindContainingIntervalIndex(pnt, xs)
+        dist = pnt - xs[intervalIndex]
+        normalDist = dist / (xs[intervalIndex + 1] - xs[intervalIndex])
+        projectPoint = ProjectPointOntoBoundary(normalDist, intervalIndex, boundary)
+        projectedPoints[i] = projectPoint
+    end
+    return projectedPoints
+end
+```
+
+with the two helper functions
+
+```julia
+function FindContainingIntervalIndex(pnt, dist)
+    # assert that dist is increasing
+    index = - 1
+    
+    # clamp
+    if pnt < dist[1]
+        index = 1
+    end
+
+    if pnt > dist[end]
+        index = length(dist) - 1
+    end
+
+    for (i,d) in enumerate(dist)
+        if d > pnt
+            index = i - 1
+        end
+    end
+
+    return index
+end
+
+function ProjectPointOntoBoundary(s, ind, boundary)
+    # interpolate boundary[ind] and boundary[ind + 1] with s
+    projectedPoint = s * boundary[ind] + (1 - s) * boundary[ind+1]
+    return projectPoint
+end
+
+```
+

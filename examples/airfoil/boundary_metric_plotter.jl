@@ -49,6 +49,8 @@ function plotBoundary(airfoil, boundarySection, m_vals, m_vals_section, xs, meth
             xlabel = "s", ylabel = "m(x(s))", label = "m(x(s))",
             legend = :topright, linewidth=2, markershape=:circle)
 
+    # add red arrow showing the direction of xs 
+    quiver!(p5, [xs[1]], [m_vals_section[1]], quiver=([xs[2] - xs[1]], [m_vals_section[2] - m_vals_section[1]]), color=:red, label="s direction", lw=1)
 
 
     # Combine the plots
@@ -60,7 +62,7 @@ end
 
 
 # build the metric
-saveFig = false
+saveFig = true
 method = "local" 
 
 folder = "MetricReformulation/"
@@ -69,7 +71,7 @@ path = "docs/src/assets/images/$folder/"
 
 scale = 40000
 
-problems = [1] # 1: x=0, 2: x=1, 3: uniform
+problems = [1,2,3] # 1: x=0, 2: x=1, 3: uniform
 names = ["x=0", "x=1", "uniform"]
 
 initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3)

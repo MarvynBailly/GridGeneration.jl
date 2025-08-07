@@ -1,6 +1,6 @@
 include("../../src/GridGeneration.jl")
 include("GetAirfoilGrid.jl")
-# include("metric/Metric.jl")
+include("metric/Metric.jl")
 
 using Plots, MAT, DelimitedFiles
 
@@ -90,6 +90,7 @@ function GetOptimalSolution(m, mx, N, xs; method = "system of odes")
     m_func = GridGeneration.build_interps_linear(xs, m)
     mx_func = GridGeneration.build_interps_linear(xs, mx)
     sol = SolveODE(m_func, mx_func, N, xs[1], xs[end])
+    @assert length(sol[1, :]) == N "Solution length ($(length(sol[1, :]))) does not match expected number of points (N = $N)"
 
 
 
@@ -188,35 +189,35 @@ function ComputeOptimalNumberofPoints(x, M, s)
 end
 
 
-function M_func(x, problem)
+# function M_func(x, problem)
     
-    if problem == 1
-        return scale 
-    elseif problem == 2
-        return scale * (1 + 15 * (x))^(-2)
-    elseif problem == 3
-        return scale * (1 + 15 * (1-x))^(-2)
-    elseif problem == 4
-        return scale * exp(-(x - 0.5)^2 / base)
-    elseif problem == 5
-        return scale * (1 + 15 * (x))^(-2) + scale * (1 + 15 * (1-x))^(-2)
-    end
-end
+#     if problem == 1
+#         return scale 
+#     elseif problem == 2
+#         return scale * (1 + 15 * (x))^(-2)
+#     elseif problem == 3
+#         return scale * (1 + 15 * (1-x))^(-2)
+#     elseif problem == 4
+#         return scale * exp(-(x - 0.5)^2 / base)
+#     elseif problem == 5
+#         return scale * (1 + 15 * (x))^(-2) + scale * (1 + 15 * (1-x))^(-2)
+#     end
+# end
 
-function M_u1_func(x, problem)
+# function M_u1_func(x, problem)
     
-    if problem == 1
-        return 0
-    elseif problem == 2
-        return -2 * scale * (1 + 15 * (x))^(-3) * (15)
-    elseif problem == 3
-        return -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
-    elseif problem == 4
-        return scale * exp(-(x - 0.5)^2 / base ) * (-2 * (x - 0.5) / base)
-    elseif problem == 5
-        return -2 * scale * (1 + 15 * (x))^(-3) * (15) + -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
-    end
-end
+#     if problem == 1
+#         return 0
+#     elseif problem == 2
+#         return -2 * scale * (1 + 15 * (x))^(-3) * (15)
+#     elseif problem == 3
+#         return -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
+#     elseif problem == 4
+#         return scale * exp(-(x - 0.5)^2 / base ) * (-2 * (x - 0.5) / base)
+#     elseif problem == 5
+#         return -2 * scale * (1 + 15 * (x))^(-3) * (15) + -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
+#     end
+# end
 
 
 #####################
@@ -230,6 +231,7 @@ airfoil = bottom[:, 101:end-100]
 SectionIndices = 400:500
 # SectionIndices = 1:length(airfoil[1, :])
 boundarySection = airfoil[:, SectionIndices]
+boundarySection = reverse(boundarySection, dims=2)
 
 N = length(boundarySection[1, :])
 
@@ -247,26 +249,20 @@ problems = [1] # 1: x=0, 2: x=1, 3: uniform
 names = ["x=0", "x=1", "uniform"]
 
 # for (name, problem) in zip(names, problems) 
-problem = 1
+problem = 2
 name = names[problem]
 
-# M_func = (x,y) -> Metric(x, y, scale, problem)
-# M_u1_func = (x,y) -> MetricDerivative(x, y, scale, problem)
+M_func = (x,y) -> Metric(x, y, scale, problem)
+M_u1_func = (x,y) -> MetricDerivative(x, y, scale, problem)
 
-# m = GridGeneration.Get1DMetric(boundarySection, M_func, method = method)
-# mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func, method = method)
-xs = range(0, 1, length=N)
-
-m = M_func.(boundarySection[1,:],  problem + 1 )
-mx = M_u1_func.(boundarySection[1,:], problem + 1)
+m = GridGeneration.Get1DMetric(boundarySection, M_func, method = method)
+mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func, method = method)
+# xs = range(0, 1, length=N)
+xs = GridGeneration.Boundary2Dto1D(boundarySection)
 
 
-
-p = plot(xs, m, title = "1D Metric (method = $method) with $name clustering",
-        xlabel = "s", ylabel = "m(x(s))", label = "m(x(s))",
-        legend = :topright, linewidth=2)
-display(p)
-readline()
+# m = M_func.(boundarySection[1,:],  problem + 1 )
+# mx = M_u1_func.(boundarySection[1,:], problem + 1)
 
 
 

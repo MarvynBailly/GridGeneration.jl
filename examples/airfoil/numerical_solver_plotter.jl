@@ -43,37 +43,30 @@ function M_u1_func(x, problem)
 end
 
 
-problems = [2];
+problems = [5];
 # problem = 3 # 1: uniform, 2: clustering at x=0, 3: clustering at x=1, 4: clustering at x=0.5
 
+method = :numeric # :numeric or :analytic
 
-
+names = ["Uniform", "x=0", "x=1", "x=0.5", "Edges"]
+scale = 1000
 
 for problem in problems
-    method = "numeric"
-
     N = 500
     x0 = 0.0
-    x1 = 4.0
+    x1 = 1.0
 
-    scale = 1000
 
-    if problem == 1
-        name = "Uniform"
-    elseif problem == 2
-        name = "x=0"
-    elseif problem == 3
-        name = "x=1"
-    elseif problem == 4
-        name = "x=0.5"
-    elseif problem == 5
-        name = "edges"
-    end
 
     M(x) = M_func(x, problem)
     M_u1(x) = M_u1_func(x, problem)
 
-    sol = GridGeneration.SolveODE(M, M_u1, N, x0, x1);
+    xs = range(x0, x1, length=N)
+
+    m = M_func.(xs, problem)
+    mx = M_u1_func.(xs, problem)
+
+    sol = GridGeneration.SolveODE(m, mx, N, xs, method=method);
 
     imageName = "$(name)_N$(N)_$(method).svg"
     imagePath = "$(path)$(imageName)"

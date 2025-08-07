@@ -2,7 +2,7 @@ include("../../src/GridGeneration.jl")
 include("GetAirfoilGrid.jl")
 include("metric/Metric.jl")
 
-using Plots, MAT, DelimitedFiles
+using Plots, MAT, DelimitedFiles, Interpolations
 
 function PlotProjectedPoints(projected_x, projected_y, projected_x_opt, projected_y_opt, x_bnd, y_bnd, metric, method, name)
     # 5. Plot the projected points on the airfoil
@@ -79,7 +79,122 @@ function PlotProjectedPoints(projected_x, projected_y, projected_x_opt, projecte
 end
 
 
+function ProjectBoundary1Dto2DGif(boundary, points, xs)
+    projectedPoints = zeros(2, length(points))
+    
+    # make the plot have line and scatter points
+    boundaryPlot = plot(boundary[1, :], boundary[2, :], 
+        seriestype=:scatter, 
+        label="Boundary", 
+        color=:black, 
+        markershape=:diamond,
+        markersize=3, 
+        markerstrokewidth=0,
+        xlabel="x",
+        ylabel="y",
+        title="1D Boundary to 2D Projection")
+    
+    for (i, pnt) in enumerate(points)
+        # clamp
+        if i == 1
+            intervalIndex = 1
+            normalDist = 0
+        elseif i == length(points)
+            intervalIndex = length(xs) - 1
+            normalDist = 1
+        else
+            intervalIndex = FindContainingIntervalIndex(pnt, xs)
+            normalDist = ComputeNormalDistance(pnt, xs, intervalIndex)
+        end
+        
+        projectPoint = ProjectPointOntoBoundary(normalDist, intervalIndex, boundary)
+        projectedPoints[:, i] = projectPoint
 
+        solPlot = plot(xs, zeros(length(points)), 
+            seriestype=:scatter, 
+            label="Original Points", 
+            color=:black, 
+            markersize=4, 
+            markerstrokewidth=0,
+            xlabel="x",
+            ylabel="y",
+            title="1D Point distribution")
+        
+        plot!(points, zeros(length(xs)), 
+            seriestype=:scatter, 
+            label="Solution Points", 
+            color=:red, 
+            markersize=3, 
+            markerstrokewidth=0,
+            xlabel="x",
+            ylabel="y",
+            title="1D Point distribution")
+
+        # color the current point 
+        scatter!(solPlot, [pnt], [0], 
+            seriestype=:scatter, 
+            label="Point $i", 
+            color=:blue, 
+            markersize=3, 
+            markerstrokewidth=0) 
+
+        distPlot = plot(xs[intervalIndex:intervalIndex+1], 
+            zeros(2), 
+            label="Interval $intervalIndex",
+            color=:orange,
+            markersize=3,
+            markerstrokewidth=0,
+            xlabel="x",
+            ylabel="y",
+            title="Interval containing point $i")
+        scatter!(distPlot, [pnt], [0], 
+            seriestype=:scatter, 
+            label="Point $i", 
+            color=:blue, 
+            markersize=3, 
+            markerstrokewidth=0)
+
+        projDistPlot = scatter([boundary[1, intervalIndex]], [boundary[2, intervalIndex]],
+            seriestype=:scatter,  
+            label="Boundary Point i", 
+            color=:green, 
+            markersize=3, 
+            markerstrokewidth=0,
+            xlabel="x",
+            ylabel="y",
+            title="Boundary")
+
+        scatter!(projDistPlot, [boundary[1, intervalIndex+1]], [boundary[2, intervalIndex + 1]],
+            seriestype=:scatter,  
+            label="Boundary Point i + 1", 
+            color=:black, 
+            markersize=3, 
+            markerstrokewidth=0,
+            xlabel="x",
+            ylabel="y",
+            title="Boundary")
+        
+        scatter!(projDistPlot, [projectPoint[1]], [projectPoint[2]], 
+            seriestype=:scatter, 
+            label="Projected Point", 
+            color=:red, 
+            markersize=5, 
+            markerstrokewidth=0)
+        
+        scatter!(boundaryPlot, [projectPoint[1]], [projectPoint[2]], 
+            seriestype=:scatter, 
+            label="", 
+            color=:red, 
+            markersize=5, 
+            markerstrokewidth=0)
+
+        # println("Projecting point $i: $pnt onto boundary at index $intervalIndex with normalDist = $normalDist")    
+        masterPlot = plot(solPlot, distPlot, projDistPlot, boundaryPlot, layout = @layout([a b; c d]), size = (800, 600))
+        # display(masterPlot)
+    end
+
+    return projectedPoints
+end
 
 #####################
 # SET UP DOMAIN
@@ -89,13 +204,20 @@ initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt"
 
 bottom = initialGrid[:,:,1]
 airfoil = bottom[:, 101:end-100]  
-SectionIndices = 500:550
-# SectionIndices = 1:length(airfoil[1, :])
-boundarySection = airfoil[:, SectionIndices]
+sectionIndices = 100:200
+
+# sectionIndices = 400:500
+# sectionIndices = 1:length(airfoil[1, :])
+
+
+# random subset of the points to make the distribution less uniform
+keep = rand(length(sectionIndices)) .< 0.5  
+newSectionIndices = sectionIndices[keep]   
+boundarySection = airfoil[:, newSectionIndices]
 
 N = length(boundarySection[1, :])
 
-xs = GridGeneration.Boundary2Dto1D(boundarySection)
+xs = GridGeneration.ProjectBoundary2Dto1D(boundarySection)
 
 # build the metric
 saveFig = false
@@ -112,42 +234,64 @@ names = ["x=0", "x=1", "uniform"]
 problem = 1
 name = names[problem]
 
-M_func = (x,y) -> Metric(x, y, scale, problem)
-M_u1_func = (x,y) -> MetricDerivative(x, y, scale, problem)
 
-m = GridGeneration.Get1DMetric(boundarySection, M_func, method = method)
-mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func, method = method)
 
-sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs)
+
+M_func_test = (x,y) -> Metric(x, y, scale, problem)
+M_u1_func_test = (x,y) -> MetricDerivative(x, y, scale, problem)
+
+m = GridGeneration.Get1DMetric(boundarySection, M_func_test, method = method)
+mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func_test, method = method)
+
+sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs; method=:analytic)
 
 x_sol, x_sol_opt = sol[1, :], sol_opt[1, :]
 
-projected_x, projected_y = GridGeneration.InterpolateBoundaryManually(x_sol, boundarySection)
-projected_x_opt, projected_y_opt = GridGeneration.InterpolateBoundaryManually(x_sol_opt, boundarySection)
+
+projected_points = GridGeneration.ProjectBoundary1Dto2D(boundarySection, x_sol, xs)
+projected_points_opt = GridGeneration.ProjectBoundary1Dto2D(boundarySection, x_sol_opt, xs)
+
+projected_x, projected_y = projected_points[1, :], projected_points[2, :]
+projected_x_opt, projected_y_opt = projected_points_opt[1, :], projected_points_opt[2, :]
 
 
 
-minM = minimum(m)
-
-p1 = plot(xs, m, title = "ODE Solution for 1D Metric (method = $method) with $name clustering",
+p1 = plot(xs, m, title = "1D Metric with Boundary Spacing (method = $method, $name clustering)",
         xlabel = "s", ylabel = "m(x(s))", label = "m(x(s))",
-        legend = :topright, linewidth=2)
-scatter!(p1, xs, m, markershape=:circle, markersize=4, markerstrokewidth=0, c = :black, label="Boundary Values")
-scatter!(p1, xs, zeros(length(xs)), markershape=:circle, markersize=4, markerstrokewidth=0, c = :black, label="")
-scatter!(p1, xs, minM/2 * ones(length(xs)), markershape=:circle, markersize=4, markerstrokewidth=0, c = :black, label="")
-
-scatter!(p1, sol[1,:], minM/2 * ones(length(sol[1,:])), markershape=:circle, markersize=2.5, markerstrokewidth=0, c = :red, label="Non-Optimal Solution (N = $(length(sol[1,:])))")
-scatter!(p1, sol_opt[1,:], minM/2 * zeros(length(sol_opt[1,:])), markershape=:circle, markersize=2, markerstrokewidth=0, c = :green, label="Optimal Solution (N = $(length(sol_opt[1,:])))")
+        legend = :best, linewidth=2)
+scatter!(p1, xs, zeros(length(xs)), markershape=:circle, markersize=2, markerstrokewidth=0, c = :black, label="1D Boundary Values")
+scatter!(p1, xs, m, markershape=:diamond, markersize=2, markerstrokewidth=0, c = :black, label="2D Boundary Values")
+# add red arrow to show the direction of xs
+quiver!(p1, [xs[1]], [m[1]], quiver=([xs[5] - xs[1]], [m[5] - m[1]]), color=:red, label="s direction", lw=1)
 
 
-p2 = plot( title = "Optimal Points Projected on Boundary", aspect_ratio = 1)
 
-plot!(p2, boundarySection[1, :], boundarySection[2, :], label="Boundary", color=:black, linewidth=1)
-scatter!(p2, boundarySection[1, :], boundarySection[2, :], label="1D Metric", marker_z = m, markersize=4, markerstrokewidth=0)
-scatter!(p2, projected_x_opt, projected_y_opt, label="Projected Points Optimal ($(length(projected_x_opt)))", color = :green, marker=:circle, markersize=2, markerstrokewidth=0)
+p2 = plot(title = "Optimal and Non-Optimal 1D Distributions (method = $method, $name clustering)",
+        xlabel = "s", ylabel = "m(x(s))", label = "m(x(s))",
+        legend = :best, linewidth=2)
+scatter!(p2, xs, zeros(length(xs)), markershape=:circle, markersize=3, markerstrokewidth=0, c = :black, label="1D Boundary Values")
+scatter!(p2, sol[1,:], zeros(length(sol[1,:])), markershape=:circle, markersize=2.5, markerstrokewidth=0, c = :red, label="Non-Optimal Solution (N = $(length(sol[1,:])))")
+scatter!(p2, sol_opt[1,:], zeros(length(sol_opt[1,:])), markershape=:circle, markersize=2, markerstrokewidth=0, c = :green, label="Optimal Solution (N = $(length(sol_opt[1,:])))")
+
+p3 = plot( title = "Optimal Points Projected on Boundary", aspect_ratio = 1)
+
+plot!(p3, boundarySection[1, :], boundarySection[2, :], label="Boundary", color=:black, linewidth=1)
+scatter!(p3, boundarySection[1, :], boundarySection[2, :], label="1D Metric", marker_z = m, markersize=4, markerstrokewidth=0)
+scatter!(p3, projected_x_opt, projected_y_opt, label="Projected Points Optimal ($(length(projected_x_opt)))", color = :green, marker=:circle, markersize=2, markerstrokewidth=0)
 # scatter!(p3, boundarySection[1, :], boundarySection[2, :], label="Discrete Metric Values ($(length(boundarySection[1,:])))", marker_z = m_vals_section, markersize=2, markerstrokewidth=0, c = :brg)
 
+p5 = plot()
+plot!(p5, boundarySection[1, :], boundarySection[2, :], label="Boundary", color=:black, linewidth=2)
+plot!(p5, projected_x_opt,projected_y_opt, label="Projected Solution", color=:red, linewidth=1)
+scatter!(p5, projected_x_opt, projected_y_opt, label="Projected Points Optimal ($(length(projected_x_opt)))", color = :green, marker=:circle, markersize=2, markerstrokewidth=0)
+
 # p3 = plot(p1, p2, layout = @layout([A{0.001h}; b c]), size = (1000, 600))
-p3 = plot(p1, p2, layout = @layout([a ; b]), size = (1000, 600))
-display(p3)
+p4 = plot(p1, p2, p3, p5, layout = @layout([a ; b ; c ; d]), size = (800, 1000))
+
+
+
+# if saveFig
+#     savefig(p4, path * "ode_solution_$(name)_$(method).png")
+# else
+    display(p4)
 # end
