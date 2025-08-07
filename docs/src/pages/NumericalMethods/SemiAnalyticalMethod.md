@@ -86,4 +86,22 @@ function semi_analytic_solution_from_data(x_vals, M_vals, N)
 end
 ```
 
+## Analytic Solution
+
+Now if we know $M(x)$, we can carry out the integration and find the solution. Let's do this and use this exact solution as a double check to our numerical solvers.
+
+Suppose $M(x) = 400 x^2$ on the interval $[0,1]$. We expect clustering near $x=1$. Plugging this into the solution yields
+
+$\int_{0}^{x(s)} \sqrt{400 \xi^2} d\xi =  s \int_{0}^{1} \sqrt{400 \xi^2} d\xi  \iff \int_{0}^{x(s)} 20 \xi d\xi = s \int_{0}^{1} 20 \xi d\xi$
+
+Letting $I(x) = \int_0^{x(s)} \sqrt{M(\xi)} d \xi$ we can integrate to find
+
+$I(x) = 10x^2 \implies I(1) = 10.$
+
+Plugging this in we find that
+
+$10x^2(s) = 10 s \implies x_\text{sol} = \sqrt{s}.$
+
+Which makes sense as $s \in [0,1]$ would clustered around $x=1$ under the mapping $x_\text{sol}(s)$.
+
 ## Results

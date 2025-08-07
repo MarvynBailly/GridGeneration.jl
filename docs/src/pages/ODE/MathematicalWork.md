@@ -56,7 +56,6 @@ $\begin{align*}
 x_{ss} = - \frac{ M_x x_s^2 \left( 2\sigma^2 M x_s^2 +  m \right)}{2M \left( 2\sigma^2 M x_s^2 + m\right)} = - \frac{ M_x x_s^2}{2M}.
 \end{align*}$
 
-
 ### First Order System
 
 To turn the above into a first order system, let $u_1 = x$ and $u_2 = x_s$, then
@@ -66,17 +65,26 @@ u_1' = u_2 = x',\\
 u'_2 = x'' = - \frac{1}{2} \frac{M_x}{M} x_s^2.
 \end{cases}$
 
+
 ### Semi-Analytic Solution
 
 We can continue to simplify by letting $u = x_s$, then we arrive at
 
-$\begin{align*}
-x_{ss} = - \frac{ M_x x_s^2}{2M} \implies u' = - \frac{1}{2} \frac{M_x}{M} u.
-\end{align*}$
+$x_{ss} = - \frac{ M_x x_s^2}{2M} \implies \frac{d u}{d s} = - \frac{1}{2} \frac{M_x}{M} u^2.$
+
+Now expanding the chain rule we get that
+
+$\frac{d u}{d s} = \frac{d u}{d x} \frac{dx}{ds} = \frac{du}{dx} u,$
+
+and so we can write
+
+$
+\frac{du}{dx} = - \frac{1}{2} \frac{M_x}{M} u.
+$
 
 If we assume that $x_s \neq 0$, we can divide both sides by $u$ and integrate to find that
 
-$\ln(p) = - \frac{1}{2} \ln(M) \iff p = x_s = \frac{C_1}{\sqrt{M(x)}},$
+$\ln( u ) = - \frac{1}{2} \ln(M) \iff u =  \frac{dx}{ds} = x_s = \frac{C_1}{\sqrt{M(x)}},$
 
 where $C_1$ comes from the constant of integration. 
 

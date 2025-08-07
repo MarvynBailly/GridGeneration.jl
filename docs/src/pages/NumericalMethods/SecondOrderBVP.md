@@ -202,4 +202,4 @@ Here are the results for the numerical approach with $\alpha = 40000$ and $\beta
 
 ### Clustering Near Edges 
 
-![edge clustering](../../assets/images/ODENumericalMethods/edges_N500_2ndOrder-omega=0.5.svg)
+![edge clustering](../../assets/images/ODENumericalMethods/Edges_N500_2ndOrder-omega=0.5.svg)
