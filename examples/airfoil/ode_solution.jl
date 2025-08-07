@@ -2,7 +2,7 @@ include("../../src/GridGeneration.jl")
 include("GetAirfoilGrid.jl")
 include("metric/Metric.jl")
 
-using Plots, MAT, DelimitedFiles, Interpolations
+using Plots, MAT, DelimitedFiles
 
 function PlotProjectedPoints(projected_x, projected_y, projected_x_opt, projected_y_opt, x_bnd, y_bnd, metric, method, name)
     # 5. Plot the projected points on the airfoil
@@ -204,7 +204,7 @@ initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt"
 
 bottom = initialGrid[:,:,1]
 airfoil = bottom[:, 101:end-100]  
-sectionIndices = 100:200
+sectionIndices = 100:300
 
 # sectionIndices = 400:500
 # sectionIndices = 1:length(airfoil[1, :])
@@ -222,6 +222,7 @@ xs = GridGeneration.ProjectBoundary2Dto1D(boundarySection)
 # build the metric
 saveFig = false
 method = "local"
+numMethod = "2ndorder"
 folder = "PointProjection"
 path = "docs/src/assets/images/$folder/"
 
@@ -231,7 +232,7 @@ problems = [1] # 1: x=0, 2: x=1, 3: uniform
 names = ["x=0", "x=1", "uniform"]
 
 # for (name, problem) in zip(names, problems) 
-problem = 1
+problem = 2
 name = names[problem]
 
 
@@ -243,7 +244,7 @@ M_u1_func_test = (x,y) -> MetricDerivative(x, y, scale, problem)
 m = GridGeneration.Get1DMetric(boundarySection, M_func_test, method = method)
 mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func_test, method = method)
 
-sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs; method=:analytic)
+sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs; method= numMethod)
 
 x_sol, x_sol_opt = sol[1, :], sol_opt[1, :]
 
