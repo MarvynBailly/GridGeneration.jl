@@ -47,7 +47,7 @@ end
 ```
 Now as the user we can define the metric function and derivative (analytically for now) and solve the spacing
 
-```@example
+```
 using GridGeneration
 
 # define metric and derivative
