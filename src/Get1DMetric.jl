@@ -10,15 +10,14 @@ function Get1DMetric(points, getMetric; method = "local")
         return sqrt(v[1]^2 + v[2]^2)
     end
 
-
     n = size(points, 2)
     m_vals = zeros(Float64, n)
     diff = zeros(Float64, 2, n)
 
-    diff[:, 2:n-1] = (points[:, 3:n] - points[:, 1:n-2])     
-    diff[:, n] = (points[:, n] - points[:, n-1]) 
-    diff[:,1] = points[:, 2] - points[:, 1] 
-    
+    diff[:, 2:n-1] = points[:, 3:n] - points[:, 1:n-2]
+    diff[:, n] = points[:, n] - points[:, n-1]
+    diff[:,1] =  points[:, 2] - points[:, 1]
+
     for i in 1:n
         # get metric value for the points M
         metricValues = getMetric(points[1, i], points[2, i])

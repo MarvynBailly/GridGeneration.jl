@@ -204,21 +204,33 @@ initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt"
 
 bottom = initialGrid[:,:,1]
 airfoil = bottom[:, 101:end-100]  
-# sectionIndices = 100:300
-
-# 
-sectionIndices = 200:300
-
-
-
+sectionIndices = 100:300
 # sectionIndices = 500:600
-# sectionIndices = 1:length(airfoil[1, :])
 
+# uniform
+# boundarySection = airfoil[:, sectionIndices]
 
-# random subset of the points to make the distribution less uniform
-keep = rand(length(sectionIndices)) .< 0.5  
-newSectionIndices = sectionIndices[keep]   
+# starting sparse and going denser
+# Parameters
+n = length(sectionIndices)
+min_density = 0.1  # minimum probability of selecting a point (sparse)
+max_density = 1.0  # maximum probability (dense)
+
+# Create a function for density that increases as we move along the indices
+density_function(i) = min_density + (max_density - min_density) * (i / n)
+
+# Use the density function to decide which indices to keep
+keep = [rand() < density_function(i) for i in 1:n]
+
+# Apply the selection
+newSectionIndices = sectionIndices[keep]
 boundarySection = airfoil[:, newSectionIndices]
+
+# gross
+# keep = rand(length(sectionIndices)) .< 0.3  
+# newSectionIndices = sectionIndices[keep]   
+# boundarySection = airfoil[:, newSectionIndices]
+
 
 N = length(boundarySection[1, :])
 
@@ -233,12 +245,8 @@ path = "docs/src/assets/images/$folder/"
 
 scale = 40000
 
-problems = [1] # 1: x=0, 2: x=1, 3: uniform
-names = ["x=0", "x=1", "uniform"]
-
-# for (name, problem) in zip(names, problems) 
-problem = 1
-name = names[problem]
+problem = 2
+name = "x=1"
 
 
 
@@ -246,63 +254,45 @@ name = names[problem]
 M_func_test = (x,y) -> Metric(x, y, scale, problem)
 M_u1_func_test = (x,y) -> MetricDerivative(x, y, scale, problem)
 
-# m = GridGeneration.Get1DMetric(boundarySection, M_func_test, method = method)
-# mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func_test, method = method)
-
 m = GridGeneration.Get1DMetric(boundarySection, M_func_test, method = method)
 mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func_test, method = method)
 
+f = x -> mx_func(x) / (2 * m_func(x))
+
+# get the direction of the boundary
 dir = boundarySection[1, 1] > boundarySection[1, end] ? -1 : 1
 
 sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs, dir; method= numMethod)
 
-x_sol, x_sol_opt = sol[1, :], sol_opt[1, :]
+sol_x = sol[1, :]
+
+m_func = GridGeneration.build_interps_linear(xs, m)
+mx_func = GridGeneration.build_interps_linear(xs, mx)
 
 
-projected_points = GridGeneration.ProjectBoundary1Dto2D(boundarySection, x_sol, xs)
-projected_points_opt = GridGeneration.ProjectBoundary1Dto2D(boundarySection, x_sol_opt, xs)
+p = plot(boundarySection[1, :], boundarySection[2, :], 
+    seriestype=:scatter, 
+    label="Boundary", 
+    marker_z = m,
+    markershape=:diamond,
+    markersize=3, 
+    markerstrokewidth=0,
+    xlabel="x",
+    ylabel="y",
+    title="1D Boundary to 2D Projection")
 
-projected_x, projected_y = projected_points[1, :], projected_points[2, :]
-projected_x_opt, projected_y_opt = projected_points_opt[1, :], projected_points_opt[2, :]
+p1 = scatter(xs, marker_z =m, zeros(N), label="1D projection")
 
+p2 = scatter(xs, m, label="1d Metric values")
+# scatter!(p2, xs, mx, label="1d Metric derivative values", color=:red)
 
+p3 = scatter(xs, m_func.(xs), label="Interpolated 1d Metric values")
+# scatter!(p3, xs, mx_func.(xs), label="Interpolated 1d Metric derivative values", color=:red)
 
-p1 = plot(xs, m, title = "1D Metric with Boundary Spacing (method = $method, $name clustering)",
-        xlabel = "s", ylabel = "m(x(s))", label = "m(x(s))",
-        legend = :best, linewidth=2)
-scatter!(p1, xs, zeros(length(xs)), markershape=:circle, markersize=2, markerstrokewidth=0, c = :black, label="1D Boundary Values")
-scatter!(p1, xs, m, markershape=:diamond, markersize=2, markerstrokewidth=0, c = :black, label="2D Boundary Values")
-# add red arrow to show the direction of xs
-quiver!(p1, [xs[1]], [m[1]], quiver=([xs[5] - xs[1]], [m[5] - m[1]]), color=:red, label="s direction", lw=1)
+p4 = scatter(xs, discreteForcing, label="Discrete forcing function")
 
+p5 = scatter(sol_x, zeros(length(sol)), label="")
 
+# p3 = plot(p, p1, p2, layout = @layout([a; b; c]), size = (800, 600))
+p3 = plot(p, p1, p2, p3, p4, p5, layout = @layout([a b; c d; e f]), size = (800, 600))
 
-p2 = plot(title = "Optimal and Non-Optimal 1D Distributions (method = $method, $name clustering)",
-        xlabel = "s", ylabel = "m(x(s))", label = "m(x(s))",
-        legend = :best, linewidth=2)
-scatter!(p2, xs, zeros(length(xs)), markershape=:circle, markersize=3, markerstrokewidth=0, c = :black, label="1D Boundary Values")
-scatter!(p2, sol[1,:], zeros(length(sol[1,:])), markershape=:circle, markersize=2.5, markerstrokewidth=0, c = :red, label="Non-Optimal Solution (N = $(length(sol[1,:])))")
-scatter!(p2, sol_opt[1,:], zeros(length(sol_opt[1,:])), markershape=:circle, markersize=2, markerstrokewidth=0, c = :green, label="Optimal Solution (N = $(length(sol_opt[1,:])))")
-
-p3 = plot( title = "Optimal Points Projected on Boundary", aspect_ratio = 1)
-
-plot!(p3, boundarySection[1, :], boundarySection[2, :], label="Boundary", color=:black, linewidth=1)
-scatter!(p3, boundarySection[1, :], boundarySection[2, :], label="1D Metric", marker_z = m, markersize=4, markerstrokewidth=0)
-scatter!(p3, projected_x_opt, projected_y_opt, label="Projected Points Optimal ($(length(projected_x_opt)))", color = :green, marker=:circle, markersize=2, markerstrokewidth=0)
-# scatter!(p3, boundarySection[1, :], boundarySection[2, :], label="Discrete Metric Values ($(length(boundarySection[1,:])))", marker_z = m_vals_section, markersize=2, markerstrokewidth=0, c = :brg)
-
-p5 = plot()
-plot!(p5, boundarySection[1, :], boundarySection[2, :], label="Boundary", color=:black, linewidth=2)
-plot!(p5, projected_x_opt,projected_y_opt, label="Projected Solution", color=:red, linewidth=1)
-scatter!(p5, projected_x_opt, projected_y_opt, label="Projected Points Optimal ($(length(projected_x_opt)))", color = :green, marker=:circle, markersize=2, markerstrokewidth=0)
-
-# p3 = plot(p1, p2, layout = @layout([A{0.001h}; b c]), size = (1000, 600))
-p4 = plot(p1, p2, p3, p5, layout = @layout([a ; b ; c ; d]), size = (800, 1000))
-
-
-
-# if saveFig
-#     savefig(p4, path * "ode_solution_$(name)_$(method).png")
-# else
-    display(p4)
-# end

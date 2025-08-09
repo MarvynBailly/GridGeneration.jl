@@ -62,7 +62,6 @@ function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, v
     return x, u_new, resNorm
 end
 
-
 function ThomasAlg(a, b, c, d)
     n = length(d)
     cp = similar(c)

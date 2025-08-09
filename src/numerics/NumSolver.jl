@@ -7,22 +7,22 @@ include("SecondOrderSolver.jl")
  This function solves the ODE system for grid spacing and computes the optimal number of points based on the metric values.
  Then recomputes the solution with the optimal number of points.
 """
-function GetOptimalSolution(m, mx, N, xs; method = "2ndorder")    
+function GetOptimalSolution(m, mx, N, xs, dir; method = "2ndorder")    
 
-    sol = SolveODE(m, mx, N, xs; method=method)
+    sol = SolveODE(m, mx, N, xs, dir; method=method)
 
     @assert length(sol[1, :]) == N "Solution length ($(length(sol[1, :]))) does not match expected number of points (N = $N)"
 
-    #TODO - finish figuring this out. Seems like the issue was not the solver. Looks like the points are clustering. The only thing I could think to try now is to pass in discrete points rather than a function. If this works, we know that the build_interps_linear is the issue. If not, then we most look elsewhere.
-
-    # N_opt = ComputeOptimalNumberofPoints(sol[1, :], m, xs)
-    # sol_opt = SolveODE(m, mx, N_opt, xs; method=method)
+    
+    N_opt = ComputeOptimalNumberofPoints(sol[1, :], m, xs)
+    sol_opt = SolveODE(m, mx, N_opt, xs, dir; method=method)
 
     sol_opt = sol;
 
     # @info("Optimal number of points: ", N_opt)
     return sol_opt, sol
 end
+
 
 
 """
@@ -32,7 +32,7 @@ The method can be either `:numeric` for numerical solution or `:analytic` for se
 Returns the solution as a 2D array where the first row is the x-coordinates and
 
 """
-function SolveODE(M, Mx, N, xs; method = :numeric, verbose = false)
+function SolveODE(M, Mx, N, xs, dir; method = :numeric, verbose = false)
     if verbose @info("Solving ODE for grid spacing using method: $method...") end
 
     if method == "1storder"
@@ -57,7 +57,8 @@ function SolveODE(M, Mx, N, xs; method = :numeric, verbose = false)
         m_func = GridGeneration.build_interps_linear(xs, M)
         mx_func = GridGeneration.build_interps_linear(xs, Mx)
 
-        f = x -> mx_func(x) / (2 * m_func(x))
+        # multiply by the direction
+        f = x -> dir * mx_func(x) / (2 * m_func(x))
 
 
 
