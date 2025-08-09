@@ -67,12 +67,12 @@ boundarySectionReverse = reverse(boundarySection, dims=2)
 
 
 xs1 = GridGeneration.ProjectBoundary2Dto1D(boundarySection)
-xs2 = GridGeneration.ProjectBoundary2Dto1D(boundarySectionReverse)
-xs = xs1
+# xs2 = GridGeneration.ProjectBoundary2Dto1D(boundarySectionReverse)
+# xs = xs1
 
 
-# boom the issue is with get1dmetric
-m = GridGeneration.Get1DMetric(reverse(boundarySection, dims=2), M_func_test)
+# the issue is with get1dmetric - I think the diff is causing a directionality that I'm not staying consistent with. Rather than changing this function, let's change all proceeding functions to stay consistent with the unknowness of the directionality
+m = GridGeneration.Get1DMetric(boundarySection, M_func_test)
 
 
 

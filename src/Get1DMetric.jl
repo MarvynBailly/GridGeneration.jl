@@ -5,6 +5,7 @@ Get1DMetric.jl
 - Output: 1xn array of metric 
 """
 function Get1DMetric(points, getMetric; method = "local")
+
     function norm(v)
         return sqrt(v[1]^2 + v[2]^2)
     end
