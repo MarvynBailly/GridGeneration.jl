@@ -6,7 +6,7 @@ include("../src/GridGeneration.jl")
 
 
 function M_func(x, scale, problem)
-    base = 0.1
+    base = 1.1
     if problem == 1
         return scale 
     elseif problem == 2
@@ -14,14 +14,16 @@ function M_func(x, scale, problem)
     elseif problem == 3
         return scale * (1 + 15 * (1-x))^(-2)
     elseif problem == 4
-        return scale * exp(-(x - 0.5)^2 / base)
+        return scale * exp(-(x -0.5)^2 / base)
     elseif problem == 5
         return scale * (1 + 15 * (x))^(-2) + scale * (1 + 15 * (1-x))^(-2)
+    elseif problem == 6
+        return scale * exp(-(x) / base)
     end
 end
 
 function M_u1_func(x, scale, problem)
-    base = 0.1
+    base = 1.1
     if problem == 1
         return 0
     elseif problem == 2
@@ -32,6 +34,8 @@ function M_u1_func(x, scale, problem)
         return scale * exp(-(x - 0.5)^2 / base ) * (-2 * (x - 0.5) / base)
     elseif problem == 5
         return -2 * scale * (1 + 15 * (x))^(-3) * (15) + -2 * scale * (1 + 15 * (1-x))^(-3) * (-15)
+    elseif problem == 6
+        return  scale * exp(-(x) / base ) * (-1/base)
     end
 end
 
@@ -45,9 +49,9 @@ end
 
 ######################
 
-problem = 5
+problem = 6
 
-name = ["Uniform", "x=0", "x=1", "x=0.5", "Edges"][problem]
+name = ["Uniform", "x=0", "x=1", "x=0.5", "Edges", "Other"][problem]
 
 folder = "ODENumericalMethods"
 path = "docs/src/assets/images/$folder/"
@@ -55,7 +59,7 @@ saveFig = false
 
 x0 = 0.0
 x1 = 1.0
-scale = 40000
+scale = 1500
 omega = 0.5
 
 method = "2ndOrder-omega=$omega"
@@ -63,7 +67,8 @@ method = "2ndOrder-omega=$omega"
 forcing = x -> f(x, scale, problem)
 
 
-Ns = [5, 50, 100, 500]
+# Ns = [5, 50, 100, 500]
+Ns = [100]
 norms = zeros(length(Ns))
 
 for (i, N) in enumerate(Ns)

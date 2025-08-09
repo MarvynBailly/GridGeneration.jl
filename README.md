@@ -10,19 +10,19 @@ See the documentation and development for [GridGeneration.jl](https://marvyn.com
   - [x] Derived full analytic solution when $M(x)$ is explicitly provided. 
   - [x] Implement Solver
 - [x] Tidy up "2D to 1D Reformulation"
-- [x] Rewrite Numerical Solver for nonlinear second order BVP ODE. Use thomas alogrithm to invert tridigaonal system with dirichlet boundary values.
+- [x] Rewrite Numerical Solver for nonlinear second order BVP ODE. Use thomas algorithm to invert tridigaonal system with dirichlet boundary values.
   - [x] Create pages and files
   - [ ] Verification of Solver
     - [x] passes eye norm
-    - [ ] Check via MMS?
-    - [ ] Check via analytical solution for explicit $M(x)$.
+    - [ ] (non-important) Check via MMS?
+    - [ ] (non-important) Check via analytical solution for explicit $M(x)$.
   - [x] Implement Solver
     - [ ] FIX BUG in NumSolver causing points to cluster the wrong way. 
-- [ ] Compare numerical, analytic, and semi-analytical results.
-- [ ] Add section on Grid format
+- [ ] (non-important) Compare numerical, analytic, and semi-analytical results. 
+- [ ] (non-important) Add section on Grid format 
 - [ ] Add single block input with no splitting. User can upload a block, code with solve along the edges of the block, fill in with TFI, and generate the .grid files
-- [ ] Add support for single block input with user splitting. User can upload a block and split locations, code will creat multiblocks, solve along the edges of the block, fill in with TFI, and generate the .grid files
-- [ ] Add support for multiblock input with user splitting.
+- [ ] (hit here by 15th) Add support for single block input with user splitting. User can upload a block and split locations, code will creat multiblocks, solve along the edges of the block, fill in with TFI, and generate the .grid files
+- [ ]  Add support for multiblock input with user splitting.
 - [ ] Try custom splitting idea.
 
 

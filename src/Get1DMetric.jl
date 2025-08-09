@@ -31,7 +31,6 @@ function Get1DMetric(points, getMetric; method = "local")
             # normalize the localDiff vector
             normLocalDiff = norm(localDiff)
             m_vals[i] = localDiff' * M * localDiff / normLocalDiff^2
-            
         elseif method == "nuclear"
             m_vals[i] = M[1, 1] + M[2, 2]
         end
