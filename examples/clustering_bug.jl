@@ -70,7 +70,12 @@ xs1 = GridGeneration.ProjectBoundary2Dto1D(boundarySection)
 xs2 = GridGeneration.ProjectBoundary2Dto1D(boundarySectionReverse)
 xs = xs1
 
-m = GridGeneration.Get1DMetric(boundarySection, M_func_test)
+
+# boom the issue is with get1dmetric
+m = GridGeneration.Get1DMetric(reverse(boundarySection, dims=2), M_func_test)
+
+
+
 mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func_test)
 
 m_func = GridGeneration.build_interps_linear(xs, m)
@@ -88,14 +93,23 @@ x1 = 1
 
 x, u, resNorm = GridGeneration.SolveSecondOrder(met3, x0, x1; N=N, omega=omega, tol=1e-15, max_iter=200, verbose=true)
 
-p1 = plot(s, met2.(s), label="met2", xlabel="x", ylabel="y", title="Metric Function", legend=:topleft)
-plot!(p1, s, met3.(s), label="met3", xlabel="s", ylabel="y", title="Metric Function", linewidth=2)
-p2 = scatter(u, zeros(length(x)), label="Grid", xlabel="x", ylabel="y", title="Grid Generation", legend=:topleft, markershape=:circle, markersize=2)
-
-p3 = plot(x, u, label="x(s)", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
-plot!(p3, x, x, label="x=s", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
+p = plot(range(0,1,length=length(m)), m, label="m", xlabel="x", ylabel="y", title="Metric Function", legend=:topleft)
 
 
-finalPlot = plot(p1, p2, p3, layout=@layout([a;b;c]), size=(800, 600), title="Airfoil Grid Generation with Metric Function")
+first = [v[1] for v in M_func_test.(s, 0)]
 
-display(finalPlot)
+plot!(p, s, first, label="M_func_test", xlabel="x", ylabel="y", title="Metric Function", linewidth=2)
+display(p)
+
+
+# p1 = plot(s, met2.(s), label="met2", xlabel="x", ylabel="y", title="Metric Function", legend=:topleft)
+# plot!(p1, s, met3.(s), label="met3", xlabel="s", ylabel="y", title="Metric Function", linewidth=2)
+# p2 = scatter(u, zeros(length(x)), label="Grid", xlabel="x", ylabel="y", title="Grid Generation", legend=:topleft, markershape=:circle, markersize=2)
+
+# p3 = plot(x, u, label="x(s)", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
+# plot!(p3, x, x, label="x=s", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
+
+
+# finalPlot = plot(p1, p2, p3, layout=@layout([a;b;c]), size=(800, 600), title="Airfoil Grid Generation with Metric Function")
+
+# display(finalPlot)

@@ -1,6 +1,3 @@
-using Plots
-
-
 function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, verbose=false)
     function normInf(x)
         return maximum(abs, x)
@@ -15,14 +12,6 @@ function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, v
 
     u = [x0; collect(x[2:end-1]); x1]  # initial guess: linear
 
-    # # scatter all the f points
-    # p = plot()
-    # for i in 1:10
-    #     fi = f(u[i])
-    #     scatter!(p, [u[i]], [fi], label="f(u[$i])")
-    # end
-    # display(p)
-    # readline()
 
     u_new = similar(u)
 
