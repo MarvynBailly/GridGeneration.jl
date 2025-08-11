@@ -25,8 +25,6 @@ function true_solution(x, scale, problem)
     end
 end
 
-
-
 function equidistribute_linear_inverse(x, m, N)
     @assert length(x) == length(m) "x and m must have same length"
     @assert isapprox(first(x), 0.0; atol=1e-12) && isapprox(last(x), 1.0; atol=1e-12)
@@ -89,13 +87,20 @@ for problem in 2:6
 m_vals = M_func.(xs, scale, base, problem)
 true_sol = true_solution.(xs, scale, problem)
 
-sol = equidistribute_linear_inverse(xs, m_vals, N)
+# sol = equidistribute_linear_inverse(xs, m_vals, N)
 
-N_opt = GridGeneration.ComputeOptimalNumberofPoints(xs, m_vals, sol)
+# N_opt = GridGeneration.ComputeOptimalNumberofPoints(xs, m_vals, sol)
 
-sol_opt = equidistribute_linear_inverse(xs, m_vals, N_opt)
+# sol_opt1 = equidistribute_linear_inverse(xs, m_vals, N_opt)
 
-@info("Optimal number of points: $N_opt")
+# @info("Optimal N found $N_opt")
+
+
+sol_opt2, sol = GridGeneration.GetOptimalSolution(m_vals, m_vals, N, xs; method="analytic")
+sol = sol[1, :]
+sol_opt = sol_opt2[1, :]
+
+N_opt = size(sol_opt, 2)
 
 p1 = plot(xs, m_vals, label="m(x)", xlabel="x", ylabel="m", title="Mass Distribution")
 p2 = scatter(sol, zero.(sol), label="Non-optimal x(s) (N = $N)", xlabel="x", ylabel="s", title="Point Distribution", markerstrokewidth = 0) 
