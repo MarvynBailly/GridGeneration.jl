@@ -207,18 +207,18 @@ airfoil = bottom[:, 101:end-100]
 # sectionIndices = 100:300
 
 # 
-sectionIndices = 200:300
+sectionIndices = 1:100
 
-
+boundarySection = airfoil[:, sectionIndices]
 
 # sectionIndices = 500:600
 # sectionIndices = 1:length(airfoil[1, :])
 
 
 # random subset of the points to make the distribution less uniform
-keep = rand(length(sectionIndices)) .< 0.5  
-newSectionIndices = sectionIndices[keep]   
-boundarySection = airfoil[:, newSectionIndices]
+# keep = rand(length(sectionIndices)) .< 0.9 
+# newSectionIndices = sectionIndices[keep]   
+# boundarySection = airfoil[:, newSectionIndices]
 
 N = length(boundarySection[1, :])
 
@@ -252,7 +252,7 @@ M_u1_func_test = (x,y) -> MetricDerivative(x, y, scale, problem)
 m = GridGeneration.Get1DMetric(boundarySection, M_func_test, method = method)
 mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func_test, method = method)
 
-dir = boundarySection[1, 1] > boundarySection[1, end] ? -1 : 1
+dir = 1#boundarySection[1, 1] > boundarySection[1, end] ? 1 : -1
 
 sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs, dir; method= numMethod)
 

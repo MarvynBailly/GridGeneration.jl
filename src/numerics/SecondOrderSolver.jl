@@ -7,9 +7,6 @@ function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, v
     h = 1.0 / (N + 1)
     x = range(0, 1, length=N+2)
 
-
-
-
     u = [x0; collect(x[2:end-1]); x1]  # initial guess: linear
 
 
@@ -44,6 +41,7 @@ function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, v
 
         # Check convergence
         resNorm = normInf(u_new - u)
+        if verbose @info("Iteration $iter: norm = $(resNorm)") end
         if resNorm < tol
             if verbose @info("Converged in $iter iterations with norm $(resNorm)") end
             return x, u_new, resNorm

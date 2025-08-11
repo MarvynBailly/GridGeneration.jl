@@ -100,12 +100,14 @@ $\int_{x(0)}^{x(s)} \sqrt{M(\xi)} d\xi = C_1 s$
 
 Finally let's enforce the boundary condition at $x(1) = L$ to solve for $C_1$ and find that
 
-$C_1 = \int_{0}^{L} \sqrt{M(\xi)} d \xi = I.$
+$C_1 = \int_{0}^{L} \sqrt{M(\xi)} d \xi.$
 
 Therefore the final solution becomes
 
-$\int_{0}^{x(s)} \sqrt{M(\xi)} d\xi = I s.$
+$\int_{0}^{x(s)} \sqrt{M(\xi)} d\xi = I(L) s.$
 
 If we let $I(x) = \int_0^x \sqrt{M(\xi)} d \xi$, we can further clean up the express as
 
-$I(x(s)) = s I(x(s=1))$
+$I(x(s)) = s I(x(s=1)) \implies x(s) = I^{-1}\left( s \cdot I(L) \right),$
+
+if the inverse of $I$ exists.

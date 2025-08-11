@@ -6,7 +6,7 @@ include("../src/GridGeneration.jl")
 
 
 function M_func(x, scale, problem)
-    base = 1.1
+    base = 0.05
     if problem == 1
         return scale 
     elseif problem == 2
@@ -23,7 +23,7 @@ function M_func(x, scale, problem)
 end
 
 function M_u1_func(x, scale, problem)
-    base = 1.1
+    base = 0.05
     if problem == 1
         return 0
     elseif problem == 2
@@ -49,7 +49,7 @@ end
 
 ######################
 
-problem = 6
+problem = 4
 
 name = ["Uniform", "x=0", "x=1", "x=0.5", "Edges", "Other"][problem]
 
@@ -59,8 +59,9 @@ saveFig = false
 
 x0 = 0.0
 x1 = 1.0
-scale = 1500
+scale = 4000
 omega = 0.5
+
 
 method = "2ndOrder-omega=$omega"
 
@@ -83,11 +84,14 @@ x, u, resNorm = GridGeneration.SolveSecondOrder(forcing, x0, x1; N=N, omega=omeg
 
 x_solution = u
 M_solution = M_func.(x, scale, problem)
+M_u_solution = M_u1_func.(x, scale, problem)
 
 p1 = plot(x, x_solution, label="x(s)", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
 plot!(p1, range(0, 1, length=N), range(0, 1, length=N), label="x=s", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
 
 p2 = plot(x, M_solution, label="M(x(s))", xlabel="s", ylabel="M(x(s))", title="M(x(s)) vs s", linewidth=2)
+
+# plot!(p2, x, M_u_solution, label="M'(x(s))", xlabel="s", ylabel="M'(x(s))", title="M'(x(s)) vs s", linewidth=2)
 
 p3 = scatter(x_solution, ones(length(x_solution)), label="grid points", xlabel="x(s)", ylabel="s", title="Distribution of x(s)", linewidth=2)
 
@@ -102,8 +106,14 @@ p5 = plot(title = "Convergence Norms",
         linewidth = 2)
 plot!(p5, Ns, norms, label="Norms", marker=:circle, yscale = :log10)
 
-p4 = plot(titlepanel, p1, p2, p3, p5, 
-        layout = @layout([A{0.001h}; B C; D; E]),
+p6 = plot(title = "Forcing Function",
+        xlabel = "x", ylabel = "f(x)",
+        legend = :topleft,
+        linewidth = 2)
+    plot!(p6, x, forcing.(x), label="f(x)", xlabel="x", ylabel="f(x)", title="Forcing Function", linewidth=2)
+
+p4 = plot(titlepanel, p1, p2, p3, p5, p6,
+        layout = @layout([A{0.001h}; B C; D; E F]),
         size = (800, 650), legend = :topleft)
 
 imageName = "$(name)_N$(N)_$(method).svg"

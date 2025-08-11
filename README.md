@@ -15,10 +15,12 @@ See the documentation and development for [GridGeneration.jl](https://marvyn.com
   - [ ] Verification of Solver
     - [x] passes eye norm
     - [ ] (non-important) Check via MMS?
-    - [ ] (non-important) Check via analytical solution for explicit $M(x)$.
   - [x] Implement Solver
-    - [ ] FIX BUG in NumSolver causing points to cluster the wrong way. 
-- [ ] (non-important) Compare numerical, analytic, and semi-analytical results. 
+    - [x] FIX BUG in NumSolver causing points to cluster the wrong way. 
+- [x] Compare analytic and semi-analytical results.
+  - [x] For problems without analytic solution, passes "eye norm"
+- [x] Pick a method to use for code  
+  -  Picked semi-analytical solution
 - [ ] (non-important) Add section on Grid format 
 - [ ] Add single block input with no splitting. User can upload a block, code with solve along the edges of the block, fill in with TFI, and generate the .grid files
 - [ ] (hit here by 15th) Add support for single block input with user splitting. User can upload a block and split locations, code will creat multiblocks, solve along the edges of the block, fill in with TFI, and generate the .grid files

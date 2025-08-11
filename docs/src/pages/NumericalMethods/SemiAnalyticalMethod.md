@@ -6,19 +6,21 @@ As shown in [math work](../ODE/MathematicalWork.md), we can reduce the ODE to
 
 We have an initial value boundary value problem (IVBP ODE), so let's prescribe boundary conditions at $x(s=0) = 0$ and $x(s=1) = 1$ such that our computational domain is $s \in [0,1]$ and the physical domain is $x \in [0,1] \subset \R$.
 
-$\int_{x(0)}^{x(s)} \sqrt{M(\xi)} d\xi = C_1 s$
+$I(x) := \int_{x(0)}^{x(s)} \sqrt{M(\xi)} d\xi = C_1 s$
 
 Finally let's enforce the boundary condition at $x(1) = 1$ to solve for $C_1$ and find that
 
-$C_1 = \int_{0}^{1} \sqrt{M(\xi)} d \xi = I.$
+$C_1 = \int_{0}^{1} \sqrt{M(\xi)} d \xi =: I_\text{tot}.$
 
 Therefore the final solution becomes
 
-$\int_{0}^{x(s)} \sqrt{M(\xi)} d\xi = I s.$
+$\int_{0}^{x(s)} \sqrt{M(\xi)} d\xi = I_\text{tot} s.$
 
-If we let $I(x) = \int_0^x \sqrt{M(\xi)} d \xi$, we can further clean up the express as
+Now since the form of $M(x(s))$ is "not known" but rather is given as discrete points, integrating must be done numerically. We do know that $M$ is SPD and so 
 
-$I(x(s)) = s I(x(s=1))$
+$l^\top M l \geq 0, \forall l.$
+
+Since we are approximating $M \in \R^{2 \times 2}$ by $m = l^\top M l \in \R$, we are ensured that $\sqrt(m)$ will be positive. This implies that $I(x)$ is monotone increasing (modulo edge cases). To compute $I^{-1}(x)$, let's use linear interpolation. We can later try using "monotone cubic Hermite" (PCHIP).
 
 ## Algorithm
 Since the real function of $M(x)$ is unknown, let's use trapezoid rule to integrate. Then the algorithm will follow the steps
@@ -26,69 +28,68 @@ Since the real function of $M(x)$ is unknown, let's use trapezoid rule to integr
 - Compute $I(x)$ via trapezoid rule.
 - Compute $l = I(1)$.
 - Solve $I(x) = s * I(1)$
-  - We can do this via interpolation $x(s) = I^{-1}(s \cdot I(1))$.
+  - Linear Interpolation
+  - monotone cubic Hermite (PCHIP)
+  - Higher order interpolation
 
+
+### Linear Interpolation
+
+If we assume that $I(x)$ is given by piecewise linear functions between nodal values, than 
+
+$I(x) \approx I_i + \frac{I_{i+1} - I_{i}}{x_{i+1} - x_i} (x - x_{i+1})$
+
+Since we have our trapezoidal approximation we can write $I(x) \approx t_j$ and solving for $x$ now gives
+
+$\theta = \frac{t_j - I_i}{I_{i+1} - I_i} \in [0,1], \quad x_j = x_i + \theta (x_{i+1} - x_i)$
+
+where we can numerically find $i$ using a binary search which is helpfully defined in Julia as `searchsortedlast(dist, pnt)`.
 
 ```julia
-function make_linear_inverse_interpolator(x_vals, y_vals)
-    @assert length(x_vals) == length(y_vals)
-    @assert all(diff(y_vals) .> 0) "y_vals must be strictly increasing for invertibility"
+function equidistribute_linear_inverse(x, m, N)
+    @assert length(x) == length(m) "x and m must have same length"
+    @assert isapprox(first(x), 0.0; atol=1e-12) && isapprox(last(x), 1.0; atol=1e-12)
+    @assert issorted(x) "x must be strictly increasing"
+    @assert minimum(m) >= 0.
 
-    function Iinv(y_query)
-        @assert y_query ≥ y_vals[1] && y_query ≤ y_vals[end] "Query out of bounds"
+    n = length(x) - 1
+    Δx = x[2:end] .- x[1:end-1]
+    w  = sqrt.(max.(m))  # √m
 
-        # Binary search to find the interval [i, i+1] such that y_vals[i] ≤ y_query ≤ y_vals[i+1]
-        low, high = 1, length(y_vals) - 1
-        while low ≤ high
-            mid = div(low + high, 2)
-            if y_vals[mid] ≤ y_query ≤ y_vals[mid+1]
-                # linear interpolation
-                y1, y2 = y_vals[mid], y_vals[mid+1]
-                x1, x2 = x_vals[mid], x_vals[mid+1]
-                t = (y_query - y1) / (y2 - y1)
-                return x1 + t * (x2 - x1)
-            elseif y_query < y_vals[mid]
-                high = mid - 1
-            else
-                low = mid + 1
-            end
+    # cumulative trapezoid
+    I = similar(x, Float64)
+    I[1] = 0.0
+    for i in 1:n
+        I[i+1] = I[i] + 0.5*(w[i] + w[i+1]) * Δx[i]
+    end
+    Itot = I[end]
+
+    # uniform s-grid and targets
+    s = range(0.0, 1.0; length=N)
+    t = Itot .* s
+
+    # invert by linear interpolation on (I, x)
+    x_nodes = similar(s, Float64)
+    for (j, tj) in enumerate(t)
+        # find i with I[i] <= tj <= I[i+1]
+        i = searchsortedlast(I, tj)
+        if i == length(I)         # tj == I[end]
+            x_nodes[j] = x[end]
+        elseif I[i+1] == I[i]     # flat segment (m ~ 0)
+            x_nodes[j] = x[i]     # or x[i] + θ*Δx[i] if you want uniform spread
+        else
+            θ = (tj - I[i]) / (I[i+1] - I[i])
+            x_nodes[j] = x[i] + θ * (x[i+1] - x[i])
         end
-
-        error("Value not found in data range.")
     end
-
-    return Iinv
-end
-
-function semi_analytic_solution_from_data(x_vals, M_vals, N)
-    @assert length(x_vals) == length(M_vals) "x_vals and M_vals must be the same length"
-    @assert all(diff(x_vals) .>= 0) "x_vals must be increasing"
-
-    # Step 1: Compute I(x) via trapezoidal integration of sqrt(M)
-    sqrtM = sqrt.(M_vals)
-    I_vals = zeros(length(x_vals))
-    for i in 2:length(x_vals)
-        Δx = x_vals[i] - x_vals[i-1]
-        I_vals[i] = I_vals[i-1] + 0.5 * Δx * (sqrtM[i] + sqrtM[i-1])
-    end
-
-    I_total = I_vals[end]
-
-    # Step 2: Interpolation of I(x) to get inverse: I(x) → x
-    # Itp = LinearInterpolation(I_vals, x_vals, extrapolation_bc=Throw())
-    Iinv = make_linear_inverse_interpolator(x_vals, I_vals)
-
-    # Step 3: Compute x(s) from I(x(s)) = s * I_total
-    s_vals = range(0, 1; length=N)
-    x_of_s = [Iinv(s * I_total) for s in s_vals]
-
-    return s_vals, x_of_s
+    return x_nodes
 end
 ```
 
 ## Analytic Solution
-
 Now if we know $M(x)$, we can carry out the integration and find the solution. Let's do this and use this exact solution as a double check to our numerical solvers.
+
+### Example 1
 
 Suppose $M(x) = 400 x^2$ on the interval $[0,1]$. We expect clustering near $x=1$. Plugging this into the solution yields
 
@@ -105,3 +106,18 @@ $10x^2(s) = 10 s \implies x_\text{sol} = \sqrt{s}.$
 Which makes sense as $s \in [0,1]$ would clustered around $x=1$ under the mapping $x_\text{sol}(s)$.
 
 ## Results
+
+### x=0 clustering
+![x=0](../../assets/images/ODENumericalMethods/semianalytic=2_N=100.png)
+
+### x=1 clustering
+![x=0](../../assets/images/ODENumericalMethods/semianalytic=3_N=100.png)
+
+### x=0.5 clustering
+![x=0](../../assets/images/ODENumericalMethods/semianalytic=4_N=100.png)
+
+### edge clustering
+![x=0](../../assets/images/ODENumericalMethods/semianalytic=5_N=100.png)
+
+### edge and center clustering
+![x=0](../../assets/images/ODENumericalMethods/semianalytic=6_N=100.png)

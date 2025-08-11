@@ -2,6 +2,8 @@ include("FirstOrderSolver.jl")
 include("AnalyticSolver.jl")
 include("SecondOrderSolver.jl")
 
+using Plots
+
 """
  Get the optimal solution for the ODE grid spacing problem.
  This function solves the ODE system for grid spacing and computes the optimal number of points based on the metric values.
@@ -15,11 +17,18 @@ function GetOptimalSolution(m, mx, N, xs, dir; method = "2ndorder")
 
     
     N_opt = ComputeOptimalNumberofPoints(sol[1, :], m, xs)
+    @info("Optimal number of points: ", N_opt)
+
+    if N_opt == 1 
+        N_opt = 3
+    end
+
+    if N_opt % 2 == 0
+        N_opt += 1
+    end
+
     sol_opt = SolveODE(m, mx, N_opt, xs, dir; method=method)
 
-    sol_opt = sol;
-
-    # @info("Optimal number of points: ", N_opt)
     return sol_opt, sol
 end
 
@@ -60,11 +69,9 @@ function SolveODE(M, Mx, N, xs, dir; method = :numeric, verbose = false)
         # multiply by the direction
         f = x -> dir * mx_func(x) / (2 * m_func(x))
 
-
-
-        x0 = xs[1]
-        x1 = xs[end]
-        result = SolveSecondOrder(f, x0, x1; N = N - 2, omega=0.5, max_iter = 100, tol=1e-10, verbose=true)
+        x0 = 0#xs[1]
+        x1 = 1#xs[end]
+        result = SolveSecondOrder(f, x0, x1; N = N - 2, omega=0.001, max_iter =500, tol=1e-10, verbose=true)
         # if verbose println("Solution found.") end
 
         sol = zeros(2, N)
