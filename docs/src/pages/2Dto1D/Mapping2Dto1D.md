@@ -36,3 +36,13 @@ Zooming in on the leading edge of the airfoil, we see a potential issue: the sol
 
 
 ### Real Metric Data
+
+Here we have real metric data:
+
+![real-metric](../../assets/images/PointProjection/ode_solution_real_metric.svg)
+
+Since the spacing of the points is hard to see, the difference of the 1D points is plotted in red. 
+
+Here we show real metric data but scaled down by $0.001$:
+
+![real-metric](../../assets/images/PointProjection/ode_solution_real_metric_sparser.svg)
