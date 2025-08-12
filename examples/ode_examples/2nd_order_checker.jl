@@ -1,6 +1,6 @@
 using Plots
 
-include("../src/GridGeneration.jl")
+include("../../src/GridGeneration.jl")
 
 
 

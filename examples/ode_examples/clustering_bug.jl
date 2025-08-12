@@ -1,4 +1,4 @@
-include("../src/GridGeneration.jl")
+include("../../src/GridGeneration.jl")
 include("airfoil/GetAirfoilGrid.jl")
 include("airfoil/metric/Metric.jl")
 

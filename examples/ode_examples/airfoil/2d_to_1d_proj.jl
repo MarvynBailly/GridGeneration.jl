@@ -1,4 +1,4 @@
-include("../../src/GridGeneration.jl")
+include("../../../src/GridGeneration.jl")
 
 using Plots, MAT, DelimitedFiles
 

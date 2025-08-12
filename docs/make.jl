@@ -45,6 +45,8 @@ makedocs(
             "Metric Reformulation" => "pages/2Dto1D/MetricReformulation.md",
             "Projecting Points" => "pages/2Dto1D/PointProjection.md",
         ],
+
+        "Grid Format" => "pages/GridFormat.md",
     ],
 
 
