@@ -6,5 +6,6 @@ include("TFI.jl")
 include("Get1DMetric.jl")
 include("Interpolators.jl")
 include("1D2DFuctions.jl")
+include("Metric.jl")
 
 end

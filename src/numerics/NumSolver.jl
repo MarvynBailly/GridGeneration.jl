@@ -1,4 +1,4 @@
-include("FirstOrderSolver.jl")
+# include("FirstOrderSolver.jl") remove to avoid DifferentialEquations.jl dependencies.
 include("AnalyticSolver.jl")
 include("SecondOrderSolver.jl")
 
