@@ -70,7 +70,7 @@ tree, refs = setup_metric_tree(metric_data, [])
 
 # m = GridGeneration.Get1DMetric(boundarySection, M_func_test)
 
-# sol_opt, sol = GridGeneration.GetOptimalSolution(m, m, N, xs)
+sol_opt, sol = GridGeneration.GetOptimalSolution(m, m, N, xs)
 
 # x_sol, x_sol_opt = sol[1, :], sol_opt[1, :]
 

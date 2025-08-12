@@ -21,7 +21,9 @@ See the documentation and development for [GridGeneration.jl](https://marvyn.com
   - [x] For problems without analytic solution, passes "eye norm"
 - [x] Pick a method to use for code  
   - [x]  Picked semi-analytical solution
-- [ ] (non-important) Add section on Grid format 
+- [ ] Test analytic solution with real metric data
+  - [ ] Double check if metric nearest neighbors is worth the package overhead.
+- [ ] Add section on Grid format 
 - [ ] Add single block input with no splitting. User can upload a block, code with solve along the edges of the block, fill in with TFI, and generate the .grid files
 - [ ] (hit here by 15th) Add support for single block input with user splitting. User can upload a block and split locations, code will creat multiblocks, solve along the edges of the block, fill in with TFI, and generate the .grid files
 - [ ]  Add support for multiblock input with user splitting.
