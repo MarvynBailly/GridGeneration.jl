@@ -8,7 +8,7 @@ include("SecondOrderSolver.jl")
  This function solves the ODE system for grid spacing and computes the optimal number of points based on the metric values.
  Then recomputes the solution with the optimal number of points.
 """
-function GetOptimalSolution(m, mx, N, xs; dir=1, method = "2ndorder")    
+function GetOptimalSolution(m, mx, N, xs; dir=1, method = "analytic")    
 
     sol = SolveODE(m, mx, N, xs, dir; method=method)
 

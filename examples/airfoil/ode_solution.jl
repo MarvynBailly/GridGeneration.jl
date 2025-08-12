@@ -207,7 +207,8 @@ airfoil = bottom[:, 101:end-100]
 # sectionIndices = 100:300
 
 # 
-sectionIndices = 1:100
+sectionIndices = 1:length(airfoil[1, :]) 
+# sectionIndices = 300:400
 
 boundarySection = airfoil[:, sectionIndices]
 
@@ -216,7 +217,7 @@ boundarySection = airfoil[:, sectionIndices]
 
 
 # random subset of the points to make the distribution less uniform
-# keep = rand(length(sectionIndices)) .< 0.9 
+# keep = rand(length(sectionIndices)) .< 0.1
 # newSectionIndices = sectionIndices[keep]   
 # boundarySection = airfoil[:, newSectionIndices]
 
@@ -227,17 +228,17 @@ xs = GridGeneration.ProjectBoundary2Dto1D(boundarySection)
 # build the metric
 saveFig = false
 method = "local"
-numMethod = "2ndorder"
+numMethod = "analytic"
 folder = "PointProjection"
 path = "docs/src/assets/images/$folder/"
 
 scale = 40000
 
-problems = [1] # 1: x=0, 2: x=1, 3: uniform
+problems = [2] # 1: x=0, 2: x=1, 3: uniform
 names = ["x=0", "x=1", "uniform"]
 
-# for (name, problem) in zip(names, problems) 
-problem = 1
+for (name, problem) in zip(names, problems) 
+# problem = 1
 name = names[problem]
 
 
@@ -254,7 +255,7 @@ mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func_test, method = method
 
 dir = 1#boundarySection[1, 1] > boundarySection[1, end] ? 1 : -1
 
-sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs, dir; method= numMethod)
+sol_opt, sol = GridGeneration.GetOptimalSolution(m, mx, N, xs; dir=dir, method= numMethod)
 
 x_sol, x_sol_opt = sol[1, :], sol_opt[1, :]
 
@@ -292,17 +293,30 @@ scatter!(p3, projected_x_opt, projected_y_opt, label="Projected Points Optimal (
 # scatter!(p3, boundarySection[1, :], boundarySection[2, :], label="Discrete Metric Values ($(length(boundarySection[1,:])))", marker_z = m_vals_section, markersize=2, markerstrokewidth=0, c = :brg)
 
 p5 = plot()
+# p5 = plot(aspect_ratio = 1)
 plot!(p5, boundarySection[1, :], boundarySection[2, :], label="Boundary", color=:black, linewidth=2)
 plot!(p5, projected_x_opt,projected_y_opt, label="Projected Solution", color=:red, linewidth=1)
 scatter!(p5, projected_x_opt, projected_y_opt, label="Projected Points Optimal ($(length(projected_x_opt)))", color = :green, marker=:circle, markersize=2, markerstrokewidth=0)
+
+# p6 = plot(xlims=[-0.05,0.05], ylims=[-0.1, 0.1])
+# plot!(p6, boundarySection[1, :], boundarySection[2, :], label="Boundary", color=:black, linewidth=2, title="Projected Points")
+# plot!(p6, projected_x_opt,projected_y_opt, label="Projected Solution", color=:red, linewidth=1, title="leading edge zoom in")
+
+# p7 = plot(p5, p6, layout = @layout([a b]), size = (800, 400))
+# display(p7)
+# scatter!(p6, projected_x_opt, projected_y_opt, label="Projected Points Optimal ($(length(projected_x_opt)))", color = :green, marker=:circle, markersize=2, markerstrokewidth=0)
+
 
 # p3 = plot(p1, p2, layout = @layout([A{0.001h}; b c]), size = (1000, 600))
 p4 = plot(p1, p2, p3, p5, layout = @layout([a ; b ; c ; d]), size = (800, 1000))
 
 
 
-# if saveFig
-#     savefig(p4, path * "ode_solution_$(name)_$(method).png")
-# else
+
+
+if saveFig
+    savefig(p4, path * "ode_solution_$(name)_$(method).svg")
+else
     display(p4)
-# end
+end
+end
