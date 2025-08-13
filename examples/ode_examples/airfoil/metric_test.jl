@@ -27,7 +27,7 @@ end
 
 
 # build the metric
-saveFig = true
+saveFig = false
 method = "local" # "local" or "nuclear"
 
 folder = "Mapping2Dto1D"
@@ -39,11 +39,11 @@ problems = [2] # 1: x=0, 2: x=1, 3: uniform
 names = ["x=0", "x=1", "uniform"]
 
 
-initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3)
+initialGrid = GetAirfoilGrid(airfoilPath = "examples/ode_examples/airfoil/data/A-airfoil.txt", radius = 3)
 
 bottom = initialGrid[:,:,1]
 airfoil = bottom[:, 101:end-100]  
-SectionIndices = 100:10:250
+SectionIndices = 100:length(airfoil[1, :]) 
 # SectionIndices = 1:length(airfoil[1, :])
 
 boundarySection = airfoil[:, SectionIndices]
@@ -55,7 +55,7 @@ N = length(boundarySection[1, :])
 x = boundarySection[1, :]
 y = boundarySection[2, :]
 
-# segment lengths (N-1)
+# segment lengths (N-1)]
 Δx = diff(x)
 Δy = diff(y)
 Δs = sqrt.(Δx.^2 .+ Δy.^2)

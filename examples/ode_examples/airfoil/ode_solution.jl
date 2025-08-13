@@ -200,9 +200,9 @@ end
 # SET UP DOMAIN
 #####################
 
-initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3)
+initialGrid = GetAirfoilGrid(airfoilPath = "examples/ode_examples/airfoil/data/A-airfoil.txt", radius = 3)
 
-bottom = initialGrid[:,:,1]
+bottom = initialGrid[:,:,10]
 airfoil = bottom[:, 101:end-100]  
 # sectionIndices = 100:300
 
@@ -234,7 +234,7 @@ path = "docs/src/assets/images/$folder/"
 
 scale = 40000
 
-problems = [2] # 1: x=0, 2: x=1, 3: uniform
+problems = [1] # 1: x=0, 2: x=1, 3: uniform
 names = ["x=0", "x=1", "uniform"]
 
 for (name, problem) in zip(names, problems) 
