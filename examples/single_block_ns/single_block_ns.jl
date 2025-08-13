@@ -55,16 +55,20 @@ end
 # Set up the input
 #################
 
+#################
+# Real Metric Data
+#################
+
 # set up metric data
-metricPath = "examples/single_block_ns/airfoil/metric/A-airfoil_grid_data.mat"
+# metricPath = "examples/single_block_ns/airfoil/metric/A-airfoil_grid_data.mat"
 # load metric
-metricData = matread(metricPath)
+# metricData = matread(metricPath)
 # set up metric function
-tree, refs = GridGeneration.setup_metric_tree(metricData)
-metricFunc = (x,y) -> GridGeneration.find_nearest_kd(metricData, tree, refs, x, y)
+# tree, refs = GridGeneration.setup_metric_tree(metricData)
+# metricFunc = (x,y) -> GridGeneration.find_nearest_kd(metricData, tree, refs, x, y)
 
 # load in the initial grid - no trailing edge 
-initialGrid = GetAirfoilGrid(airfoilPath="examples/single_block_ns/airfoil/data/A-airfoil.txt", radius = 3)
+initialGrid = GetAirfoilGrid(airfoilPath="examples/single_block_ns/airfoil/data/A-airfoil.txt", radius = 0.2)
 # throw away trailing edge stuff
 airfoilGrid = initialGrid[:, 101:end-100, :]
 
