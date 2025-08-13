@@ -10,7 +10,7 @@ include("SecondOrderSolver.jl")
 """
 function GetOptimalSolution(m, mx, N, xs; dir=1, method = "analytic")    
 
-    sol = SolveODE(m, mx, N, xs, dir; method=method)
+    sol = SolveODE(m, mx, N, xs; dir=dir, method=method)
 
     @assert length(sol[1, :]) == N "Solution length ($(length(sol[1, :]))) does not match expected number of points (N = $N)"
 
@@ -26,7 +26,7 @@ function GetOptimalSolution(m, mx, N, xs; dir=1, method = "analytic")
     #     N_opt += 1
     # end
 
-    sol_opt = SolveODE(m, mx, N_opt, xs, dir; method=method)
+    sol_opt = SolveODE(m, mx, N_opt, xs; dir=dir, method=method)
 
     return sol_opt, sol
 end
@@ -40,7 +40,7 @@ The method can be either `:numeric` for numerical solution or `:analytic` for se
 Returns the solution as a 2D array where the first row is the x-coordinates and
 
 """
-function SolveODE(M, Mx, N, xs, dir; method = :numeric, verbose = false)
+function SolveODE(M, Mx, N, xs; dir=1, method = "analytic", verbose = false)
     if verbose @info("Solving ODE for grid spacing using method: $method...") end
 
     if method == "1storder"

@@ -47,6 +47,13 @@ makedocs(
         ],
 
         "Grid Format" => "pages/GridFormat.md",
+
+        "Single Block Grid Input" => Any[
+            "pages/SingleBlock/nosplitting.md",
+            "pages/SingleBlock/splitting.md"
+        ],
+
+        "Multi-Block Grid Input" => "pages/MultiBlock/multiblock.md",
     ],
 
 

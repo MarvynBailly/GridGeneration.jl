@@ -47,8 +47,8 @@ and include in your script:
 using GridGeneration
 ```
 
-### run build script website
+### run build script
 julia --project=docs/ docs/make.jl
 
-### to launch local server
+### launch local server
 julia --project=docs -e "using LiveServer; LiveServer.servedocs()"

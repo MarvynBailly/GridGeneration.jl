@@ -6,7 +6,8 @@ struct PtRef
     j::Int
 end
 
-function setup_metric_tree(data, refs)
+function setup_metric_tree(data)
+    refs = PtRef[]
     coords = Float64[]
     for (b, (Xb,Yb)) in enumerate(zip(data["x"], data["y"]))
     Ny, Nz = size(Xb)
