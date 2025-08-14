@@ -60,7 +60,7 @@ interInfo = Any[]
 
 block, bndInfo, interInfo = GridGeneration.SolveBlock(airfoilGrid, bndInfo, interInfo, metricFunc; tfi_method="TFI")
 
-# plot the block
+# plot the blockz
 
 
 
