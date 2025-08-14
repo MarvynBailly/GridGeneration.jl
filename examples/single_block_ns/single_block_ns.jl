@@ -55,7 +55,7 @@ bndInfo = getBoundaryConditions(initialGrid)
 # define interInfo
 interInfo = Any[]
 
-block, bndInfo, interInfo = GridGeneration.SolveBlock(airfoilGrid, bndInfo, interInfo, metricFunc)
+block, bndInfo, interInfo = GridGeneration.SolveBlock(airfoilGrid, bndInfo, interInfo, metricFunc; tfi_method="TFI")
 
 # plot the block
 

@@ -23,7 +23,7 @@ function ProcessEdgePair(edgeA, edgeB, metricFunc, solver)
     return projectedA, projectedB
 end
 
-function SolveBlock(block, bndInfo, interInfo, metricFunc; solver="analytic")
+function SolveBlock(block, bndInfo, interInfo, metricFunc; solver="analytic", tfi_method="TFI")
     left   = block[:, 1, :]
     right  = block[:, end, :]
     projectedLeft, projectedRight = ProcessEdgePair(left, right, metricFunc, solver)
@@ -32,7 +32,13 @@ function SolveBlock(block, bndInfo, interInfo, metricFunc; solver="analytic")
     top    = block[:, :, end]
     projectedBottom, projectedTop = ProcessEdgePair(bottom, top, metricFunc, solver)
 
-    computedBlock = GridGeneration.TFI_2D([projectedTop', projectedRight', projectedBottom', projectedLeft'])
+    if tfi_method == "TFI"
+        computedBlock = GridGeneration.TFI_2D([projectedTop', projectedRight', projectedBottom', projectedLeft'])
+    elseif tfi_method == "TFI_2D_Hermite"
+        computedBlock = GridGeneration.TFI_2D_Hermite([projectedTop', projectedRight', projectedBottom', projectedLeft'])
+    else
+        error("Unknown TFI method: $tfi_method")
+    end
 
     bndInfo = GridGeneration.UpdateBndInfo!(bndInfo, computedBlock)
 
