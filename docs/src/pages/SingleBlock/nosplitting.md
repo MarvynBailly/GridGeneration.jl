@@ -60,7 +60,16 @@ function SolveBlock(block, bndInfo, interInfo, metricFunc; solver="analytic")
     return computedBlock, bndInfo, interInfo
 end
 ```
+## Custom Metric
+Let's also create a tool to output a custom metric field. I make this function by computing the distance from the airfoil to the point with the following `w_rational(d, A, ℓ, p) = A / (1 + (d/ℓ)^p)` where $d$ is the distance, $A$ controls the amplitude, and $l$ and $p$ are used to control the fall off. This gives the space around the airfoil a higher metric value which decreases as you move away from the boundary. Let's also add a "hotspot" to control where the function places more points. We can achieve this by using the same function from above but rather than using the distance from the airfoil, we pass in the distance to the $(\text{hotspot}_x, \text{hotspot}_y)$. Finally we can add these two functions togethers.
+
 
 ### Examples 
-Let's use a small grid around an airfoil as an example. Since we are doing single block, let's not have a c-grid yet but keep one block around
+Let's use a small grid around an airfoil as an example. Looping over hotspots along the airfoil domain we can make some fun gifs as shown below. We see that the basic TFI method struggles to preserve orthogonality in the interior points but I'm not worried about this. We can use higher order TFI methods or elliptic smoothing to remedy this.
 
+#### Example 1
+![test](../../assets/gifs/SingleBlockns/hotspot_along_airfoil.gif)
+#### Example 2
+![test](../../assets/gifs/SingleBlockns/hotspot_along_airfoil_dense1.gif)
+#### Example 3
+![test](../../assets/gifs/SingleBlockns/hotspot_along_airfoil_dense2.gif)

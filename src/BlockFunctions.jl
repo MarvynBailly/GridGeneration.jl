@@ -12,7 +12,7 @@ function ProcessEdgePair(edgeA, edgeB, metricFunc, solver)
     optNB = GridGeneration.ComputeOptimalNumberofPoints(xsB, metricB, solB[1, :])
 
     optN = max(optNA, optNB)
-    @info "Optimal number of points: $optN"
+    # @info "Optimal number of points: $optN"
 
     solOptA = GridGeneration.SolveODE(metricA, metricA, optN, xsA; method=solver)
     solOptB = GridGeneration.SolveODE(metricB, metricB, optN, xsB; method=solver)

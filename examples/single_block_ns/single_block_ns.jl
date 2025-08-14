@@ -38,16 +38,19 @@ airfoilGrid = initialGrid[:, 101:end-100, :]
 airfoil = airfoilGrid[:,:,1]
 
 
-metricFunc = make_getMetric(airfoil;
-    A_airfoil = 400.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   # tight decay from the airfoil
-    A_origin  = 10000.0,  ℓ_origin  = 0.05, p_origin  = 10,   # hotspot at (0,0)
-    floor     = 1e-4,
+metricFunc1 = make_getMetric(airfoil;
+    A_airfoil = 50.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
+    A_origin  = 500.0,  ℓ_origin  = 0.2, p_origin  = 10,   
+    floor     = 1e-4,  origin_center=(0.85, -0.1),
 profile   = :rational)  # or :gauss
 
+# metricFunc2 = make_getMetric(airfoil;
+#     A_airfoil = 50.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
+#     A_origin  = 500.0,  ℓ_origin  = 0.1, p_origin  = 10,   
+#     floor     = 1e-4,  origin_center=(-1.0, -1.8),
+# profile   = :rational)  # or :gauss
 
-
-
-
+metricFunc = (x,y) -> metricFunc1(x,y)# .+ metricFunc2(x,y)
 
 # define the boundary information
 bndInfo = getBoundaryConditions(initialGrid)
@@ -103,7 +106,7 @@ end
 
 # add a zoomed in figure 
 p2 = deepcopy(p1)
-plot!(p2, xlims=(-0.5, 0.5), ylims=(-0.5, 0.5),
+plot!(p2, xlims=(-0.15, 1.15), ylims=(-0.25, 0.25),
         title="Zoomed in view",
         xlabel="x", ylabel="y",
         cb_label="M11(x,y)", equal_aspect=true, colormap=:imola)
