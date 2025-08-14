@@ -122,7 +122,7 @@ version = "2.50.1+0"
 deps = ["Documenter", "NearestNeighbors"]
 path = "C:\\Users\\admin\\Documents\\GitHub\\GridGeneration\\docs\\.."
 uuid = "a45aac3a-c828-4b24-bd97-84998539262e"
-version = "0.2.0"
+version = "1.0.0"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "PrecompileTools", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]

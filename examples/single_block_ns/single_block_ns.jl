@@ -53,7 +53,7 @@ profile   = :rational)  # or :gauss
 metricFunc = (x,y) -> metricFunc1(x,y)# .+ metricFunc2(x,y)
 
 # define the boundary information
-bndInfo = getBoundaryConditions(initialGrid)
+bndInfo = getBoundaryConditions(airfoilGrid)
 
 # define interInfo
 interInfo = Any[]
