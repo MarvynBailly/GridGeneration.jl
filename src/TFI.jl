@@ -39,7 +39,9 @@ function TFI_2D(boundary)
     Y =  A .* Ly .+ B .* Ry .+ C .* By' .+ D .* Ty' .-
          (A .* C .* y00 .+ B .* C .* y10 .+ A .* D .* y01 .+ B .* D .* y11)
 
-    return X', Y'
+    block = permutedims(cat(X', Y'; dims=3), (3, 1, 2))
+
+    return block
 end
 
 

@@ -1,0 +1,40 @@
+function ProcessEdgePair(edgeA, edgeB, metricFunc, solver)
+    metricA = GridGeneration.Get1DMetric(edgeA, metricFunc)
+    metricB = GridGeneration.Get1DMetric(edgeB, metricFunc)
+
+    xsA = GridGeneration.ProjectBoundary2Dto1D(edgeA)
+    xsB = GridGeneration.ProjectBoundary2Dto1D(edgeB)
+
+    solA = GridGeneration.SolveODE(metricA, metricA, length(xsA), xsA; method=solver)
+    solB = GridGeneration.SolveODE(metricB, metricB, length(xsB), xsB; method=solver)
+
+    optNA = GridGeneration.ComputeOptimalNumberofPoints(xsA, metricA, solA[1, :])
+    optNB = GridGeneration.ComputeOptimalNumberofPoints(xsB, metricB, solB[1, :])
+
+    optN = max(optNA, optNB)
+    @info "Optimal number of points: $optN"
+
+    solOptA = GridGeneration.SolveODE(metricA, metricA, optN, xsA; method=solver)
+    solOptB = GridGeneration.SolveODE(metricB, metricB, optN, xsB; method=solver)
+
+    projectedA = GridGeneration.ProjectBoundary1Dto2D(edgeA, solOptA[1, :], xsA)
+    projectedB = GridGeneration.ProjectBoundary1Dto2D(edgeB, solOptB[1, :], xsB)
+
+    return projectedA, projectedB
+end
+
+function SolveBlock(block, bndInfo, interInfo, metricFunc; solver="analytic")
+    left   = block[:, 1, :]
+    right  = block[:, end, :]
+    projectedLeft, projectedRight = ProcessEdgePair(left, right, metricFunc, solver)
+
+    bottom = block[:, :, 1]
+    top    = block[:, :, end]
+    projectedBottom, projectedTop = ProcessEdgePair(bottom, top, metricFunc, solver)
+
+    computedBlock = GridGeneration.TFI_2D([projectedTop', projectedRight', projectedBottom', projectedLeft'])
+
+    bndInfo = GridGeneration.UpdateBndInfo!(bndInfo, computedBlock)
+
+    return computedBlock, bndInfo, interInfo
+end

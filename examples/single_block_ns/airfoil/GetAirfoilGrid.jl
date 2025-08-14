@@ -18,6 +18,5 @@ function GetAirfoilGrid(; airfoilPath = "examples/airfoil/A-airfoil.txt", radius
     )
 
     initialGrid = GridGeneration.TFI_2D(boundary)
-    initialGrid = permutedims(cat(initialGrid...; dims=3), (3, 1, 2));
     return initialGrid
 end
