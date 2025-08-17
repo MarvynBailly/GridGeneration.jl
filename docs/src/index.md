@@ -6,6 +6,11 @@ CurrentModule = GridGeneration
 
 Welcome to the documentation and formulation for GridGeneration.jl
 
+## Current Example
+
+Just finished adding support for [Single Block Input with Block Splitting](./pages/SingleBlock/splitting.md)
+
+
 ## Overview
 
 A brief description of the underlying ordinary differential equation (ODE) is presented in [ODE Formulation](./pages/ODE/ODEFormulation.md) with supporting work shown in [Mathematical Work](./pages/ODE/MathematicalWork.md). The ODE is nonlinear and second order boundary value problem which can be reformulated as a system system of first order ODEs. Two numerical methods, one for the [First Order System](./pages/NumericalMethods/FirstOrderSystem.md) using Julia's library [DifferentialEquations.jl](./pages/NumericalMethods/FirstOrderSystem.md) and second for the [Second Order BVP ODE](./pages/NumericalMethods/SecondOrderBVP.md) using central differencing and fixed point iteration with under-relaxation. Both methods prove to be rather unstable so a [semi-analytical method](./pages/NumericalMethods/SemiAnalyticalMethod.md) (semi due to the use of numerical integration and inversion) is adopted. 
