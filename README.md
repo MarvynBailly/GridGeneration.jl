@@ -29,10 +29,10 @@ See the documentation and development for [GridGeneration.jl](https://marvyn.com
   - [ ] Design a suite of test cases using the metric maker
   - [x] Update page with images
 - [ ] (hit here by 15th) Add support for single block input with user splitting. User can upload a block and split locations, code will creat multiblocks, solve along the edges of the block, fill in with TFI, and generate the .grid files
-  - [ ] Write SplitBlock algorithm
+  - [x] Write SplitBlock algorithm
     - [x] Write Pseudocode.
-    - [ ] Write Pseudocode into real code.
-  - [ ] Write SolveAllBlocks algorithm
+    - [x] Write Pseudocode into real code.
+  - [x] Write SolveAllBlocks algorithm
   - [ ] Update page with images
 - [ ]  Add support for multiblock input with user splitting.
   - [ ] Modify SplitBlock to SplitBlocks
