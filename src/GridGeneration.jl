@@ -10,6 +10,8 @@ include("Metric.jl")
 include("BlockFunctions.jl")
 include("BoundaryUtils.jl")
 include("InterfaceUtils.jl")
+include("SplittingFunctions.jl")
+include("SolveAllBlocks.jl")
 
 
 end

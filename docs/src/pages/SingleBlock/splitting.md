@@ -374,5 +374,71 @@ end
 
 
 ### Examples
-Putting this all together and using our custom metric creator, we get the following results:
+Putting this all together and using our custom metric creator, we can use the code as follows:
 
+#### Example 1
+
+```julia
+include("GridGeneration.jl")
+
+#################
+# Load in initial single block grid
+#################
+# load in the initial grid - no trailing edge 
+initialGrid = GetAirfoilGrid(airfoilPath="examples/single_block_ns/airfoil/data/A-airfoil.txt", radius = 2)
+# throw away trailing edge stuff
+airfoilGrid = initialGrid[:, 101:end-100, :]
+airfoil = airfoilGrid[:,:,1]
+
+# define the boundary information
+bndInfo = getBoundaryConditions(airfoilGrid)
+
+# define interInfo
+interInfo = Any[]
+
+#################
+# Make a custom metric
+#################
+
+metricFunc1 = make_getMetric(airfoil;
+    A_airfoil = 50.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
+    A_origin  = 500.0,  ℓ_origin  = 0.1, p_origin  = 10,   
+    floor     = 1e-4,  origin_center=(1, -0.6),
+profile   = :rational)  # or :gauss
+
+metricFunc2 = make_getMetric(airfoil;
+    A_airfoil = 0.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
+    A_origin  = 700.0,  ℓ_origin  = 0.1, p_origin  = 10,   
+    floor     = 1e-4,  origin_center=(0.5, 0.1),
+profile   = :rational)  # or :gauss
+
+metricFunc = (x,y) -> metricFunc1(x,y) .+ metricFunc2(x,y)
+
+
+
+#################
+# Add split locations 
+#################
+
+
+splitLocations = [
+    [ 300, 500 ],   # split along the x axis
+    [ 40, 80 ]      # split along the y axis
+]
+
+#################
+## Split the blocks
+#################
+
+blocks, bndInfo, interInfo = GridGeneration.SplitBlock(airfoilGrid, splitLocations, bndInfo, interInfo)
+
+#################
+##### Run the solver on them
+#################
+
+blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(metricFunc, blocks, bndInfo, interInfo)
+```
+
+which yields
+
+![example1](../../assets/images/SingleBlock/examples1.svg)
