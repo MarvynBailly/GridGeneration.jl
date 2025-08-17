@@ -26,7 +26,6 @@ See the documentation and development for [GridGeneration.jl](https://marvyn.com
 - [x] Add section on Grid format 
   - [x] Add relevant information
 - [x] Add single block input with no splitting. User can upload a block, code with solve along the edges of the block, fill in with TFI, and generate the .grid files
-  - [ ] Design a suite of test cases using the metric maker
   - [x] Update page with images
 - [x] Add support for single block input with user splitting. User can upload a block and split locations, code will creat multiblocks, solve along the edges of the block, fill in with TFI, and generate the .grid files
   - [x] Write SplitBlock algorithm
@@ -34,7 +33,13 @@ See the documentation and development for [GridGeneration.jl](https://marvyn.com
     - [x] Write Pseudocode into real code.
   - [x] Write SolveAllBlocks algorithm
   - [x] Update page with images
+- [ ] Design a suite of test cases using the metric maker
+  - [ ] Uniform Distribution
+  - [ ] Leading Edge
+  - [ ] Trailing Edge
+  - [ ] Leading and Trailing Edge
 - [ ]  Add support for multiblock input with user splitting.
+  - [x]  Multiblock input with no splitting
   - [ ] Modify SplitBlock to SplitBlocks
 - [ ] Try custom splitting idea.
   - [ ] Take output from this as input to SplitBlocks
