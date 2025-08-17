@@ -46,14 +46,14 @@ makedocs(
             "Projecting Points" => "pages/2Dto1D/PointProjection.md",
         ],
 
-        "Grid Format" => "pages/GridFormat.md",
+        "Grid Format" => Any["Grid Format" => "pages/GridFormat.md"],
 
         "Single Block Grid Input" => Any[
             "pages/SingleBlock/nosplitting.md",
             "pages/SingleBlock/splitting.md"
         ],
 
-        "Multi-Block Grid Input" => "pages/MultiBlock/multiblock.md",
+        "Multi-Block Grid Input" => Any["Multi-Block Input" => "pages/MultiBlock/multiblock.md"],
     ],
 
 

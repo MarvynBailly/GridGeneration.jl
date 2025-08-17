@@ -9,5 +9,7 @@ include("1D2DFuctions.jl")
 include("Metric.jl")
 include("BlockFunctions.jl")
 include("BoundaryUtils.jl")
+include("InterfaceUtils.jl")
+
 
 end

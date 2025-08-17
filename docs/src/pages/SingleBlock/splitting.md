@@ -1,18 +1,5 @@
 # Single Block with Splitting
-Next, let's build `GridGeneration` functions that allow the user to add splits into the blocks. The flow I'm thinking will be
-- Input single Tortuga block and desired split locations with the block
-- break the block into sub-blocks at the split locations
-  - Create new interfaces and add to `interInfo`
-  - Update `bndInfo` for the blocks
-  - Save block in blocks
-- For (blockId, block) in enumerate(blocks)
-  - for each dir in unvistedDirs[blockId]
-    - get neighboring block ids
-    - add this block and neighboring blocks to computeBlocks
-    - for each edge in computeBlocks, solve for optimal $N$
-    - take optimal $N$ for this direction to be the max of all opt $N$s
-    - solve ODE with optimal $N$ along dir for each computeBlock
-    - mark dir as visited for each computeBlock
+ 
 
 Let's make this into two main `GridGeneration` functions: `GridGeneration.SplitBlock(block, splitLocations, bndInfo, interInfo)` and `GridGeneration.SolveAllBlocks(metric, blocks, bndInfo, interInfo).` And thus all we have to do is
 - Input single Tortuga block and desired split locations with the block
@@ -103,7 +90,7 @@ with two helper functions `GetTouchingBoundaries` and `GroupBoundariesByName`. T
 
 Here we handle the interface info by looking to the right and above.
 
-### Get Touching Boundaries
+### Get Touching Boundaries - Idea 1
 The function will check each of the edges of the child (newly created subblock) to see if they are on the boundary of their parent block (the original block being split). If the edge is on a boundary, inherit the boundary type from parent to child. We can check if the child is on the boundary of the parent by seeing if child start indices are equal to `1` or if the end indices are equal to size of the parent.
 
 ```julia
@@ -178,6 +165,62 @@ function GetBoundaryNameBySide(bndInfo; side=:none)
 end
 ```
 
+
+### Get Touching Boundaries - Idea 2 (Current)
+Another option is to use this old existing function of mine:
+```julia
+function GetTouchingBoundaries(block::Dict, bndInfo)
+    # Child window in parent (global) coordinates, inclusive
+    block_i1, block_j1 = block["start"]
+    block_i2, block_j2 = block["end"]
+    blockId = block["block"]
+
+    # Global -> child-local index maps
+    to_local_i(i) = i - block_i1 + 1
+    to_local_j(j) = j - block_j1 + 1
+
+    touchingFaces = Vector{Dict{String,Any}}()
+
+    for bnd in bndInfo
+        name = bnd["name"]
+        for face in bnd["faces"]
+            faceStart = face["start"];  faceEnd = face["end"]
+            i1, j1 = faceStart[1], faceStart[2]
+            i2, j2 = faceEnd[1],   faceEnd[2]
+
+            # Vertical face on parent's left/right boundary?
+            if i1 == i2 && (i1 == block_i1 || i1 == block_i2)
+                jlo = max(min(j1, j2), block_j1)
+                jhi = min(max(j1, j2), block_j2)
+                if jhi > jlo
+                    push!(touchingFaces, Dict(
+                        "name"  => name,
+                        "block" => blockId,
+                        "start" => [to_local_i(i1), to_local_j(jlo), 1],
+                        "end"   => [to_local_i(i2), to_local_j(jhi), 1],
+                    ))
+                end
+
+            # Horizontal face on parent's bottom/top boundary?
+            elseif j1 == j2 && (j1 == block_j1 || j1 == block_j2)
+                ilo = max(min(i1, i2), block_i1)
+                ihi = min(max(i1, i2), block_i2)
+                if ihi > ilo
+                    push!(touchingFaces, Dict(
+                        "name"  => name,
+                        "block" => blockId,
+                        "start" => [to_local_i(ilo), to_local_j(j1), 1],
+                        "end"   => [to_local_i(ihi), to_local_j(j2), 1],
+                    ))
+                end
+            end
+        end
+    end
+
+    return touchingFaces
+end
+```
+
 ### Group Boundaries by Name
 Algorithm reformulates the list of boundaries into the Tortuga format, a list of dicts of dicts, where the first dict is the type of boundary and the sub dict are the blocks and edges.
 
@@ -209,6 +252,127 @@ function GroupBoundariesByName(faceList)
 end
 ```
 
+### Split Examples
+
+Inputting the following splits
+
+```julia 
+splitLocations = [
+    [ 300, 500 ],   # split along the x axis
+    [ 40 ]      # split along the y axis
+]
+```
+
+yields:
+
+![test](../../assets/images/SingleBlock/split_example.svg)
 
 ## Solve All Blocks Algorithm
+
+With the single block splitting working, let's move to creating an algorithm to solve the ODE across all the edges of the blocks. The challenging part here comes from the required consistency across the edges of the blocks. Consider blocks $B_1$ with left/right edges $e$ and $f$ and neighboring block $B_2$ with left/right edges $f$ and $g$. Now if we solve the ODE along $e,f,g$ and find the optimal number of points (let's denote this via $N_e, N_f,$ and $N_g$) are such that $N_e > N_f, N_g > N_f$ with $N_e \neq N_g$, then we will have an issue solving along $e$ with the optimal number of points. To fix this issue, we can take the global optimal number $N_\text{opt}$ of the pairs, that is $N_\text{opt} = \max(N_e, N_f, N_g)$ and solve the $e,f,$ and $g$ edges with $N_\text{opt}$.
+
+Let's have an array `blockInstructions` of size of blocks that will contain the max number of points in each direction. Now we loop through the blocks and do the following:
+- for each dir
+  - collect the neighboring block IDs using the interface info and save in array
+  - Solve for the number of points for in the dir on both edges
+  - Send the number of points to each neighbor with the following logic:
+    - if incoming is greater than saved, overwrite with incoming, else keep the saved value. We can do this by looking at the correct spot in the `blockInstructions` using the neighboring block Id, and in the correct direction using the current dir. 
+
+Once we loop through all blocks, each block should now contain the max number of points to use in each direction. We can finally loop through all the blocks and solve the ODE with the correct number of points.
+
+### Algorithm
+
+```julia
+function SolveAllBlocks(metric, blocks, bndInfo, interInfo)
+    blockDirOptN = similar(blocks)
+
+    for i in 1:length(blockDirOptN)
+        blockDirOptN[i] = [-1,-1]
+    end
+
+    # compute max number of points for each block
+    for (blockId, block) in enumerate(blocks)
+        for dir in 1:2  # 1 for horizontal, 2 for vertical
+            blockNeighbors = GetNeighbors(blockId, interInfo, dir; include_start=true)
+            # println("blockId: ", blockId, " dir: ", dir, " neighbors: ", blockNeighbors)
+
+            #############
+            # method 1
+            #############
+            if dir == 1  # horizontal
+                left   = block[:, 1, :]
+                right  = block[:, end, :]
+                optN = GridGeneration.GetOptNEdgePair(left, right, metric)
+            else  # vertical
+                bottom   = block[:, :, 1]
+                top  = block[:, :, end]
+                optN = GridGeneration.GetOptNEdgePair(bottom, top, metric)
+            end
+
+            # Update the blockDirOptN with the max number of points
+            for computeBlocks in blockNeighbors
+                if blockDirOptN[computeBlocks][dir] < optN
+                    blockDirOptN[computeBlocks][dir] = optN
+                end
+            end
+        end
+    end
+
+    # solve all blocks using the optimal number
+    computedBlocks = similar(blocks)
+    p1 = plot()
+    for (blockId, block) in enumerate(blocks)
+        optNs = blockDirOptN[blockId]
+
+        computedBlock, bndInfo, interInfo = GridGeneration.SolveBlockFixedN(block, bndInfo, interInfo, metric, optNs)
+
+        computedBlocks[blockId] = computedBlock
+    end
+
+    # update the boundary information and interface information 
+    GridGeneration.UpdateBndInfo!(bndInfo, computedBlocks; verbose=false)
+    updatedInterInfo = GridGeneration.UpdateInterInfo(interInfo, computedBlocks; verbose=false)
+
+    return computedBlocks, bndInfo, updatedInterInfo
+end
+
+```
+
+
+We can find the neighboring cells in a direction using this recursive function:
+
+```julia
+function GetNeighbors(blockId::Int, interInfo, dir::Int; include_start::Bool=false)
+    seen = Set{Int}()
+
+    function visit(bid::Int)
+        # already visited this block
+        bid ∈ seen && return
+        push!(seen, bid)
+
+        for info in interInfo
+            if info["blockA"] == bid || info["blockB"] == bid
+                # Orientation is defined by the A-side span (shared for both sides)
+                startA = info["start_blkA"]
+                endA   = info["end_blkA"]
+                is_vertical   = (startA[1] != endA[1])
+                is_horizontal = (startA[2] != endA[2])
+
+                if (dir == 2 && is_vertical) || (dir == 1 && is_horizontal)
+                    other = (info["blockA"] == bid) ? info["blockB"] : info["blockA"]
+                    visit(other)
+                end
+            end
+        end
+    end
+
+    visit(blockId)
+
+    return include_start ? collect(seen) : [b for b in seen if b != blockId]
+end
+```
+
+
+### Examples
+Putting this all together and using our custom metric creator, we get the following results:
 
