@@ -33,12 +33,12 @@ See the documentation and development for [GridGeneration.jl](https://marvyn.com
     - [x] Write Pseudocode into real code.
   - [x] Write SolveAllBlocks algorithm
   - [x] Update page with images
-- [ ] Design a suite of test cases using the metric maker
-  - [ ] Uniform Distribution
-  - [ ] Leading Edge
-  - [ ] Trailing Edge
-  - [ ] Leading and Trailing Edge
-- [ ]  Add support for multiblock input with user splitting.
+- [x] Design a suite of test cases using the metric maker
+  - [x] Uniform Distribution
+  - [x] Leading Edge
+  - [x] Trailing Edge
+  - [x] Leading and Trailing Edge
+- [x]  Add support for multiblock input with user splitting.
   - [x]  Multiblock input with no splitting
   - [ ] Modify SplitBlock to SplitBlocks
 - [ ] Try custom splitting idea.

@@ -1,0 +1,7 @@
+[deps]
+BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
+NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"

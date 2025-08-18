@@ -60,6 +60,7 @@ function plot_scalar_field(f, xs::AbstractVector, ys::AbstractVector;
     end
 
     # heatmap
+
     p = heatmap(xs, ys, W; xlabel, ylabel, title,
                 c=colormap, colorbar_title=cb_label,
                 clim, aspect_ratio=(equal_aspect ? 1 : :auto))

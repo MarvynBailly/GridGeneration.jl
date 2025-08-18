@@ -8,7 +8,7 @@ Welcome to the documentation and formulation for GridGeneration.jl
 
 ## Current Example
 
-Just finished adding support for [Single Block Input with Block Splitting](./pages/SingleBlock/splitting.md)
+Just finished adding examples for [airfoil case](./pages/Examples/airfoil.md)
 
 
 ## Overview

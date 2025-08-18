@@ -373,7 +373,7 @@ end
 ```
 
 
-### Examples
+## Examples
 Putting this all together and using our custom metric creator, we can use the code as follows:
 
 #### Example 1

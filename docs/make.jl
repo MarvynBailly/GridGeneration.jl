@@ -33,6 +33,10 @@ makedocs(
             "ODE Formulation" => "pages/ODE/ODEFormulation.md",
             "Mathematical Work" => "pages/ODE/MathematicalWork.md",
             ],
+
+        "Examples" => Any[
+            "Airfoil" => "pages/Examples/airfoil.md",
+        ],
         
         "Numerical Methods" => Any[
             "First Order System" => "pages/NumericalMethods/FirstOrderSystem.md",
