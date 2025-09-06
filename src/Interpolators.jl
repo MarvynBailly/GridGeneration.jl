@@ -8,7 +8,7 @@ function build_interps_linear(xv, Mv)
     M_of = function (x)
         if x ≤ xv[1]; return Mv[1] end
         if x ≥ xv[end]; return Mv[end] end
-        if x == Infinity; return Mv[end] end
+        # if x == Infinity; return Mv[end] end
         # find which interval x belongs from xv
         i = searchsortedlast(xv, x)
 

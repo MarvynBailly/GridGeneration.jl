@@ -30,8 +30,11 @@ function GetOptNEdgePair(edgeA, edgeB, metricFunc; solver="analytic")
     xsA = GridGeneration.ProjectBoundary2Dto1D(edgeA)
     xsB = GridGeneration.ProjectBoundary2Dto1D(edgeB)
 
-    solA = GridGeneration.SolveODE(metricA, metricA, length(xsA), xsA; method=solver)
-    solB = GridGeneration.SolveODE(metricB, metricB, length(xsB), xsB; method=solver)
+    metricADiff = GridGeneration.CentralDiff(xsA, metricA)
+    metricBDiff = GridGeneration.CentralDiff(xsB, metricB)
+
+    solA = GridGeneration.SolveODE(metricA, metricADiff, length(xsA), xsA; method=solver)
+    solB = GridGeneration.SolveODE(metricB, metricBDiff, length(xsB), xsB; method=solver)
 
     optNA = GridGeneration.ComputeOptimalNumberofPoints(xsA, metricA, solA[1, :])
     optNB = GridGeneration.ComputeOptimalNumberofPoints(xsB, metricB, solB[1, :])
@@ -48,11 +51,14 @@ function ProcessEdgePairFixedN(edgeA, edgeB, metricFunc, solver, N)
     xsA = GridGeneration.ProjectBoundary2Dto1D(edgeA)
     xsB = GridGeneration.ProjectBoundary2Dto1D(edgeB)
 
+    metricADiff = GridGeneration.CentralDiff(xsA, metricA)
+    metricBDiff = GridGeneration.CentralDiff(xsB, metricB)
+
     optN = N
     # @info "Optimal number of points: $optN"
 
-    solOptA = GridGeneration.SolveODE(metricA, metricA, optN, xsA; method=solver)
-    solOptB = GridGeneration.SolveODE(metricB, metricB, optN, xsB; method=solver)
+    solOptA = GridGeneration.SolveODE(metricA, metricADiff, optN, xsA; method=solver)
+    solOptB = GridGeneration.SolveODE(metricB, metricBDiff, optN, xsB; method=solver)
 
     projectedA = GridGeneration.ProjectBoundary1Dto2D(edgeA, solOptA[1, :], xsA)
     projectedB = GridGeneration.ProjectBoundary1Dto2D(edgeB, solOptB[1, :], xsB)

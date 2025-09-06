@@ -1,11 +1,13 @@
 module GridGeneration
 
 include("numerics/NumSolver.jl")
+include("numerics/CentralDiff.jl")
+
 include("SetupDomain.jl")
 include("TFI.jl")
 include("Get1DMetric.jl")
 include("Interpolators.jl")
-include("1D2DFuctions.jl")
+include("1D2DFunctions.jl")
 include("Metric.jl")
 include("BlockFunctions.jl")
 include("BoundaryUtils.jl")

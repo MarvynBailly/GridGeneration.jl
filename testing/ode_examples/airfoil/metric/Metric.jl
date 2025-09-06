@@ -1,7 +1,7 @@
 function Metric(x,y, scale, problem)
     if problem == 1
         M11 = scale * (1 .+ 15 * (x)).^(-2)
-        M22 = scale * (1 .+ 15 * (y)).^(-2)
+        M22 = scale * (1 .+ 15 * (x)).^(-2)
         return [M11, M22]
     elseif problem == 2
         M11 = scale * (1 .+ 15 * (1 .- x)).^(-2)

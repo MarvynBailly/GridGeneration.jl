@@ -7,6 +7,7 @@ function GetAirfoilGrid(; airfoilPath = "examples/airfoil/A-airfoil.txt", radius
 
     # read the airfoil data
     airfoilData = readdlm(airfoilPath, '\t', skipstart=1)
+
     # set up a c grid around the provided inner boundary
     boundary = GridGeneration.SetupDomain(
         airfoilData, 
@@ -16,8 +17,6 @@ function GetAirfoilGrid(; airfoilPath = "examples/airfoil/A-airfoil.txt", radius
         type = type
     )
 
-
     initialGrid = GridGeneration.TFI_2D(boundary)
-
     return initialGrid
 end

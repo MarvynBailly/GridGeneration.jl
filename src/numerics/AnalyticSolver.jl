@@ -20,7 +20,7 @@ function equidistribute_linear_inverse(x, m, N)
 
     n = length(x) - 1
     Δx = x[2:end] .- x[1:end-1]
-    w  = sqrt.(max.(m))  # √m
+    w  = sqrt.(m)  # √m
 
     # cumulative trapezoid
     I = similar(x, Float64)
@@ -42,7 +42,6 @@ function equidistribute_linear_inverse(x, m, N)
         if i == length(I)         # tj == I[end]
             x_nodes[j] = x[end]
         elseif I[i+1] == I[i]     # flat segment (m ~ 0)
-            println("here")
             x_nodes[j] = x[i]     # or x[i] + θ*Δx[i] if you want uniform spread
         else
             θ = (tj - I[i]) / (I[i+1] - I[i])

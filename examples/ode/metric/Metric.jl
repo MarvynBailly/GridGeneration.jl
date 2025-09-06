@@ -15,7 +15,7 @@ function Metric(x,y; problem = 1, scale = 4000)
         return [M11, M22]
     elseif problem == 2
         metricFunction =  make_getMetric(airfoil;
-                A_airfoil = 100,  ℓ_airfoil = 0.5, p_airfoil = 2,   
+                A_airfoil = 10,  ℓ_airfoil = 0.5, p_airfoil = 2,   
                 A_origin  = scale,  ℓ_origin  = 0.1, p_origin  = 10,   
                 floor     = 1e-4,  origin_center=(0, 0),
                 profile   = :rational
@@ -24,7 +24,7 @@ function Metric(x,y; problem = 1, scale = 4000)
     elseif problem == 3
         metricFunction =  make_getMetric(airfoil;
                 A_airfoil = 100.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
-                A_origin  = scale,  ℓ_origin  = 0.1, p_origin  = 10,   
+                A_origin  = 500.0,  ℓ_origin  = 0.1, p_origin  = 10,   
                 floor     = 1e-4,  origin_center=(1, 0),
                 profile   = :rational
             ) 
@@ -32,13 +32,13 @@ function Metric(x,y; problem = 1, scale = 4000)
     elseif problem == 4
         metricFunction1 =  make_getMetric(airfoil;
                 A_airfoil = 100.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
-                A_origin  = scale,  ℓ_origin  = 0.1, p_origin  = 10,   
+                A_origin  = 500.0,  ℓ_origin  = 0.1, p_origin  = 10,   
                 floor     = 1e-4,  origin_center=(0, 0),
                 profile   = :rational
             ) 
         metricFunction2 =  make_getMetric(airfoil;
                 A_airfoil = 100.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
-                A_origin  = scale,  ℓ_origin  = 0.1, p_origin  = 10,   
+                A_origin  = 500.0,  ℓ_origin  = 0.1, p_origin  = 10,   
                 floor     = 1e-4,  origin_center=(1, 0),
                 profile   = :rational
             )

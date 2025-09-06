@@ -1,4 +1,6 @@
 include("../../../src/GridGeneration.jl")
+include("metric/Metric.jl")
+include("GetAirfoilGrid.jl")
 
 using Plots, MAT, DelimitedFiles
 
@@ -88,7 +90,7 @@ end
 # SET UP DOMAIN
 #####################
 
-initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3)
+initialGrid = GetAirfoilGrid(airfoilPath = "testing/ode_examples/airfoil/data/A-airfoil.txt", radius = 3)
 
 bottom = initialGrid[:,:,1]
 airfoil = bottom[:, 101:end-100]  
@@ -96,26 +98,24 @@ SectionIndices = 100:250
 # SectionIndices = 1:length(airfoil[1, :])
 boundarySection = airfoil[:, SectionIndices]
 
-arclength = sum(sqrt.(diff(boundarySection[1, :]).^2 .+ diff(boundarySection[2, :]).^2))
 N = length(boundarySection[1, :])
 
-
-
-
-xs = Boundary2Dto1D(boundarySection)
+xs = GridGeneration.ProjectBoundary2Dto1D(boundarySection)
 
 # build the metric
-saveFig = true
+saveFig = false
 method = "local" # "local" or "nuclear"
 folder = "Mapping2Dto1D"
 path = "docs/src/assets/images/$folder/"
 
 scale = 40000
 
-problems = [3] # 1: x=0, 2: x=1, 3: uniform
-names = ["x=0", "x=1", "uniform"]
+# problems = [3] # 1: x=0, 2: x=1, 3: uniform
+# names = ["x=0", "x=1", "uniform"]
 
-for (name, problem) in zip(names, problems) 
+# for (name, problem) in zip(names, problems) 
+problem = 1
+name = "x=0"
 
 M_func = (x,y) -> Metric(x, y, scale, problem)
 M_u1_func = (x,y) -> MetricDerivative(x, y, scale, problem)
@@ -123,37 +123,37 @@ M_u1_func = (x,y) -> MetricDerivative(x, y, scale, problem)
 m = GridGeneration.Get1DMetric(boundarySection, M_func, method = method)
 mx = GridGeneration.Get1DMetric(boundarySection, M_u1_func, method = method)
 
-m_func = build_interps_linear(xs, m)
-mx_func = build_interps_linear(xs, mx)
+m_func = GridGeneration.build_interps_linear(xs, m)
+mx_func = GridGeneration.build_interps_linear(xs, mx)
 
-# pass the functions to the solver
-sol = GridGeneration.SolveODE(m_func, mx_func, N, xs[1], xs[end])
+# # pass the functions to the solver
+sol = GridGeneration.SolveODE(m_func, mx_func, N, xs; method="2ndorder")
 
-sigma_opt = GridGeneration.ComputeOptimalSpacing(sol[1, :], m, xs)
+# sigma_opt = GridGeneration.ComputeOptimalSpacing(sol[1, :], m, xs)
 
-N_opt = ceil(Int, 1 / sigma_opt)
-@info("Optimal number of points: ", N_opt)
+# N_opt = ceil(Int, 1 / sigma_opt)
+# @info("Optimal number of points: ", N_opt)
 
-sol_opt = GridGeneration.SolveODE(m_func, mx_func, N_opt, xs[1], xs[end])
+# sol_opt = GridGeneration.SolveODE(m_func, mx_func, N_opt, xs)
 
-x_sol = sol[1, :]
-x_sol_opt = sol_opt[1, :]
+# x_sol = sol[1, :]
+# x_sol_opt = sol_opt[1, :]
 
-# scale the solutions back to the correct size
-x_sol = x_sol * xs[end]
-x_sol_opt = x_sol_opt * xs[end]
+# # scale the solutions back to the correct size
+# x_sol = x_sol * xs[end]
+# x_sol_opt = x_sol_opt * xs[end]
 
-projected_x, projected_y = InterpolateBoundaryManually(x_sol, boundarySection)
-projected_x_opt, projected_y_opt = InterpolateBoundaryManually(x_sol_opt, boundarySection)
+# projected_x, projected_y = InterpolateBoundaryManually(x_sol, boundarySection)
+# projected_x_opt, projected_y_opt = InterpolateBoundaryManually(x_sol_opt, boundarySection)
 
-p = PlotProjectedPoints(projected_x, projected_y, projected_x_opt, projected_y_opt, boundarySection[1, :], boundarySection[2, :], m_vals_section, method, name)
+# p = PlotProjectedPoints(projected_x, projected_y, projected_x_opt, projected_y_opt, boundarySection[1, :], boundarySection[2, :], m_vals_section, method, name)
 
-imageName = "result_$(name)_$(method).svg"
-imagePath = "$path$imageName"
+# imageName = "result_$(name)_$(method).svg"
+# imagePath = "$path$imageName"
 
-if saveFig
-    savefig(p, imagePath)
-else
-    display(p)
-end
-end
+# if saveFig
+#     savefig(p, imagePath)
+# else
+#     display(p)
+# end
+# end

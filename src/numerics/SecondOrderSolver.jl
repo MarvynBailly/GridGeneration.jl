@@ -1,3 +1,5 @@
+using LinearAlgebra
+
 function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, verbose=false)
     function normInf(x)
         return maximum(abs, x)
@@ -17,7 +19,7 @@ function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, v
     b = fill(-2 / h^2, N)   # diagonal
     c = fill(1 / h^2, N)    # superdiagonal
     rhs = zeros(N)
-    resNorm = 0
+    resNorm = zeros(max_iter)
 
     for iter in 1:max_iter
         for i in 1:N
@@ -40,9 +42,10 @@ function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, v
         u_new[2:N+1] = δu
 
         # Check convergence
-        resNorm = normInf(u_new - u)
+        # resNorm = normInf(u_new - u)
+        resNorm[iter] = norm(u_new - u)
         if verbose @info("Iteration $iter: norm = $(resNorm)") end
-        if resNorm < tol
+        if resNorm[iter] < tol
             if verbose @info("Converged in $iter iterations with norm $(resNorm)") end
             return x, u_new, resNorm
         end
@@ -56,9 +59,13 @@ function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, v
         u = (1 - omega) * u + omega * u_new
     end
 
-    @info("Did not converge after $max_iter iterations with norm $(resNorm).")
+    @info("Did not converge after $max_iter iterations with norm $(resNorm[end]).")
     return x, u_new, resNorm
 end
+
+
+
+
 
 function ThomasAlg(a, b, c, d)
     n = length(d)

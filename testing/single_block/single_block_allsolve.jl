@@ -17,7 +17,7 @@ using MAT
 #################
 
 # load in the initial grid - no trailing edge 
-initialGrid = GetAirfoilGrid(airfoilPath="examples/single_block_ns/airfoil/data/A-airfoil.txt", radius = 2)
+initialGrid = GetAirfoilGrid(airfoilPath="testing/single_block_ns/airfoil/data/A-airfoil.txt", radius = 2)
 # throw away trailing edge stuff
 airfoilGrid = initialGrid[:, 101:end-100, :]
 airfoil = airfoilGrid[:,:,1]
@@ -54,8 +54,8 @@ metricFunc = (x,y) -> metricFunc1(x,y) .+ metricFunc2(x,y)
 
 
 splitLocations = [
-    [ 300, 500 ],   # split along the x axis
-    [ 40, 80 ]      # split along the y axis
+    [  ],   # split along the x axis
+    [  ]      # split along the y axis
 ]
 
 
@@ -85,7 +85,8 @@ plt2 = plot_blocks_interfaces_boundaries(blocks, interInfo, bndInfo;
 ##### Run the solver on them
 #################
 
-blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(metricFunc, blocks, bndInfo, interInfo)
+# blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(metricFunc, blocks, bndInfo, interInfo; solver="analytic")
+# blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(metricFunc, blocks, bndInfo, interInfo; solver="2ndorder")
 
 
 plt3 = plot_blocks_interfaces_boundaries(blocks, interInfo, bndInfo;

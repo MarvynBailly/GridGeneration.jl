@@ -41,7 +41,7 @@ end
 # SET UP DOMAIN
 #####################
 
-saveFig = true
+saveFig = false
 folder = "PointProjection"
 path = "docs/src/assets/images/$folder/"
 

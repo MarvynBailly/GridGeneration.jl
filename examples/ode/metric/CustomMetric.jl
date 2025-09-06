@@ -84,7 +84,6 @@ function make_getMetric(airfoil;
                                                     profile === :gauss    ? A * exp(-(d/ℓ)^p) :
                                                     error("profile must be :rational or :gauss")
 
-
     return function (x::Real, y::Real)
         # distances
         d_air = dist_to_polyline(x, y, airfoil; closed=closed_airfoil)

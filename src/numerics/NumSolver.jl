@@ -68,7 +68,7 @@ function SolveODE(M, Mx, N, xs; dir=1, method = "analytic", verbose = false)
 
         x0 = 0#xs[1]
         x1 = 1#xs[end]
-        result = SolveSecondOrder(f, x0, x1; N = N - 2, omega=0.001, max_iter =500, tol=1e-10, verbose=true)
+        result = SolveSecondOrder(f, x0, x1; N = N - 2, omega=0.5, max_iter =500, tol=1e-10, verbose=false)
         # if verbose println("Solution found.") end
 
         sol = zeros(2, N)
@@ -91,26 +91,51 @@ end
 Compute the optimal grid spacing based on the metric values `M` at points `x` and spacing `s`.
 return Ceil(Int, 1 / sigma_opt) as the optimal number of points.
 """
+# function ComputeOptimalNumberofPoints(x, M, s)
+#     @assert length(x) == length(M) == length(s) "x, M, s must have same length (x: $(length(x)), M: $(length(M)), s: $(length(s)))"
+#     N = length(x)
+#     @assert N ≥ 2 "need at least two points"
+
+#     numer = 0.0
+#     denom = 0.0
+#     @inbounds for i in 2:N-1
+#         Δs  = s[i+1] - s[i]
+#         @assert Δs > 0 "s must be strictly increasing"
+#         x_s = (x[i+1] - x[i-1]) / (2*Δs)
+#         Mc  = 0.5*(M[i] + M[i+1])          # cell-avg M
+#         p   = Mc * x_s^2
+#         numer += p * Δs
+#         denom += (p^2) * Δs
+#     end
+
+#     sigma_opt = sqrt(numer / denom)
+#     N_opt = ceil(Int, 1 / sigma_opt)
+
+#     return N_opt
+# end
+
 function ComputeOptimalNumberofPoints(x, M, s)
-    @assert length(x) == length(M) == length(s) "x, M, s must have same length (x: $(length(x)), M: $(length(M)), s: $(length(s)))"
-    N = length(x)
-    @assert N ≥ 2 "need at least two points"
+    @assert length(x) == length(M) == length(s) "x, M, s must match"
+    Nn = length(x)
+    @assert Nn ≥ 2 "need at least two points"
+    @assert all(diff(s) .> 0) "s must be strictly increasing"
 
     numer = 0.0
     denom = 0.0
-    @inbounds for i in 2:N-1
-        Δs  = s[i+1] - s[i]
-        @assert Δs > 0 "s must be strictly increasing"
-        x_s = (x[i+1] - x[i-1]) / (2*Δs)
-        Mc  = 0.5*(M[i] + M[i+1])          # cell-avg M
-        p   = Mc * x_s^2
+
+    @inbounds for i in 1:Nn-1
+        Δs   = s[i+1] - s[i]
+        x_s  = (x[i+1] - x[i]) / Δs                 # cell derivative
+        Mc   = 0.5*(M[i] + M[i+1])                  # cell-average metric
+        p    = Mc * x_s^2
         numer += p * Δs
         denom += (p^2) * Δs
     end
 
+    @assert denom > 0 "denominator zero: p is zero everywhere?"
     sigma_opt = sqrt(numer / denom)
-    N_opt = ceil(Int, 1 / sigma_opt)
 
+    # nodes = intervals + 1
+    N_opt = ceil(Int, 1 + 1/(sigma_opt))
     return N_opt
 end
-

@@ -1,4 +1,5 @@
 function SetupDomain(airfoil, radius, vertN, horzN; type = "cgrid")
+
     # add a point to be cut off 
     horzN = horzN + 1  
     # throw away the last column
@@ -7,24 +8,23 @@ function SetupDomain(airfoil, radius, vertN, horzN; type = "cgrid")
     if type == "cgrid"
         # build the C-grid around the airfoil
         airfoilBoundary = BuildCGrid(airfoil, radius, vertN)
-        
+
         # build out the branch cut on the left side
         branchCutLeft = BuildBranchCut(airfoilBoundary, radius, vertN, horzN; direction="left" )
-        
         # build out the branch cut on the right side
         branchCutRight = BuildBranchCut(airfoilBoundary, radius, vertN, horzN; direction="right")
-
+        
         # combine the airfoil boundary and the branch cuts, removing the duplicate points
         boundaryTop = vcat(branchCutLeft[1][1:end-1,:], airfoilBoundary[1], branchCutRight[1][2:end,:])
-
+        
         boundaryBottom = vcat(branchCutLeft[3][1:end-1,:], airfoilBoundary[3], branchCutRight[3][2:end,:])
-
+        
         boundaryLeft = branchCutLeft[4]
         boundaryRight = branchCutRight[2]
     else 
         error("Invalid type. Use 'cgrid'.")
     end
-
+    
     return [boundaryTop, boundaryRight, boundaryBottom, boundaryLeft]
 end
 

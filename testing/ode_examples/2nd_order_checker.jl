@@ -41,7 +41,8 @@ end
 
 
 function f(x, scale, problem)
-    return (M_u1_func(x, scale, problem) / (2 * M_func(x, scale, problem)))
+    # return (M_u1_func(x, scale, problem) / (2 * M_func(x, scale, problem)))
+    # return ( / (2 * M_func(x, scale, problem)))
     # return x^2 #(M_u1_func(x, scale, problem) / (2 * M_func(x, scale, problem)))
 end
 
@@ -59,7 +60,7 @@ saveFig = false
 
 x0 = 0.0
 x1 = 1.0
-scale = 4000
+scale = 40000
 omega = 0.5
 
 

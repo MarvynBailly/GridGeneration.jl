@@ -8,24 +8,39 @@ include("metric/CustomMetric.jl")
 include("../../plotter/metric_grid_plotter.jl")
 include("../../plotter/blocks_interfaces_boundaries.jl")
 
+using MAT
+
 function procPlot(p, saveFig, filePath)
     # if saveFig
     #     @info "saving fig at $filePath"
     #     savefig(p, filePath)
     # else
-    display(p)
+    display(p) 
     # end
 end
 
 
-problem = 5
-name = ["Constant", "Leading Edge", "Trailing Edge", "Leading & Trailing Edge", "Custom"][problem]
+problem = 4
+name = ["Constant", "Leading Edge", "Trailing Edge", "Leading & Trailing Edge", "Custom", "Real"][problem]
+scale = 4000
+
+
+# splitLocations = [
+#     [ 300, 500 ],   # split along the x axis
+#     [ 40, 80 ]      # split along the y axis
+# ]
 
 splitLocations = [
-    [ 300, 500 ],   # split along the x axis
-    [ 40, 80 ]      # split along the y axis
+    [ 400 ],   # split along the x axis
+    [  50 ]      # split along the y axis
 ]
 
+# set up real metric data
+metricPath = "examples/airfoil/metric/A-airfoil_grid_data.mat"
+# load metric
+metricData = matread(metricPath)
+# set up metric tree for fast nearest neighbor search
+tree, refs = GridGeneration.setup_metric_tree(metricData)
 
 
 
@@ -42,7 +57,7 @@ interInfo = Any[]
 ##########################
 # METRIC
 ##########################
-metricFunc = (x,y) -> Metric(x,y; problem = problem, scale = 4000)
+metricFunc = (x,y) -> Metric(x,y; problem = problem, scale = scale)
 
 ##########################
 # SPLIT
@@ -63,20 +78,7 @@ plt2 = plot_blocks_interfaces_boundaries(blocksSplit, interInfoSplit, bndInfoSpl
 # SOLVE
 ##########################
 
-blocksSolve, bndInfoSolve, interInfoSolve = GridGeneration.SolveAllBlocks(metricFunc, blocksSplit, bndInfoSplit, interInfoSplit)
-
-
-
-
-
-
-
-
-
-
-
-
-
+blocksSolve, bndInfoSolve, interInfoSolve = GridGeneration.SolveAllBlocks(metricFunc, blocksSplit, bndInfoSplit, interInfoSplit; solver="analytic")
 
 
 
@@ -88,8 +90,39 @@ blocksSolve, bndInfoSolve, interInfoSolve = GridGeneration.SolveAllBlocks(metric
 
 
 ##########################
-# PLOTS
+# INFO
 ##########################
+verbose = true
+function printBlockInfo(blocks; verbose = false)
+    if verbose
+        println("===========================")
+        println("Number of blocks after splitting: ", length(blocksSolve))
+        println("The size of each block is: ", )
+        totalPoints = 0
+        for (i, block) in enumerate(blocksSolve)
+            println("- Block $i size: ", size(block))
+            totalPoints += size(block, 2) * size(block, 3)
+        end
+        println("Total number of points in all blocks: ", totalPoints)
+        println("===========================")
+    end
+end
+
+printBlockInfo(blocksSolve; verbose = verbose)
+
+
+
+
+
+@info "Continue to plot?"
+readline()
+
+
+
+
+##########################
+# # PLOTS
+# ##########################
 bndInfo = getBoundaryConditions(airfoilGrid)
 interInfo = Any[]
 plt1 = plot_blocks_interfaces_boundaries([airfoilGrid], interInfo, bndInfo;
@@ -101,7 +134,7 @@ plt1 = plot_blocks_interfaces_boundaries([airfoilGrid], interInfo, bndInfo;
 )
 
 
-########## METRIC
+# ########## METRIC
 w = (x,y) -> first(metricFunc(x,y))
 xl,xr = -0.5, 1.5
 yl, yr = -1.0, 1.0
@@ -124,7 +157,7 @@ plot!(plt4, xlims=(xl, xr), ylims=(yl, yr))
 # filepath = "$path/$filename.svg"
 # procPlot(plt2, saveFig, filepath)
 
-########## SPLIT INFORMATION - post solver
+# ########## SPLIT INFORMATION - post solver
 plt3 = plot_blocks_interfaces_boundaries(blocksSolve, interInfoSolve, bndInfoSolve;
     grid_stride= 1,
     show_block_ids=true,
@@ -146,16 +179,18 @@ for block in blocksSolve
     X = block[1, :, :]
     Y = block[2, :, :]
 
-    for j in 1:size(X, 1)
-        plot!(plt6, X[j, :], Y[j, :], color=:black, lw=0.6, label=false, alpha=0.7)
+    for j in 1:1:size(X, 1)
+        plot!(plt6, X[j, :], Y[j, :], color=:black, lw=0.05, label=false, alpha=1.0)
         plot!(plt4, X[j, :], Y[j, :], color=:black, lw=0.6, label=false, alpha=0.7)
     end
 
-    for i in 1:size(X, 2)
-        plot!(plt6, X[:, i], Y[:, i], color=:black, lw=0.6, label=false, alpha=0.7)
+    for i in 1:1:size(X, 2)
+        plot!(plt6, X[:, i], Y[:, i], color=:black, lw=0.05, label=false, alpha=1.0)
         plot!(plt4, X[:, i], Y[:, i], color=:black, lw=0.6, label=false, alpha=0.7)
     end
 end
+
+display(plt6)
 
 p4 = plot(plt5, plt4, plt6, layout=@layout([a ; b;  c]), size=(500, 1000),
     xlabel="x", ylabel="y",

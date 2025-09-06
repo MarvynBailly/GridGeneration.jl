@@ -40,16 +40,13 @@ function f(x, scale, problem)
     # return x^2 #(M_u1_func(x, scale, problem) / (2 * M_func(x, scale, problem)))
 end
 
-problem = 3
+problem = 2
 scale = 40000
 
-met1 = x -> f(x, scale, problem) # M_func(x, scale, problem)
 
 
-
-
-M_func_test = (x, y) -> Metric(x, 0, scale, problem - 1 )
-M_u1_func_test = (x, y) -> MetricDerivative(x, 0, scale, problem - 1)
+M_func_test = (x, y) -> Metric(x, 0, scale, problem )
+M_u1_func_test = (x, y) -> MetricDerivative(x, 0, scale, problem)
 
 met2 = (x) -> (M_u1_func_test(x, 0) ./ (2 * M_func_test(x, 0)))[1]
 
@@ -61,9 +58,9 @@ s = range(0,1,length=100)
 initialGrid = GetAirfoilGrid(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3)
 bottom = initialGrid[:,:,1]
 airfoil = bottom[:, 101:end-100]  
-sectionIndices = 100:300
+sectionIndices = 100:600
 boundarySection = airfoil[:, sectionIndices]
-boundarySectionReverse = reverse(boundarySection, dims=2)
+# boundarySectionReverse = reverse(boundarySection, dims=2)
 
 
 xs1 = GridGeneration.ProjectBoundary2Dto1D(boundarySection)
@@ -91,7 +88,7 @@ omega = 0.5
 x0 = 0
 x1 = 1
 
-x, u, resNorm = GridGeneration.SolveSecondOrder(met3, x0, x1; N=N, omega=omega, tol=1e-15, max_iter=200, verbose=true)
+x, u, resNorm = GridGeneration.SolveSecondOrder(m, x0, x1; N=N, omega=omega, tol=1e-15, max_iter=200, verbose=true)
 
 p = plot(range(0,1,length=length(m)), m, label="m", xlabel="x", ylabel="y", title="Metric Function", legend=:topleft)
 
@@ -102,14 +99,15 @@ plot!(p, s, first, label="M_func_test", xlabel="x", ylabel="y", title="Metric Fu
 display(p)
 
 
-# p1 = plot(s, met2.(s), label="met2", xlabel="x", ylabel="y", title="Metric Function", legend=:topleft)
-# plot!(p1, s, met3.(s), label="met3", xlabel="s", ylabel="y", title="Metric Function", linewidth=2)
-# p2 = scatter(u, zeros(length(x)), label="Grid", xlabel="x", ylabel="y", title="Grid Generation", legend=:topleft, markershape=:circle, markersize=2)
-
-# p3 = plot(x, u, label="x(s)", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
-# plot!(p3, x, x, label="x=s", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
+p1 = plot(s, m, label="met2", xlabel="x", ylabel="y", title="Metric Function", legend=:topleft)
 
 
-# finalPlot = plot(p1, p2, p3, layout=@layout([a;b;c]), size=(800, 600), title="Airfoil Grid Generation with Metric Function")
+p2 = scatter(u, zeros(length(x)), label="Grid", xlabel="x", ylabel="y", title="Grid Generation", legend=:topleft, markershape=:circle, markersize=2)
 
-# display(finalPlot)
+p3 = plot(x, u, label="x(s)", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
+plot!(p3, x, x, label="x=s", xlabel="s", ylabel="x(s)", title="Solution for x(s) vs s", linewidth=2)
+
+
+finalPlot = plot(p1, p2, p3, layout=@layout([a;b;c]), size=(800, 600), title="Airfoil Grid Generation with Metric Function")
+
+display(finalPlot)
