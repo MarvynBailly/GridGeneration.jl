@@ -13,7 +13,7 @@ function ProjectBoundary2Dto1D(boundary)
 
     xs = [0.0; cumsum(Δs)]   # length N, xs[1]=0, xs[end]=arclength
 
-    # normalize 
+    # normalize  - double check this normalization
     xs = xs ./ xs[end]  # now xs is in [0, 1]
     return xs
 end

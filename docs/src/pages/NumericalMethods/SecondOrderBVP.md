@@ -6,7 +6,7 @@ $x_{ss} + \frac{ M_x x_s^2}{2M} = 0,$
 with boundary values $x(0) = a$ and $x(1) = b$ from [math work](../ODE/MathematicalWork.md). Let $f(x) = \frac{M_x}{2 M}$ to get
 
 $x_{ss} + f(x) x_{s}^2 = 0$.
-w
+
 ## Numerical Method
 Let $\{x_i\}_{i=0}^{N+1}$ be a discretization of $[a, b]$ with uniform grid spacing $h$. Let's discretizing $x_{ss}$ and $x_s$ via a second order central difference:
 

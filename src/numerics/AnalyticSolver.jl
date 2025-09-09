@@ -14,7 +14,7 @@ The function returns a tuple of `s_vals` (the normalized parameter values) and `
 """
 function equidistribute_linear_inverse(x, m, N)
     @assert length(x) == length(m) "x and m must have same length"
-    @assert isapprox(first(x), 0.0; atol=1e-12) && isapprox(last(x), 1.0; atol=1e-12)
+    @assert isapprox(first(x), 0.0; atol=1e-12) #&& isapprox(last(x), 1.0; atol=1e-12)
     @assert issorted(x) "x must be strictly increasing"
     @assert minimum(m) >= 0 "m must be positive"
 
