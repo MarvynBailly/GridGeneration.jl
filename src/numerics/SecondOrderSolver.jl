@@ -27,7 +27,7 @@ function SolveSecondOrder(f, x0, x1; N=100, omega=0.5, max_iter=100, tol=1e-8, v
 
             du = u[i+2] - u[i]
             
-            rhs[i] = - (fi / (4h^2)) * du^2
+            rhs[i] = - (fi / (4 * h^2)) * du^2
         end
         rhs[1] += - x0 / h^2
         rhs[end] += - x1 / h^2

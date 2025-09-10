@@ -120,14 +120,21 @@ function ComputeOptimalNumberofPoints(x, M, s)
     @assert Nn ≥ 2 "need at least two points"
     @assert all(diff(s) .> 0) "s must be strictly increasing"
 
+    # compute x_s
+    x_s = zeros(Nn)
+    @inbounds for i in 2:Nn-1
+        Δs = s[i+1] - s[i-1]
+        x_s[i] = (x[i+1] - x[i-1]) / Δs
+    end
+    x_s[1] = (x[2] - x[1]) / (s[2] - s[1])               # forward difference
+    x_s[end] = (x[end] - x[end-1]) / (s[end] - s[end-1]) # backward difference
+
+    # compute integral with trapezoidal rule
     numer = 0.0
     denom = 0.0
-
-    @inbounds for i in 1:Nn-1
+    @inbounds for i in 2:Nn
         Δs   = s[i+1] - s[i]
-        x_s  = (x[i+1] - x[i]) / Δs                 # cell derivative
-        Mc   = 0.5*(M[i] + M[i+1])                  # cell-average metric
-        p    = Mc * x_s^2
+        p    = 0.5*(M[i-1] + M[i])
         numer += p * Δs
         denom += (p^2) * Δs
     end
