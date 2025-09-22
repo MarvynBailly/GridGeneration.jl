@@ -20,7 +20,7 @@ function ComputeOptimalNumberofPoints(x, M)
     # compute integral with trapezoidal rule
     numer = 0.0
     denom = 0.0
-    @inbounds for i in 2:Nn
+    @inbounds for i in 2:Nn-1
         Δs   = s[i+1] - s[i]
         p    = 0.5*(M(x[i-1])*x_s[i-1]^2 + M(x[i])*x_s[i]^2)
         numer += p * Δs
@@ -33,35 +33,6 @@ function ComputeOptimalNumberofPoints(x, M)
     N_opt = floor(Int, 1/(sigma_opt))
     return N_opt
 end
-
-function prolongate(u_coarse, Nfine)
-    Nc = length(u_coarse)
-    x_coarse = range(0, 1; length=Nc)
-    x_fine   = range(0, 1; length=Nfine)
-
-    u_fine = similar(x_fine)
-
-    j = 1
-    for (i, xf) in enumerate(x_fine)
-        # advance j so that x_coarse[j] <= xf <= x_coarse[j+1]
-        while j < Nc && x_coarse[j+1] < xf
-            j += 1
-        end
-        if xf ≤ x_coarse[1]
-            u_fine[i] = u_coarse[1]
-        elseif xf ≥ x_coarse[end]
-            u_fine[i] = u_coarse[end]
-        else
-            xL, xR = x_coarse[j], x_coarse[j+1]
-            uL, uR = u_coarse[j], u_coarse[j+1]
-            θ = (xf - xL) / (xR - xL)
-            u_fine[i] = (1-θ)*uL + θ*uR
-        end
-    end
-
-    return u_fine
-end
-
 
 
 function residual(u, f, h)
@@ -114,7 +85,7 @@ function SolveSecondOrder(f, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbo
         if verbose @info("Iteration $iter: norm = $(resNorm[iter])") end
 
         if resNorm[iter] < tol
-            if verbose @info("Converged in $iter iterations with norm $(resNorm[iter])") end
+            @info("Converged in $iter iterations with norm $(resNorm[iter])")
             resNorm = resNorm[1:iter]
             return u_new, resNorm
         end
@@ -122,6 +93,7 @@ function SolveSecondOrder(f, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbo
         u = (1 - omega) * u + omega * u_new
     end
 
+    @info("Didn't converge with last norm $(resNorm[end])")
     return u, resNorm
 end
 
@@ -186,13 +158,20 @@ function SolveFirstOrder(M, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbos
     return u, resNorm
 end
 
+function centralDiff(f, x)
+    fx = similar(x)
+    fx[2:end-1] = (f.(x[3:end]) - f.(x[1:end-2])) ./ (x[3:end] - x[1:end-2])
+    fx[1] = (f(x[2]) - f(x[1])) / (x[2] - x[1])               
+    fx[end] = (f(x[end]) - f(x[end-1])) / (x[end] - x[end-1]) 
+    return fx
+end
 
 
-problem = 3
+problem = 1
 
 # domain
-L = 5.0
-N = 100
+L = 1.0
+N = 500
 xs = range(0, L, length=N)
 s = range(0, 1, length=N)
 
@@ -207,7 +186,7 @@ if problem == 1
     trueSol = s -> s * L
 elseif problem == 2
     a = 10
-    b = 200
+    b = 10
     M = x -> (a + b * x)^2
     Mx = x -> 2 * b * (a + b * x)
     
@@ -216,28 +195,40 @@ elseif problem == 2
     C = a * L + 0.5 * b * L^2
     trueSol = s -> (-a + sqrt(a^2 + 2 * b * C* s)) / b
 elseif problem == 3
-    b = 300
+    b = 20
     e = 2.5
     M = x -> 100 + (b * (e - x))^2
     Mx = x -> -2 * (b^2) * (e - x)
 
     showTrue = false
+elseif problem == 4
+    scale = 400000
+    M = x -> scale * (1 + 15 * (1 - x))^(-2) + scale * (1 + 15 * (x))^(-2)
+    showTrue = false
 end
 
+# numerically compute dMdx 
+Mx_num = centralDiff(M, xs)
+Mx_func = GridGeneration.build_interps_linear(xs, Mx_num)
+f = x -> Mx_func(x) / (2 * M(x))
 
-f = x -> Mx(x) / (2 * M(x))
+# f = x -> Mx(x) / (2 * M(x))
 
-sol1, _ = SolveSecondOrder(f, xs; N=N, omega=0.02, max_iter=10000, tol=1e-8, verbose=false)
+sol, _ = SolveSecondOrder(f, xs; N=N, omega=0.02, max_iter=50000, tol=1e-5, verbose=false)
 
-nOpt = ComputeOptimalNumberofPoints(sol1, M)
+nOpt = ComputeOptimalNumberofPoints(sol, M)
 @info "Computed Optimal number of points: $nOpt"
 
-# xs = prolongate(sol1, nOpt)
 
-sol1, resNorm = SolveSecondOrder(f, xs; N=nOpt, omega=0.02, max_iter=10000, tol=1e-8, verbose=false)
+xsOpt = range(0, L, length=nOpt)
+Mx_num = centralDiff(M, xsOpt)
+Mx_funcOpt = GridGeneration.build_interps_linear(xsOpt, Mx_num)
+f = x -> Mx_funcOpt(x) / (2 * M(x))
 
-nOpt = ComputeOptimalNumberofPoints(sol1, M)
-@info "Computed Optimal number of points: $nOpt"
+solOpt, resNorm = SolveSecondOrder(f, xsOpt; N=nOpt, omega=0.02, max_iter=10000, tol=1e-5, verbose=false)
+
+# nOpt = ComputeOptimalNumberofPoints(sol1, M)
+# @info "Computed Optimal number of points: $nOpt"
 
 
 
@@ -246,17 +237,15 @@ pltRes = plot(resNorm, yscale=:log10, xlabel="Iteration", ylabel="Residual Norm"
 display(pltRes)
 
 
-# sol2 = SolveFirstOrder(M, sol1; N=100, omega=0.02, max_iter=10000, tol=1e-8, verbose=true)
-
-
-
 pM = plot(xs, M.(xs), label="M(x)", xlabel="x", ylabel="M", title="Metric Function")
 
-pXvS = plot(s, sol1, label="Numerical Method 1", lw=2, xlabel="s", ylabel="x", title="Optimal Mapping x(s)")
+pXvS = plot(s, sol, label="Numerical Method", lw=2, xlabel="s", ylabel="x", title="Optimal Mapping x(s)")
+
+plot!(pXvS, range(0,1,length=length(solOpt)), solOpt, label="Numerical Method w/ Optimal Points", lw=2, ls=:dash, legend=:topleft)
 # plot!(pXvS, s, sol2, label="Numerical Method 2", lw=2, legend=:topleft)
 
 pPoints = scatter(
-    sol1, zero.(sol1);
+    solOpt, zero.(solOpt);
     markershape = :vline,
     markersize  = 10,         
     markerstrokewidth = 1.5,
