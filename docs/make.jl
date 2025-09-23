@@ -9,14 +9,14 @@ makedocs(
     modules  = [GridGeneration],
     sitename = "GridGeneration.jl",
     authors  = "Marvyn Bailly",
-    format = Documenter.HTML(
-        prettyurls = !isempty(get(ENV, "CI", "")),
-    ),
-    # format   = Documenter.HTML(
-    #     prettyurls = get(ENV, "CI", "false") == "true",
-    #     canonical = "https://MarvynBailly.github.io/GridGeneration.jl/stable/",
-    #     assets=String[],
+    # format = Documenter.HTML(
+    #     prettyurls = !isempty(get(ENV, "CI", "")),
     # ),
+    format   = Documenter.HTML(
+        prettyurls = get(ENV, "CI", "false") == "true",
+        canonical = "https://MarvynBailly.github.io/GridGeneration",
+        assets=String[],
+    ),
     
     
     
@@ -58,6 +58,6 @@ makedocs(
 )
 
 deploydocs(
-    repo      = "github.com/MarvynBailly/GridGeneration.jl",
+    repo      = "github.com/MarvynBailly/GridGeneration",
     devbranch = "main",
 )
