@@ -1,5 +1,5 @@
 function SolveAnalytic(xs, M, N; method="linear")
-    x_sol = equidistribute_linear_inverse(xs, M, N)
+    x_sol = AnalyticalSolution(xs, M)
     sol = zeros(2, N)
     sol[1, :] = x_sol
     return sol
@@ -12,14 +12,15 @@ Compute a semi-analytic solution for the second-order BVP using the provided met
 Uses numerical integration and interpolation to derive the solution.
 The function returns a tuple of `s_vals` (the normalized parameter values) and `x_sol` (the corresponding x values).
 """
-function equidistribute_linear_inverse(x, m, N)
-    @assert length(x) == length(m) "x and m must have same length"
+function AnalyticalSolution(x, M)
     @assert isapprox(first(x), 0.0; atol=1e-12) #&& isapprox(last(x), 1.0; atol=1e-12)
     @assert issorted(x) "x must be strictly increasing"
-    @assert minimum(m) >= 0 "m must be positive"
 
-    n = length(x) - 1
+
+    N = length(x)
+    n = N - 1
     Δx = x[2:end] .- x[1:end-1]
+    m = M.(x)
     w  = sqrt.(m)  # √m
 
     # cumulative trapezoid

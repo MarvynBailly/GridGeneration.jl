@@ -1,148 +1,81 @@
-# include("FirstOrderSolver.jl") remove to avoid DifferentialEquations.jl dependencies.
 include("AnalyticSolver.jl")
 include("SecondOrderSolver.jl")
-
+include("CentralDiff.jl")
+include("OptPointsSolver.jl")
 
 """
  Get the optimal solution for the ODE grid spacing problem.
  This function solves the ODE system for grid spacing and computes the optimal number of points based on the metric values.
  Then recomputes the solution with the optimal number of points.
 """
-function GetOptimalSolution(m, mx, N, xs; dir=1, method = "analytic")    
+# function GetOptimalSolution(m, mx, N, xs; dir=1, method = "analytic")    
 
-    sol = SolveODE(m, mx, N, xs; dir=dir, method=method)
+#     sol = SolveODE(m, mx, N, xs; dir=dir, method=method)
 
-    @assert length(sol[1, :]) == N "Solution length ($(length(sol[1, :]))) does not match expected number of points (N = $N)"
+#     @assert length(sol[1, :]) == N "Solution length ($(length(sol[1, :]))) does not match expected number of points (N = $N)"
 
     
-    N_opt = ComputeOptimalNumberofPoints(xs, m, sol[1, :])
-    @info("Optimal number of points: ", N_opt)
+#     N_opt = ComputeOptimalNumberofPoints(xs, m)
+#     @info("Optimal number of points: ", N_opt)
 
-    # if N_opt == 1 
-    #     N_opt = 3
-    # end
+#     # if N_opt == 1 
+#     #     N_opt = 3
+#     # end
 
-    # if N_opt % 2 == 0
-    #     N_opt += 1
-    # end
+#     # if N_opt % 2 == 0
+#     #     N_opt += 1
+#     # end
 
-    sol_opt = SolveODE(m, mx, N_opt, xs; dir=dir, method=method)
+#     sol_opt = SolveODE(m, mx, N_opt, xs; dir=dir, method=method)
 
-    return sol_opt, sol
-end
-
-
-
-"""
-    SolveODE(M, Mx, N, x0, x1; method = :numeric, verbose = false)
-Solve the ODE system for grid spacing using the metric values `M` and `Mx` at points `x0` and `x1`.
-The method can be either `:numeric` for numerical solution or `:analytic` for semi-analytic solution.
-Returns the solution as a 2D array where the first row is the x-coordinates and
-
-"""
-function SolveODE(M, Mx, N, xs; dir=1, method = "analytic", verbose = false)
-    if verbose @info("Solving ODE for grid spacing using method: $method...") end
-
-    if method == "1storder"
-        m_func = GridGeneration.build_interps_linear(xs, M)
-        mx_func = GridGeneration.build_interps_linear(xs, Mx)
-
-
-        x0 = xs[1]
-        x1 = xs[end]
-        sol = SolveFirstOrderLinearSystem(m_func, mx_func, N, x0, x1)
-        if verbose println("Solution found.") end
-    end
-
-    if method == "analytic"
-        sol = SolveAnalytic(xs, M, N)
-        if verbose println("Analytic solution found.") end
-    end
-
-    if method == "2ndorder"
-        m_func = GridGeneration.build_interps_linear(xs, M)
-        mx_func = GridGeneration.build_interps_linear(xs, Mx)
-
-        # multiply by the direction
-        f = x -> dir * mx_func(x) / (2 * m_func(x))
-
-        x0 = 0#xs[1]
-        x1 = 1#xs[end]
-        result = SolveSecondOrder(f, x0, x1; N = N - 2, omega=0.5, max_iter =500, tol=1e-10, verbose=false)
-        # if verbose println("Solution found.") end
-
-        sol = zeros(2, N)
-        sol[1, :] = result[2]
-    end
-
-    if verbose
-        @info("ODE solution details:")
-        @info("  Number of points: $N")
-        @info("  Start point: $x0")
-        @info("  End point: $x1")
-        @info("  Method used: $method")
-    end
-
-    return sol
-end
-
-"""
-    ComputeOptimalSpacing(x, M, s)
-Compute the optimal grid spacing based on the metric values `M` at points `x` and spacing `s`.
-return Ceil(Int, 1 / sigma_opt) as the optimal number of points.
-"""
-# function ComputeOptimalNumberofPoints(x, M, s)
-#     @assert length(x) == length(M) == length(s) "x, M, s must have same length (x: $(length(x)), M: $(length(M)), s: $(length(s)))"
-#     N = length(x)
-#     @assert N ≥ 2 "need at least two points"
-
-#     numer = 0.0
-#     denom = 0.0
-#     @inbounds for i in 2:N-1
-#         Δs  = s[i+1] - s[i]
-#         @assert Δs > 0 "s must be strictly increasing"
-#         x_s = (x[i+1] - x[i-1]) / (2*Δs)
-#         Mc  = 0.5*(M[i] + M[i+1])          # cell-avg M
-#         p   = Mc * x_s^2
-#         numer += p * Δs
-#         denom += (p^2) * Δs
-#     end
-
-#     sigma_opt = sqrt(numer / denom)
-#     N_opt = ceil(Int, 1 / sigma_opt)
-
-#     return N_opt
+#     return sol_opt, sol
 # end
 
-function ComputeOptimalNumberofPoints(x, M, s)
-    @assert length(x) == length(M) == length(s) "x, M, s must match"
-    Nn = length(x)
-    @assert Nn ≥ 2 "need at least two points"
-    @assert all(diff(s) .> 0) "s must be strictly increasing"
 
-    # compute x_s
-    x_s = zeros(Nn)
-    @inbounds for i in 2:Nn-1
-        Δs = s[i+1] - s[i-1]
-        x_s[i] = (x[i+1] - x[i-1]) / Δs
+
+"""
+    SolveODE(M, xs; method = :numeric, verbose = false)
+Solve the ODE x'' + M_x/(2M) x' = 0 for grid spacing using function M(x) on discrete points xs. 
+method can be :analytic or :numeric.
+Returns the solution and the residual norm (res only for numeric).
+"""
+
+function SolveODE(m_func, xs; solver=:analytic)
+    if solver == :analytic
+        sol = GridGeneration.AnalyticalSolution(xs, m_func)
+        return sol
+    elseif solver == :numeric
+        N = length(xs)
+        mx = GridGeneration.CentralDiff(m_func, xs)
+        mx_func = GridGeneration.LinearInterpolate(xs, mx)
+
+        f = x -> mx_func(x) ./ (2 * m_func(x))
+
+        sol, resNorm = GridGeneration.SolveSecondOrder(f, xs; N=N, omega=0.02, max_iter=10, tol=1e-5, verbose=false)
+        return sol, resNorm
     end
-    x_s[1] = (x[2] - x[1]) / (s[2] - s[1])               # forward difference
-    x_s[end] = (x[end] - x[end-1]) / (s[end] - s[end-1]) # backward difference
+end
 
-    # compute integral with trapezoidal rule
-    numer = 0.0
-    denom = 0.0
-    @inbounds for i in 2:Nn
-        Δs   = s[i+1] - s[i]
-        p    = 0.5*(M[i-1] + M[i])
-        numer += p * Δs
-        denom += (p^2) * Δs
+"""
+    SolveODE(M, xs, N; method = :numeric, verbose = false)
+Solve the ODE x'' + M_x/(2M) x' = 0 for grid spacing using function M(x) on discrete points xs. Resulting solution will have N points. 
+method can be :analytic or :numeric.
+Returns the solution and the residual norm (res only for numeric).
+"""
+function SolveODEFixedN(m_func, xs, N; solver=:analytic)
+    xsFixed = range(0, xs[end], length=N)
+    m_funcFixed = GridGeneration.LinearInterpolate(xsFixed, m_func.(xsFixed))
+    
+    if solver == :analytic
+        sol = GridGeneration.AnalyticalSolution(xsFixed, m_funcFixed)
+        return sol
+    elseif solver == :numeric
+        mx = GridGeneration.CentralDiff(m_funcFixed, xsFixed)
+        mx_func = GridGeneration.LinearInterpolate(xsFixed, mx)
+
+        f = x -> mx_func(x) ./ (2 * m_funcFixed(x))
+
+        sol, resNorm = GridGeneration.SolveSecondOrder(f, xsFixed; N=N, omega=0.02, max_iter=10, tol=1e-5, verbose=false)
+        return sol, resNorm
     end
-
-    @assert denom > 0 "denominator zero: p is zero everywhere?"
-    sigma_opt = sqrt(numer / denom)
-
-    # nodes = intervals + 1
-    N_opt = ceil(Int, 1 + 1/(sigma_opt))
-    return N_opt
 end

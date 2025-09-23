@@ -1,5 +1,5 @@
 # Build M(x) as linear interpolation, Mx(x) as piecewise-constant slope.
-function build_interps_linear(xv, Mv)
+function LinearInterpolate(xv, Mv)
     @assert length(xv) == length(Mv) ≥ 2
     @assert issorted(xv)
 

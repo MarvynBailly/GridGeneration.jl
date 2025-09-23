@@ -34,7 +34,7 @@ function GetNeighbors(blockId::Int, interInfo, dir::Int; include_start::Bool=fal
 end
 
 
-function SolveAllBlocks(metric, blocks, bndInfo, interInfo; solver = "analytic")
+function SolveAllBlocks(metric, blocks, bndInfo, interInfo; solver =:analytic)
     blockDirOptN = similar(blocks)
 
     for i in 1:length(blockDirOptN)

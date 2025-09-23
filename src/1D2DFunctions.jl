@@ -13,8 +13,6 @@ function ProjectBoundary2Dto1D(boundary)
 
     xs = [0.0; cumsum(Δs)]   # length N, xs[1]=0, xs[end]=arclength
 
-    # normalize  - double check this normalization
-    xs = xs ./ xs[end]  # now xs is in [0, 1]
     return xs
 end
 
@@ -22,63 +20,34 @@ end
 Function to convert a 1D boundary to a 2D representation
 - project `points` onto the `boundary` defined by `xs`
 """
-function ProjectBoundary1Dto2D(boundary, points, xs)
-    projectedPoints = zeros(2, length(points))
 
-    for (i, pnt) in enumerate(points)
-        # clamp
-        if i == 1
-            intervalIndex = 1
-            normalDist = 0
-        elseif i == length(points)
-            intervalIndex = length(xs) - 1
-            normalDist = 1
+function ProjectBoundary1Dto2D(boundary, sol)
+    N = size(boundary, 2)
+    # step 1: arc length cumulative xs
+    seglen = sqrt.((diff(boundary[1, :])).^2 .+ (diff(boundary[2, :])).^2)
+    xs = [0.0; cumsum(seglen)]
+    totalL = xs[end]
+
+    # sanity check: sol should be in [0, totalL]
+    @assert all(sol .>= 0) && all(sol .<= totalL + 1e-12)
+
+    projected = zeros(2, length(sol))
+
+    j = 1
+    for (k, s) in enumerate(sol)
+        # step 3: find interval
+        while j < length(xs) && xs[j+1] < s
+            j += 1
+        end
+        if j == length(xs)
+            projected[:, k] .= boundary[:, end]
         else
-            intervalIndex = FindContainingIntervalIndex(pnt, xs)
-            normalDist = ComputeNormalDistance(pnt, xs, intervalIndex)
-        end
-
-
-        projectPoint = ProjectPointOntoBoundary(normalDist, intervalIndex, boundary)
-
-        projectedPoints[:, i] = projectPoint
-
-        # println("Projecting point $i: $pnt onto boundary at index $intervalIndex with distance $dist, normalDist = $normalDist")
-
-    end
-    return projectedPoints
-end
-
-function ComputeNormalDistance(pnt, dist, int)
-    # assert that dist is increasing
-    @assert int >= 1 && int < length(dist) "int must be in range [1, $(length(dist) - 1)]"
-    return (pnt - dist[int]) / (dist[int + 1] - dist[int])
-end
-
-
-function FindContainingIntervalIndex(pnt, dist)
-    # assert that dist is increasing
-    
-    # clamp
-    if pnt < dist[1]
-        return  1
-    end
-
-    if pnt > dist[end]
-        return length(dist) - 1
-    end
-
-    for (i,d) in enumerate(dist)
-        if d > pnt
-            return i - 1
+            # step 4: relative position within interval
+            θ = (s - xs[j]) / (xs[j+1] - xs[j])
+            # step 5: interpolate boundary point
+            projected[:, k] .= (1-θ) * boundary[:, j] + θ * boundary[:, j+1]
         end
     end
 
-    return -1
-end
-
-function ProjectPointOntoBoundary(s, ind, boundary)
-    # interpolate boundary[ind] and boundary[ind + 1] with s
-    projectedPoint = s * boundary[:,ind + 1] + (1 - s) * boundary[:,ind]
-    return projectedPoint
+    return projected
 end
