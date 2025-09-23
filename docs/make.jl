@@ -33,7 +33,7 @@ makedocs(
             "Second Order BVP ODE" => "pages/NumericalMethods/SecondOrderBVP.md",
             "Semi-Analytical Method" => "pages/NumericalMethods/SemiAnalyticalMethod.md",
         ],
-#
+
         "2D to 1D Reformulation " => Any[
             "Mapping 2D to 1D" => "pages/2Dto1D/Mapping2Dto1D.md",
             "Metric Reformulation" => "pages/2Dto1D/MetricReformulation.md",
