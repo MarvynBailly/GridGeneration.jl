@@ -5,7 +5,7 @@ on:
     branches:
       - main # Or your default branch
     tags:
-      - '*' # Run on all tags
+      - 'v*' # Run on all tags
   pull_request:
 
 jobs:
