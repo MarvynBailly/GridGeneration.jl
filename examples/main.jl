@@ -1,5 +1,5 @@
-include("AirfoilExample.jl")
-include("../../plotter/metric_grid_plotter.jl")
+include("airfoil/AirfoilExample.jl")
+include("plotter/metric_grid_plotter.jl")
 
 
 ##############################################

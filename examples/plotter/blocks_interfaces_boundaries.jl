@@ -31,7 +31,7 @@ function face_midpoint(block, start::AbstractVector{<:Integer}, endp::AbstractVe
 end
 
 # A small discrete palette to cycle through boundary names
-const _default_name_colors = [:red, :blue, :green, :magenta, :orange, :cyan, :purple,
+name_colors = [:red, :blue, :green, :magenta, :orange, :cyan, :purple,
                               :brown, :olive, :pink, :teal, :navy, :darkorange, :darkgreen]
 
 # ---------- main ----------
@@ -79,7 +79,7 @@ function plot_blocks_interfaces_boundaries(blocks, interfaces, bndInfo;
         names = [bc["name"] for bc in bndInfo]
         uniq  = unique(names)
         colmap = boundary_colors === nothing ?
-                 Dict(name => _default_name_colors[1 + mod(i-1, length(_default_name_colors))]
+                 Dict(name => name_colors[1 + mod(i-1, length(name_colors))]
                       for (i,name) in enumerate(uniq)) :
                  boundary_colors
 

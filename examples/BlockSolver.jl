@@ -4,8 +4,8 @@ using MAT: matread
 
 
 include("../src/GridGeneration.jl")
-include("../plotter/metric_grid_plotter.jl")
-include("../plotter/blocks_interfaces_boundaries.jl")
+include("plotter/metric_grid_plotter.jl")
+include("plotter/blocks_interfaces_boundaries.jl")
 
 
 

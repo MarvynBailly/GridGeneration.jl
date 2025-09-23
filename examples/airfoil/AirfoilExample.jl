@@ -1,6 +1,6 @@
 using Base.Threads
 
-include("StorStegSolver.jl")
+include("../StorStegSolver.jl")
 include("../BlockSolver.jl")
 include("../../examples/airfoil/data/GetAirfoilGrid.jl")
 include("../../examples/airfoil/data/GetBoundary.jl")

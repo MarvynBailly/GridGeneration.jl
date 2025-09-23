@@ -1,4 +1,4 @@
-include("StorStegSolver.jl")
+include("../StorStegSolver.jl")
 
 function plot_grid(x, y, title_str; plt = nothing, c = nothing, lw = 0.1 )
     p = plt == nothing ? plot() : plt
