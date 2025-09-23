@@ -1,7 +1,7 @@
 name = "GridGeneration"
 uuid = "a45aac3a-c828-4b24-bd97-84998539262e"
 authors = ["Marvyn Bailly marvyn@marvyn.com"]
-version = "2.0.1"
+version = "2.0.2"
 repo = "https://github.com/MarvynBailly/GridGeneration"
 
 [deps]
@@ -10,7 +10,9 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
 
 [compat]
-julia = "1.6"
+julia = "1.10.4"
+Documenter = "v1.14.1"
+NearestNeighbors = "v0.4.22"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
