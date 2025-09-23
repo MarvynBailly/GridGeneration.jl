@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Single Block with Splitting · GridGeneration.jl</title><meta name="title" content="Single Block with Splitting · GridGeneration.jl"/><meta property="og:title" content="Single Block with Splitting · GridGeneration.jl"/><meta property="twitter:title" content="Single Block with Splitting · GridGeneration.jl"/><meta name="description" content="Documentation for GridGeneration.jl."/><meta property="og:description" content="Documentation for GridGeneration.jl."/><meta property="twitter:description" content="Documentation for GridGeneration.jl."/><meta property="og:url" content="https://MarvynBailly.github.io/GridGeneration/stable/pages/SingleBlock/splitting/"/><meta property="twitter:url" content="https://MarvynBailly.github.io/GridGeneration/stable/pages/SingleBlock/splitting/"/><link rel="canonical" href="https://MarvynBailly.github.io/GridGeneration/stable/pages/SingleBlock/splitting/"/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">GridGeneration.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><span class="tocitem">Ordinary Differential Equations</span><ul><li><a class="tocitem" href="../../ODE/ODEFormulation/">ODE Formulation</a></li><li><a class="tocitem" href="../../ODE/MathematicalWork/">Mathematical Work</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../Examples/airfoil/">Airfoil</a></li></ul></li><li><span class="tocitem">Numerical Methods</span><ul><li><a class="tocitem" href="../../NumericalMethods/FirstOrderSystem/">First Order System</a></li><li><a class="tocitem" href="../../NumericalMethods/SecondOrderBVP/">Second Order BVP ODE</a></li><li><a class="tocitem" href="../../NumericalMethods/SemiAnalyticalMethod/">Semi-Analytical Method</a></li></ul></li><li><span class="tocitem">2D to 1D Reformulation </span><ul><li><a class="tocitem" href="../../2Dto1D/Mapping2Dto1D/">Mapping 2D to 1D</a></li><li><a class="tocitem" href="../../2Dto1D/MetricReformulation/">Metric Reformulation</a></li><li><a class="tocitem" href="../../2Dto1D/PointProjection/">Projecting Points</a></li></ul></li><li><span class="tocitem">Grid Format</span><ul><li><a class="tocitem" href="../../GridFormat/">Grid Format</a></li></ul></li><li><span class="tocitem">Single Block Grid Input</span><ul><li><a class="tocitem" href="../nosplitting/">Single Block with No Splitting</a></li><li class="is-active"><a class="tocitem" href>Single Block with Splitting</a><ul class="internal"><li><a class="tocitem" href="#Split-Block-Algorithm"><span>Split Block Algorithm</span></a></li><li><a class="tocitem" href="#Solve-All-Blocks-Algorithm"><span>Solve All Blocks Algorithm</span></a></li><li><a class="tocitem" href="#Examples"><span>Examples</span></a></li></ul></li></ul></li><li><span class="tocitem">Multi-Block Grid Input</span><ul><li><a class="tocitem" href="../../MultiBlock/multiblock/">Multi-Block Input</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Single Block Grid Input</a></li><li class="is-active"><a href>Single Block with Splitting</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Single Block with Splitting</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/MarvynBailly/GridGeneration" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/MarvynBailly/GridGeneration/blob/main/docs/src/pages/SingleBlock/splitting.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Single-Block-with-Splitting"><a class="docs-heading-anchor" href="#Single-Block-with-Splitting">Single Block with Splitting</a><a id="Single-Block-with-Splitting-1"></a><a class="docs-heading-anchor-permalink" href="#Single-Block-with-Splitting" title="Permalink"></a></h1><p>Let&#39;s make this into two main <code>GridGeneration</code> functions: <code>GridGeneration.SplitBlock(block, splitLocations, bndInfo, interInfo)</code> and <code>GridGeneration.SolveAllBlocks(metric, blocks, bndInfo, interInfo).</code> And thus all we have to do is</p><ul><li>Input single Tortuga block and desired split locations with the block</li><li>Split block into multi-block grid and update bndInfo and interInfo</li><li>Solve for the optimal distribution in each block</li></ul><h2 id="Split-Block-Algorithm"><a class="docs-heading-anchor" href="#Split-Block-Algorithm">Split Block Algorithm</a><a id="Split-Block-Algorithm-1"></a><a class="docs-heading-anchor-permalink" href="#Split-Block-Algorithm" title="Permalink"></a></h2><p>We want something along the lines:</p><pre><code class="language-julia hljs">splitLocations = [
+    [ horizontal split indices... ],   # split along the x axis
+    [ vertical split indices... ]      # split along the y axis
+]
+
+blocks, bndInfo, interInfo = GridGeneration.SplitBlock(block, splitLocations, bndInfo, interInfo)</code></pre><p>where the <code>SplitBlock</code> function </p><pre><code class="language-julia hljs">function SplitBlock(block, splitLocations, bndInfo, interInfo)
+    blocks = []
+    horzSplits = [1, splitLocations[1]..., size(block, 2)]
+    vertSplits = [1, splitLocations[2]..., size(block, 3)]
+
+    parentni = size(block, 2)
+    parentnj = size(block, 3)
+    parentnk = 1
+
+    blockId = 1
+    blockBoundaries = []
+    interfaces = []
+    for j in 1:length(vertSplits)-1
+        for i in 1:length(horzSplits)-1
+            ni = horzSplits[i+1] - horzSplits[i] + 1
+            nj = vertSplits[j+1] - vertSplits[j] + 1
+            nk = 1
+            
+            subblock = block[:, horzSplits[i]:horzSplits[i+1], vertSplits[j]:vertSplits[j+1]]
+            push!(blocks, subblock) 
+
+            # get boundary info 
+            blockInfo = Dict(
+                &quot;block&quot; =&gt; blockId,
+                &quot;start&quot; =&gt; (horzSplits[i], vertSplits[j]),
+                &quot;end&quot; =&gt; (horzSplits[i+1], vertSplits[j+1]),
+                &quot;parentDims&quot; =&gt; (parentni, parentnj, parentnk)
+            )
+
+            boundaries = GetTouchingBoundaries(blockInfo, bndInfo)
+            append!(blockBoundaries, boundaries)
+            
+            # get interface info
+            # if not at the end, look forward to the next block
+            if i &lt; length(horzSplits) - 1
+                blockBId = blockId + 1
+                # println(&quot;blockID: &quot;, blockId, &quot; next blockID: &quot;, blockBId)
+                push!(interInfo, Dict(
+                    &quot;blockA&quot; =&gt; blockId, &quot;start_blkA&quot; =&gt; [ni,1,1], &quot;end_blkA&quot; =&gt; [ni,nj,nk],
+                    &quot;blockB&quot; =&gt; blockBId, &quot;start_blkB&quot; =&gt; [1,1,1], &quot;end_blkB&quot; =&gt; [1,nj,nk],
+                    &quot;offset&quot; =&gt; [0.0, 0.0, 0.0], &quot;angle&quot; =&gt; 0.0))
+            end
+
+            # if not at top, look up
+            if j &lt; length(vertSplits) - 1
+                blockBId = blockId + length(horzSplits) - 1
+                # println(&quot;blockID: &quot;, blockId, &quot; next blockID: &quot;, blockBId)
+                push!(interInfo, Dict(
+                    &quot;blockA&quot; =&gt; blockId, &quot;start_blkA&quot; =&gt; [1,nj,1], &quot;end_blkA&quot; =&gt; [ni,nj,nk],
+                    &quot;blockB&quot; =&gt; blockBId, &quot;start_blkB&quot; =&gt; [1,1,1], &quot;end_blkB&quot; =&gt; [ni,1,nk],
+                    &quot;offset&quot; =&gt; [0.0, 0.0, 0.0], &quot;angle&quot; =&gt; 0.0))
+            end
+
+            blockId += 1
+        end
+    end
+    updatedBndInfo = GroupBoundariesByName(blockBoundaries)
+    updatedInterInfo = interfaces
+
+    return blocks, updatedBndInfo, updatedInterInfo
+end</code></pre><p>with two helper functions <code>GetTouchingBoundaries</code> and <code>GroupBoundariesByName</code>. The former function will take in the block id and the starting and ending indices of the new subblock. </p><p>Here we handle the interface info by looking to the right and above.</p><h3 id="Get-Touching-Boundaries-Idea-1"><a class="docs-heading-anchor" href="#Get-Touching-Boundaries-Idea-1">Get Touching Boundaries - Idea 1</a><a id="Get-Touching-Boundaries-Idea-1-1"></a><a class="docs-heading-anchor-permalink" href="#Get-Touching-Boundaries-Idea-1" title="Permalink"></a></h3><p>The function will check each of the edges of the child (newly created subblock) to see if they are on the boundary of their parent block (the original block being split). If the edge is on a boundary, inherit the boundary type from parent to child. We can check if the child is on the boundary of the parent by seeing if child start indices are equal to <code>1</code> or if the end indices are equal to size of the parent.</p><pre><code class="language-julia hljs">function GetTouchingBoundaries(blockInfo::Dict, bndInfo)
+    # Parent extents
+    N1, N2, N3 = blockInfo[&quot;parentDims&quot;]
+
+    # Child window in parent coordinates (inclusive)
+    i0, j0 = blockInfo[&quot;start&quot;]
+    i1, j1 = blockInfo[&quot;end&quot;]
+
+    # Child-local sizes
+    ni = i1 - i0 + 1
+    nj = j1 - j0 + 1
+
+    child_id = blockInfo[&quot;block&quot;]
+    out = Vector{Dict{String,Any}}()
+
+    # LEFT side of child touches parent&#39;s LEFT boundary if i0 == 1
+    if i0 == 1
+        push!(out, Dict(
+            &quot;block&quot; =&gt; child_id,
+            &quot;name&quot;  =&gt; getBoundaryNameBySide(bndInfo; side=:left),
+            &quot;start&quot; =&gt; [1, 1, 1],
+            &quot;end&quot;   =&gt; [1, nj, 1],
+        ))
+    end
+
+    # RIGHT side of child touches parent&#39;s RIGHT boundary if i1 == N1
+    if i1 == N1
+        push!(out, Dict(
+            &quot;block&quot; =&gt; child_id,
+            &quot;name&quot;  =&gt; getBoundaryNameBySide(bndInfo; side=:right),
+            &quot;start&quot; =&gt; [ni, 1, 1],
+            &quot;end&quot;   =&gt; [ni, nj, 1],
+        ))
+    end
+
+    # BOTTOM side of child touches parent&#39;s BOTTOM boundary if j0 == 1
+    if j0 == 1
+        push!(out, Dict(
+            &quot;block&quot; =&gt; child_id,
+            &quot;name&quot;  =&gt; getBoundaryNameBySide(bndInfo; side=:bottom),
+            &quot;start&quot; =&gt; [1, 1, 1],
+            &quot;end&quot;   =&gt; [ni, 1, 1],
+        ))
+    end
+
+    # TOP side of child touches parent&#39;s TOP boundary if j1 == N2
+    if j1 == N2
+        push!(out, Dict(
+            &quot;block&quot; =&gt; child_id,
+            &quot;name&quot;  =&gt; getBoundaryNameBySide(bndInfo; side=:top),
+            &quot;start&quot; =&gt; [1, nj, 1],
+            &quot;end&quot;   =&gt; [ni, nj, 1],
+        ))
+    end
+
+    return out
+end</code></pre><p>with the helper function <code>GetBoundaryNameBySide(bndInfo; side=:side)</code> where we take advantage of the fact that bndInfo will only have information about the single inputted block. This function we can write as</p><pre><code class="language-julia hljs">function GetBoundaryNameBySide(bndInfo; side=:none)
+    
+
+
+
+
+end</code></pre><h3 id="Get-Touching-Boundaries-Idea-2-(Current)"><a class="docs-heading-anchor" href="#Get-Touching-Boundaries-Idea-2-(Current)">Get Touching Boundaries - Idea 2 (Current)</a><a id="Get-Touching-Boundaries-Idea-2-(Current)-1"></a><a class="docs-heading-anchor-permalink" href="#Get-Touching-Boundaries-Idea-2-(Current)" title="Permalink"></a></h3><p>Another option is to use this old existing function of mine:</p><pre><code class="language-julia hljs">function GetTouchingBoundaries(block::Dict, bndInfo)
+    # Child window in parent (global) coordinates, inclusive
+    block_i1, block_j1 = block[&quot;start&quot;]
+    block_i2, block_j2 = block[&quot;end&quot;]
+    blockId = block[&quot;block&quot;]
+
+    # Global -&gt; child-local index maps
+    to_local_i(i) = i - block_i1 + 1
+    to_local_j(j) = j - block_j1 + 1
+
+    touchingFaces = Vector{Dict{String,Any}}()
+
+    for bnd in bndInfo
+        name = bnd[&quot;name&quot;]
+        for face in bnd[&quot;faces&quot;]
+            faceStart = face[&quot;start&quot;];  faceEnd = face[&quot;end&quot;]
+            i1, j1 = faceStart[1], faceStart[2]
+            i2, j2 = faceEnd[1],   faceEnd[2]
+
+            # Vertical face on parent&#39;s left/right boundary?
+            if i1 == i2 &amp;&amp; (i1 == block_i1 || i1 == block_i2)
+                jlo = max(min(j1, j2), block_j1)
+                jhi = min(max(j1, j2), block_j2)
+                if jhi &gt; jlo
+                    push!(touchingFaces, Dict(
+                        &quot;name&quot;  =&gt; name,
+                        &quot;block&quot; =&gt; blockId,
+                        &quot;start&quot; =&gt; [to_local_i(i1), to_local_j(jlo), 1],
+                        &quot;end&quot;   =&gt; [to_local_i(i2), to_local_j(jhi), 1],
+                    ))
+                end
+
+            # Horizontal face on parent&#39;s bottom/top boundary?
+            elseif j1 == j2 &amp;&amp; (j1 == block_j1 || j1 == block_j2)
+                ilo = max(min(i1, i2), block_i1)
+                ihi = min(max(i1, i2), block_i2)
+                if ihi &gt; ilo
+                    push!(touchingFaces, Dict(
+                        &quot;name&quot;  =&gt; name,
+                        &quot;block&quot; =&gt; blockId,
+                        &quot;start&quot; =&gt; [to_local_i(ilo), to_local_j(j1), 1],
+                        &quot;end&quot;   =&gt; [to_local_i(ihi), to_local_j(j2), 1],
+                    ))
+                end
+            end
+        end
+    end
+
+    return touchingFaces
+end</code></pre><h3 id="Group-Boundaries-by-Name"><a class="docs-heading-anchor" href="#Group-Boundaries-by-Name">Group Boundaries by Name</a><a id="Group-Boundaries-by-Name-1"></a><a class="docs-heading-anchor-permalink" href="#Group-Boundaries-by-Name" title="Permalink"></a></h3><p>Algorithm reformulates the list of boundaries into the Tortuga format, a list of dicts of dicts, where the first dict is the type of boundary and the sub dict are the blocks and edges.</p><pre><code class="language-julia hljs">function GroupBoundariesByName(faceList)
+    boundaryGroups = Dict()
+
+    for face in faceList
+        name = face[&quot;name&quot;]
+        
+        # Copy face and remove redundant name
+        faceCopy = copy(face)
+        delete!(faceCopy, &quot;name&quot;)
+        
+        if !haskey(boundaryGroups, name)
+            boundaryGroups[name] = []
+        end
+        push!(boundaryGroups[name], faceCopy)
+    end
+
+    groupedInfo = []
+    for (name, faces) in boundaryGroups
+        if !isempty(faces)
+            push!(groupedInfo, Dict(&quot;name&quot; =&gt; name, &quot;faces&quot; =&gt; faces))
+        end
+    end
+
+    return groupedInfo
+end</code></pre><h3 id="Split-Examples"><a class="docs-heading-anchor" href="#Split-Examples">Split Examples</a><a id="Split-Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Split-Examples" title="Permalink"></a></h3><p>Inputting the following splits</p><pre><code class="language-julia hljs">splitLocations = [
+    [ 300, 500 ],   # split along the x axis
+    [ 40 ]      # split along the y axis
+]</code></pre><p>yields:</p><p><img src="../../../assets/images/SingleBlock/split_example.svg" alt="test"/></p><h2 id="Solve-All-Blocks-Algorithm"><a class="docs-heading-anchor" href="#Solve-All-Blocks-Algorithm">Solve All Blocks Algorithm</a><a id="Solve-All-Blocks-Algorithm-1"></a><a class="docs-heading-anchor-permalink" href="#Solve-All-Blocks-Algorithm" title="Permalink"></a></h2><p>With the single block splitting working, let&#39;s move to creating an algorithm to solve the ODE across all the edges of the blocks. The challenging part here comes from the required consistency across the edges of the blocks. Consider blocks <span>$B_1$</span> with left/right edges <span>$e$</span> and <span>$f$</span> and neighboring block <span>$B_2$</span> with left/right edges <span>$f$</span> and <span>$g$</span>. Now if we solve the ODE along <span>$e,f,g$</span> and find the optimal number of points (let&#39;s denote this via <span>$N_e, N_f,$</span> and <span>$N_g$</span>) are such that <span>$N_e &gt; N_f, N_g &gt; N_f$</span> with <span>$N_e \neq N_g$</span>, then we will have an issue solving along <span>$e$</span> with the optimal number of points. To fix this issue, we can take the global optimal number <span>$N_\text{opt}$</span> of the pairs, that is <span>$N_\text{opt} = \max(N_e, N_f, N_g)$</span> and solve the <span>$e,f,$</span> and <span>$g$</span> edges with <span>$N_\text{opt}$</span>.</p><p>Let&#39;s have an array <code>blockInstructions</code> of size of blocks that will contain the max number of points in each direction. Now we loop through the blocks and do the following:</p><ul><li>for each dir<ul><li>collect the neighboring block IDs using the interface info and save in array</li><li>Solve for the number of points for in the dir on both edges</li><li>Send the number of points to each neighbor with the following logic:<ul><li>if incoming is greater than saved, overwrite with incoming, else keep the saved value. We can do this by looking at the correct spot in the <code>blockInstructions</code> using the neighboring block Id, and in the correct direction using the current dir. </li></ul></li></ul></li></ul><p>Once we loop through all blocks, each block should now contain the max number of points to use in each direction. We can finally loop through all the blocks and solve the ODE with the correct number of points.</p><h3 id="Algorithm"><a class="docs-heading-anchor" href="#Algorithm">Algorithm</a><a id="Algorithm-1"></a><a class="docs-heading-anchor-permalink" href="#Algorithm" title="Permalink"></a></h3><pre><code class="language-julia hljs">function SolveAllBlocks(metric, blocks, bndInfo, interInfo)
+    blockDirOptN = similar(blocks)
+
+    for i in 1:length(blockDirOptN)
+        blockDirOptN[i] = [-1,-1]
+    end
+
+    # compute max number of points for each block
+    for (blockId, block) in enumerate(blocks)
+        for dir in 1:2  # 1 for horizontal, 2 for vertical
+            blockNeighbors = GetNeighbors(blockId, interInfo, dir; include_start=true)
+            # println(&quot;blockId: &quot;, blockId, &quot; dir: &quot;, dir, &quot; neighbors: &quot;, blockNeighbors)
+
+            #############
+            # method 1
+            #############
+            if dir == 1  # horizontal
+                left   = block[:, 1, :]
+                right  = block[:, end, :]
+                optN = GridGeneration.GetOptNEdgePair(left, right, metric)
+            else  # vertical
+                bottom   = block[:, :, 1]
+                top  = block[:, :, end]
+                optN = GridGeneration.GetOptNEdgePair(bottom, top, metric)
+            end
+
+            # Update the blockDirOptN with the max number of points
+            for computeBlocks in blockNeighbors
+                if blockDirOptN[computeBlocks][dir] &lt; optN
+                    blockDirOptN[computeBlocks][dir] = optN
+                end
+            end
+        end
+    end
+
+    # solve all blocks using the optimal number
+    computedBlocks = similar(blocks)
+    p1 = plot()
+    for (blockId, block) in enumerate(blocks)
+        optNs = blockDirOptN[blockId]
+
+        computedBlock, bndInfo, interInfo = GridGeneration.SolveBlockFixedN(block, bndInfo, interInfo, metric, optNs)
+
+        computedBlocks[blockId] = computedBlock
+    end
+
+    # update the boundary information and interface information 
+    GridGeneration.UpdateBndInfo!(bndInfo, computedBlocks; verbose=false)
+    updatedInterInfo = GridGeneration.UpdateInterInfo(interInfo, computedBlocks; verbose=false)
+
+    return computedBlocks, bndInfo, updatedInterInfo
+end
+</code></pre><p>We can find the neighboring cells in a direction using this recursive function:</p><pre><code class="language-julia hljs">function GetNeighbors(blockId::Int, interInfo, dir::Int; include_start::Bool=false)
+    seen = Set{Int}()
+
+    function visit(bid::Int)
+        # already visited this block
+        bid ∈ seen &amp;&amp; return
+        push!(seen, bid)
+
+        for info in interInfo
+            if info[&quot;blockA&quot;] == bid || info[&quot;blockB&quot;] == bid
+                # Orientation is defined by the A-side span (shared for both sides)
+                startA = info[&quot;start_blkA&quot;]
+                endA   = info[&quot;end_blkA&quot;]
+                is_vertical   = (startA[1] != endA[1])
+                is_horizontal = (startA[2] != endA[2])
+
+                if (dir == 2 &amp;&amp; is_vertical) || (dir == 1 &amp;&amp; is_horizontal)
+                    other = (info[&quot;blockA&quot;] == bid) ? info[&quot;blockB&quot;] : info[&quot;blockA&quot;]
+                    visit(other)
+                end
+            end
+        end
+    end
+
+    visit(blockId)
+
+    return include_start ? collect(seen) : [b for b in seen if b != blockId]
+end</code></pre><h2 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h2><p>Putting this all together and using our custom metric creator, we can use the code as follows:</p><h4 id="Example-1"><a class="docs-heading-anchor" href="#Example-1">Example 1</a><a id="Example-1-1"></a><a class="docs-heading-anchor-permalink" href="#Example-1" title="Permalink"></a></h4><pre><code class="language-julia hljs">include(&quot;GridGeneration.jl&quot;)
+
+#################
+# Load in initial single block grid
+#################
+# load in the initial grid - no trailing edge 
+initialGrid = GetAirfoilGrid(airfoilPath=&quot;examples/single_block_ns/airfoil/data/A-airfoil.txt&quot;, radius = 2)
+# throw away trailing edge stuff
+airfoilGrid = initialGrid[:, 101:end-100, :]
+airfoil = airfoilGrid[:,:,1]
+
+# define the boundary information
+bndInfo = getBoundaryConditions(airfoilGrid)
+
+# define interInfo
+interInfo = Any[]
+
+#################
+# Make a custom metric
+#################
+
+metricFunc1 = make_getMetric(airfoil;
+    A_airfoil = 50.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
+    A_origin  = 500.0,  ℓ_origin  = 0.1, p_origin  = 10,   
+    floor     = 1e-4,  origin_center=(1, -0.6),
+profile   = :rational)  # or :gauss
+
+metricFunc2 = make_getMetric(airfoil;
+    A_airfoil = 0.0,  ℓ_airfoil = 0.5, p_airfoil = 2,   
+    A_origin  = 700.0,  ℓ_origin  = 0.1, p_origin  = 10,   
+    floor     = 1e-4,  origin_center=(0.5, 0.1),
+profile   = :rational)  # or :gauss
+
+metricFunc = (x,y) -&gt; metricFunc1(x,y) .+ metricFunc2(x,y)
+
+
+
+#################
+# Add split locations 
+#################
+
+
+splitLocations = [
+    [ 300, 500 ],   # split along the x axis
+    [ 40, 80 ]      # split along the y axis
+]
+
+#################
+## Split the blocks
+#################
+
+blocks, bndInfo, interInfo = GridGeneration.SplitBlock(airfoilGrid, splitLocations, bndInfo, interInfo)
+
+#################
+##### Run the solver on them
+#################
+
+blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(metricFunc, blocks, bndInfo, interInfo)</code></pre><p>which yields</p><p><img src="../../../assets/images/SingleBlock/examples1.svg" alt="example1"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../nosplitting/">« Single Block with No Splitting</a><a class="docs-footer-nextpage" href="../../MultiBlock/multiblock/">Multi-Block Input »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 23 September 2025 22:19">Tuesday 23 September 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
