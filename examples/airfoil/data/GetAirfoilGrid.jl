@@ -1,5 +1,7 @@
 using DelimitedFiles
 
+include("SetupDomain.jl")
+
 function GetAirfoilGrid(; airfoilPath = "examples/airfoil/A-airfoil.txt", radius = 3, cutN = 100, type = "cgrid")
     """
     Get the initial grid for the airfoil.
@@ -9,7 +11,7 @@ function GetAirfoilGrid(; airfoilPath = "examples/airfoil/A-airfoil.txt", radius
     airfoilData = readdlm(airfoilPath, '\t', skipstart=1)
 
     # set up a c grid around the provided inner boundary
-    boundary = GridGeneration.SetupDomain(
+    boundary = SetupDomain(
         airfoilData, 
         radius, 
         cutN, 
@@ -17,6 +19,6 @@ function GetAirfoilGrid(; airfoilPath = "examples/airfoil/A-airfoil.txt", radius
         type = type
     )
 
-    initialGrid = GridGeneration.TFI_2D(boundary)
+    initialGrid = GridGeneration.TFI(boundary)
     return initialGrid
 end
