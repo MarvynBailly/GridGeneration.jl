@@ -2,7 +2,7 @@ using Documenter
 using GridGeneration
 
 
-# Make doctest examples run with `using GridGeneration`
+# Make doctest examp#les run with `using GridGeneration`
 DocMeta.setdocmeta!(GridGeneration, :DocTestSetup, :(using GridGeneration); recursive=true)
 
 makedocs(
