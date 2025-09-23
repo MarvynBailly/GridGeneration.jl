@@ -8,7 +8,7 @@ DocMeta.setdocmeta!(GridGeneration, :DocTestSetup, :(using GridGeneration); recu
 makedocs(
     modules  = [GridGeneration],
     sitename = "GridGeneration.jl",
-    authors  = "Marvyn Bailly",#
+    authors  = "Marvyn Bailly",
     format   = Documenter.HTML(
         prettyurls = get(ENV, "CI", "false") == "true",
         canonical = "https://MarvynBailly.github.io/GridGeneration/stable/",
