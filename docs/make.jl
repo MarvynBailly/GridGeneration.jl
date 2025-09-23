@@ -1,15 +1,3 @@
-# docs/make.jl
-using Pkg
-Pkg.activate(@__DIR__)
-Pkg.develop(PackageSpec(path=joinpath(@__DIR__, "..")))
-Pkg.instantiate()
-
-# Optional hot-reload during local dev
-try
-    using Revise
-catch
-end
-
 using Documenter
 using GridGeneration
 
@@ -22,7 +10,9 @@ makedocs(
     sitename = "GridGeneration.jl",
     authors  = "Marvyn Bailly",
     format   = Documenter.HTML(
-        prettyurls = !isempty(get(ENV, "CI", "")),  # false locally (Windows), true on CI
+        prettyurls = get(ENV, "CI", "false") == "true",
+        canonical = "https://MarvynBailly.github.io/GridGeneration.jl/stable/",
+        assets=String[],
     ),
     
     
@@ -60,15 +50,11 @@ makedocs(
         "Multi-Block Grid Input" => Any["Multi-Block Input" => "pages/MultiBlock/multiblock.md"],
     ],
 
-
-
     # Optional quality gates once you’re ready:
-    # doctest  = true,
     checkdocs = :exports,
 )
 
 deploydocs(
     repo      = "github.com/MarvynBailly/GridGeneration.jl",
     devbranch = "main",
-    # versions = ["stable" => "v^", "dev" => "main"],  # enable when you start tagging
 )
