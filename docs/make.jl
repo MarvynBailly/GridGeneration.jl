@@ -2,18 +2,21 @@ using Documenter
 using GridGeneration
 
 
-# Make doctest examp#les run with `using GridGeneration`
+# Make doctest examples run with `using GridGeneration`
 DocMeta.setdocmeta!(GridGeneration, :DocTestSetup, :(using GridGeneration); recursive=true)
 
 makedocs(
     modules  = [GridGeneration],
     sitename = "GridGeneration.jl",
     authors  = "Marvyn Bailly",
-    format   = Documenter.HTML(
-        prettyurls = get(ENV, "CI", "false") == "true",
-        canonical = "https://MarvynBailly.github.io/GridGeneration.jl/stable/",
-        assets=String[],
+    format = Documenter.HTML(
+        prettyurls = !isempty(get(ENV, "CI", "")),
     ),
+    # format   = Documenter.HTML(
+    #     prettyurls = get(ENV, "CI", "false") == "true",
+    #     canonical = "https://MarvynBailly.github.io/GridGeneration.jl/stable/",
+    #     assets=String[],
+    # ),
     
     
     
