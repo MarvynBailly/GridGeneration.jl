@@ -14,7 +14,7 @@ makedocs(
     # ),
     format   = Documenter.HTML(
         prettyurls = get(ENV, "CI", "false") == "true",
-        canonical = "https://MarvynBailly.github.io/GridGeneration",
+        canonical = "https://MarvynBailly.github.io/GridGeneration/stable/",
         assets=String[],
     ),
     
