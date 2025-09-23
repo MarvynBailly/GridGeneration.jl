@@ -56,4 +56,5 @@ makedocs(
 deploydocs(
     repo      = "github.com/MarvynBailly/GridGeneration",
     devbranch = "main",
+    versions = ["stable" => "v^", "v#.#.#"] 
 )
