@@ -9,9 +9,6 @@ makedocs(
     modules  = [GridGeneration],
     sitename = "GridGeneration.jl",
     authors  = "Marvyn Bailly",
-    # format = Documenter.HTML(
-    #     prettyurls = !isempty(get(ENV, "CI", "")),
-    # ),
     format   = Documenter.HTML(
         prettyurls = get(ENV, "CI", "false") == "true",
         canonical = "https://MarvynBailly.github.io/GridGeneration/stable/",
