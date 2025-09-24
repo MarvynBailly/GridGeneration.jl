@@ -10,7 +10,7 @@ makedocs(
     authors  = "Marvyn Bailly",
     format   = Documenter.HTML(
         prettyurls = get(ENV, "CI", "false") == "true",
-        canonical = "https://MarvynBailly.github.io/GridGeneration/stable/",
+        canonical = "https://MarvynBailly.github.io/GridGeneration.jl/stable/",
         assets=String[],
     ),
     
@@ -54,7 +54,7 @@ makedocs(
 )
 
 deploydocs(
-    repo      = "github.com/MarvynBailly/GridGeneration",
+    repo      = "github.com/MarvynBailly/GridGeneration.jl",
     devbranch = "main",
     versions = ["stable" => "v^", "v#.#.#"] 
 )
