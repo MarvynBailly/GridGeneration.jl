@@ -1,6 +1,6 @@
 # GridGeneration
 
-See the documentation and development for [GridGeneration.jl](https://marvyn.com/GridGeneration/dev/)
+See the documentation and development for [GridGeneration.jl](https://marvyn.com/GridGeneration.jl/dev/)
 
 ## To Do List
 - [x] Fix grid spacing algorithm to normalize local center difference vectors. 
