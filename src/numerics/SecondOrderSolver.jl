@@ -12,36 +12,43 @@ function residual(u, f, h)
 end
 
 function SolveSecondOrder(f, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbose=false)
-    x0 = xs[1]
-    x1 = xs[end]
-
     h = 1.0 / N
 
     u = collect(xs)  # initial guess: linear
     u_new = similar(u)
-
-    # Storage for tridiagonal matrix
-    Nint = N - 2
-    a = fill(1 / h^2, Nint)    # subdiagonal
-    b = fill(-2 / h^2, Nint)   # diagonal
-    c = fill(1 / h^2, Nint)    # superdiagonal
-    rhs = zeros(Nint)
+    
     resNorm = zeros(max_iter)
 
+    # Storage for tridiagonal matrix
+    a = zeros(N) 
+    b = zeros(N)
+    c = zeros(N)
+    rhs = zeros(N)
+    u_s = similar(u)
+    
+    # main diagonal
+    b[2:end-1] .= -2 / h^2      
+    b[1] = 1.0
+    b[end] = 1.0
+
+    rhs[1] = xs[1]
+    rhs[end] = xs[end]
+
     for iter in 1:max_iter
-        rhs = - f.(u[2:end-1]) .* ((u[3:end] - u[1:end-2]).^2) ./ (4 * h^2)
+        u_s[2:end-1] = (u[3:end] - u[1:end-2]) / (2 * h)
+        u_s[1] = (u[2] - u[1]) / h
+        u_s[end] = (u[end] - u[end-1]) / h
 
-        rhs[1] += - x0 / h^2
-        rhs[end] += - x1 / h^2
 
+        a[2:end-1] .= (1 / h^2) .- f.(u[2:end-1]) .* u_s[2:end-1] * (1 / (2 * h))   
+
+        c[2:end-1] .= (1 / h^2) .+ f.(u[2:end-1]) .* u_s[2:end-1] * (1 / (2 * h))   
 
         # Solve linear system
         δu = GridGeneration.ThomasAlg(a, b, c, rhs)
 
         # Update interior points
-        u_new[1] = x0
-        u_new[end] = x1
-        u_new[2:end-1] = δu
+        u_new = δu
 
         # Check convergence
         res = residual(u, f, h)
