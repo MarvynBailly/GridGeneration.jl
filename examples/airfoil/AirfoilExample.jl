@@ -1,7 +1,6 @@
 using Base.Threads
 
-include("../StorStegSolver.jl")
-include("../BlockSolver.jl")
+include("../../src/GridGeneration.jl")
 include("../../examples/airfoil/data/GetAirfoilGrid.jl")
 include("../../examples/airfoil/data/GetBoundary.jl")
 
@@ -15,13 +14,9 @@ include("../../examples/airfoil/data/GetBoundary.jl")
 function AirfoilSolver_threaded(params)
     
     # preform block splitting, solve all blocks, and use TFI to generate the grids
-    blocks, bndInfo, interInfo = BlockSplitting(
-        initialGrid = params.initialGrid, 
-        bndInfo = params.bndInfo, 
-        interInfo = params.interInfo, 
-        splitLocations = params.splitLocations, 
-        M = params.M,
-        showPlots = params.showPlots)
+    blocks, bndInfo, interInfo = GridGeneration.SplitBlock(params.initialGrid, params.splitLocations, params.bndInfo, params.interInfo)
+    blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(params.M, blocks, bndInfo, interInfo)
+
 
 
     # block = blocks[1]
@@ -35,7 +30,7 @@ function AirfoilSolver_threaded(params)
 
     @threads for i in eachindex(blocks)
         println("Solving for block $i on thread $(threadid())...")
-        xr, yr, finalError, finalIter = EllipticSolver(x = blocks[i][1, :, :], y = blocks[i][2, :, :],
+        xr, yr, finalError, finalIter = GridGeneration.EllipticSolver(x = blocks[i][1, :, :], y = blocks[i][2, :, :],
                                 max_iter = params.max_iter, tol = params.tol, ω = params.ω,
                                 s_left = params.s_left, a_decay_left = params.a_decay_left, b_decay_left = params.b_decay_left,
                                 s_right = params.s_right, a_decay_right = params.a_decay_right, b_decay_right = params.b_decay_right,
@@ -64,15 +59,10 @@ function AirfoilSolver_threaded(params)
 end
 
 function AirfoilSolver(params)
-    println("using $(params.use_left_wall) $(params.use_right_wall) $(params.use_bottom_wall) $(params.use_top_wall)")
+    # println("using $(params.use_left_wall) $(params.use_right_wall) $(params.use_bottom_wall) $(params.use_top_wall)")
     # preform block splitting, solve all blocks, and use TFI to generate the grids
-    blocks, bndInfo, interInfo = BlockSplitting(
-        initialGrid = params.initialGrid, 
-        bndInfo = params.bndInfo, 
-        interInfo = params.interInfo, 
-        splitLocations = params.splitLocations, 
-        M = params.M,
-        showPlots = params.showPlots)
+    blocks, bndInfo, interInfo = GridGeneration.SplitBlock(params.initialGrid, params.splitLocations, params.bndInfo, params.interInfo)
+    blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(params.M, blocks, bndInfo, interInfo)
 
     @info "Split block into $(length(blocks)) blocks."
 
@@ -85,8 +75,8 @@ function AirfoilSolver(params)
 
 
     for i in eachindex(blocks)
-        @info "Solving for block $i ..."
-        xr, yr, finalError, finalIter = EllipticSolver(x = blocks[i][1, :, :], y = blocks[i][2, :, :],
+        # @info "Solving for block $i ..."
+        xr, yr, finalError, finalIter = GridGeneration.EllipticSolver(x = blocks[i][1, :, :], y = blocks[i][2, :, :],
                                 max_iter = params.max_iter, tol = params.tol, ω = params.ω,
                                 s_left = params.s_left, a_decay_left = params.a_decay_left, b_decay_left = params.b_decay_left,
                                 s_right = params.s_right, a_decay_right = params.a_decay_right, b_decay_right = params.b_decay_right,

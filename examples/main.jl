@@ -1,3 +1,5 @@
+using MAT: matread
+
 include("airfoil/AirfoilExample.jl")
 include("plotter/metric_grid_plotter.jl")
 include("plotter/angle_deviation.jl")

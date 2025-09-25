@@ -1,6 +1,7 @@
 module GridGeneration
 
 include("numerics/NumSolver.jl")
+include("numerics/EllipticSolver.jl")
 
 include("metric/Metric.jl")
 include("metric/CustomMetric.jl")
