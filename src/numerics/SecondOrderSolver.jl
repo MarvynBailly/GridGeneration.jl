@@ -1,5 +1,7 @@
 using LinearAlgebra
 
+include("Thomas.jl")
+
 function residual(u, f, h)
     ui = u[2:end-1]          # interior nodes
     up = u[3:end]            # i+1
@@ -67,31 +69,4 @@ function SolveSecondOrder(f, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbo
 
     @info("Didn't converge with last norm $(resNorm[end])")
     return u, resNorm
-end
-
-
-
-function ThomasAlg(a, b, c, d)
-    n = length(d)
-    cp = similar(c)
-    dp = similar(d)
-
-    # forward sweep
-    cp[1] = c[1] / b[1]
-    dp[1] = d[1] / b[1]
-
-    for i in 2:n
-        denom = b[i] - a[i] * cp[i-1]
-        cp[i] = c[i] / denom
-        dp[i] = (d[i] - a[i] * dp[i-1]) / denom
-    end
-
-    # backward substitution
-    x = zeros(n)
-    x[end] = dp[end]
-    for i = n-1:-1:1
-        x[i] = dp[i] - cp[i] * x[i+1]
-    end
-
-    return x
 end

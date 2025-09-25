@@ -3,35 +3,6 @@ include("SecondOrderSolver.jl")
 include("CentralDiff.jl")
 include("OptPointsSolver.jl")
 
-"""
- Get the optimal solution for the ODE grid spacing problem.
- This function solves the ODE system for grid spacing and computes the optimal number of points based on the metric values.
- Then recomputes the solution with the optimal number of points.
-"""
-# function GetOptimalSolution(m, mx, N, xs; dir=1, method = "analytic")    
-
-#     sol = SolveODE(m, mx, N, xs; dir=dir, method=method)
-
-#     @assert length(sol[1, :]) == N "Solution length ($(length(sol[1, :]))) does not match expected number of points (N = $N)"
-
-    
-#     N_opt = ComputeOptimalNumberofPoints(xs, m)
-#     @info("Optimal number of points: ", N_opt)
-
-#     # if N_opt == 1 
-#     #     N_opt = 3
-#     # end
-
-#     # if N_opt % 2 == 0
-#     #     N_opt += 1
-#     # end
-
-#     sol_opt = SolveODE(m, mx, N_opt, xs; dir=dir, method=method)
-
-#     return sol_opt, sol
-# end
-
-
 
 """
     SolveODE(M, xs; method = :numeric, verbose = false)

@@ -2,17 +2,19 @@ module GridGeneration
 
 include("numerics/NumSolver.jl")
 
-include("TFI.jl")
-include("Get1DMetric.jl")
-include("Interpolators.jl")
-include("1D2DFunctions.jl")
-include("Metric.jl")
-include("BlockFunctions.jl")
-include("BoundaryUtils.jl")
-include("InterfaceUtils.jl")
-include("SplittingFunctions.jl")
-include("SolveAllBlocks.jl")
-include("CustomMetric.jl")
+include("metric/Metric.jl")
+include("metric/CustomMetric.jl")
 
+include("Interpolators/TFI.jl")
+include("Interpolators/LinearInterpolator.jl")
 
+include("projections/Get1DMetric.jl")
+include("projections/1D2DFunctions.jl")
+
+include("blocksplitting/GetNeighbors.jl")
+include("blocksplitting/BlockFunctions.jl")
+include("blocksplitting/BoundaryUtils.jl")
+include("blocksplitting/InterfaceUtils.jl")
+include("blocksplitting/SplittingFunctions.jl")
+include("blocksplitting/SolveAllBlocks.jl")
 end

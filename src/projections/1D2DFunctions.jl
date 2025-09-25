@@ -16,11 +16,11 @@ function ProjectBoundary2Dto1D(boundary)
     return xs
 end
 
+
 """ 
 Function to convert a 1D boundary to a 2D representation
 - project `points` onto the `boundary` defined by `xs`
 """
-
 function ProjectBoundary1Dto2D(boundary, sol)
     N = size(boundary, 2)
     # step 1: arc length cumulative xs

@@ -1,11 +1,3 @@
-function SolveAnalytic(xs, M, N; method="linear")
-    x_sol = AnalyticalSolution(xs, M)
-    sol = zeros(2, N)
-    sol[1, :] = x_sol
-    return sol
-end
-
-
 """
     semi_analytic_solution_from_data(x_vals, M_vals, N)
 Compute a semi-analytic solution for the second-order BVP using the provided metric values `M_vals` at points `x_vals`. 
