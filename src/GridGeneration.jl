@@ -5,8 +5,8 @@ include("numerics/NumSolver.jl")
 include("metric/Metric.jl")
 include("metric/CustomMetric.jl")
 
-include("Interpolators/TFI.jl")
-include("Interpolators/LinearInterpolator.jl")
+include("interpolators/TFI.jl")
+include("interpolators/LinearInterpolator.jl")
 
 include("projections/Get1DMetric.jl")
 include("projections/1D2DFunctions.jl")

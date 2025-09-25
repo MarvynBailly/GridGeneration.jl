@@ -109,7 +109,7 @@ M::Function = GetMetric(problem)  # M(x,y)
 ##############################################
 splitLocations::Vector{Vector{Int}} = [
     [ 300 , 400],     # split along the x axis
-    [ 10]      # split along the y axis
+    [ 30]      # split along the y axis
 ]
 
 
@@ -125,19 +125,19 @@ tol::Float64=1e-6
 
 use_top_wall::Bool=true 
 s_top::Float64=-1
-a_decay_top::Float64=0.4
-b_decay_top::Float64=0.4
+a_decay_top::Float64=0.8
+b_decay_top::Float64=0.8
 
 use_left_wall::Bool=true 
 s_left::Float64=-1
-a_decay_left::Float64=0.4
-b_decay_left::Float64=0.4
+a_decay_left::Float64=0.8
+b_decay_left::Float64=0.8
 
 
 use_right_wall::Bool=true
 s_right::Float64=-1
-a_decay_right::Float64=0.4
-b_decay_right::Float64=0.4
+a_decay_right::Float64=0.8
+b_decay_right::Float64=0.8
 
 use_bottom_wall::Bool=true 
 s_bottom::Float64=-1
@@ -189,12 +189,71 @@ SimParams(;
 
 
 
+############## POST PROCESSING ##############
+
+
+#### Post Processing
+function ComputeAngleDeviation(blocks)
+    angleDeviations = []
+    for block in blocks
+        x = block[1, :, :]
+        y = block[2, :, :]
+        nrows, ncols = size(x)
+        
+        # Initialize a matrix to store the deviation for each cell corner.
+        # The result will be (nrows-1, ncols-1), so the last row/col will be 0.
+        deviations = zeros(nrows, ncols)
+
+        # --- Corrected Vector Calculation ---
+        
+        # Vector 1: Along the xi-direction (horizontal grid lines)
+        # For each cell (i,j), this is the vector from point (i,j) to (i,j+1)
+        v1_x = x[1:end-1, 2:end]   - x[1:end-1, 1:end-1]
+        v1_y = y[1:end-1, 2:end]   - y[1:end-1, 1:end-1]
+
+        # Vector 2: Along the eta-direction (vertical grid lines)
+        # For each cell (i,j), this is the vector from point (i,j) to (i+1,j)
+        v2_x = x[2:end,   1:end-1] - x[1:end-1, 1:end-1]
+        v2_y = y[2:end,   1:end-1] - y[1:end-1, 1:end-1]
+
+        # --- Vectorized Angle Calculation ---
+        
+        # Dot product: v1 ⋅ v2
+        dot_product = v1_x .* v2_x .+ v1_y .* v2_y
+
+        # Magnitude of v1: ||v1||
+        norm1 = sqrt.(v1_x.^2 .+ v1_y.^2)
+        
+        # Magnitude of v2: ||v2||
+        norm2 = sqrt.(v2_x.^2 .+ v2_y.^2)
+
+        # Angle from dot product formula: θ = acos((v1 ⋅ v2) / (||v1|| * ||v2||))
+        epsilon = 1e-12
+        theta = acosd.(dot_product ./ (norm1 .* norm2))
+
+        # The deviation is the absolute difference from 90 degrees.
+        deviations[1:end-1, 1:end-1] = abs.(theta .- 90.0)
+        
+        push!(angleDeviations, deviations)
+    end
+    return angleDeviations
+end
+
+
+
+
+
+
+
+
+
+
 ##############################################
 #################### Main ####################
 ##############################################
 runSolver = true
 saveplots = false
-case = 2
+case = 4
 
 @info "runSolver = $runSolver, press enter to continue ..."
 
@@ -237,7 +296,7 @@ function plot_grid(x, y, title_str; plt = nothing, c = nothing)
         plot!(p, x[:, j], y[:, j], lw=0.1, color=c)
     end
     # Plot ξ-lines (lines of constant i)
-    for i in 1:1:size(x, 1)
+    for i in 1:2:size(x, 1)
         plot!(p, x[i, :], y[i, :], lw=0.1, color=c)
     end
     return p
@@ -259,6 +318,9 @@ if saveplots
 end
 
 
+# savefig(finalPlot, "bs_el_$case.svg")
+
+
 w = (x,y) -> first(M(x,y))   
 xl,xr = -1, 1 
 yl, yr = -1, 1
@@ -272,4 +334,45 @@ plt4, _ = plot_scalar_field(w, xs, ys; boundary=airfoil,
 plot!(plt4, xlims=(xl, xr), ylims=(yl, yr))
 if saveplots
     savefig(plt4, "images/metric_05.pdf")
+end
+
+
+function PlotGridQuality(blocks, angleDeviations; cmax=15)
+    p = plot()
+    for block_index in 1:length(blocks)
+        
+        # --- Extract Data for the chosen block ---
+        x = blocks[block_index][1, :, :]
+        y = blocks[block_index][2, :, :]
+        data = angleDeviations[block_index]
+
+        # --- Create the Plot ---
+        p = heatmap(
+            x, y, data,
+            aspect_ratio = :equal,
+            title = "Angle Deviation from 90° (Block $(block_index))",
+            xlabel = "X",
+            ylabel = "Y",
+            colorbar_title = "Deviation (°)",
+            color = :plasma,  # A perceptually uniform colormap
+            clims = (0, cmax)
+        )
+
+        # --- Overlay the Grid Lines ---
+        # Plotting x and y overlays the horizontal lines.
+        # Plotting the transpose (x' and y') overlays the vertical lines.
+        plot!(p, x, y, legend=false, linecolor=:black, linewidth=0.5)
+        plot!(p, x', y', legend=false, linecolor=:black, linewidth=0.5)
+    end
+    return p
+end
+
+
+
+postProcessing = true
+
+if postProcessing
+    angleDeviations = ComputeAngleDeviation(blocks_smooth)
+    qualityPlot = PlotGridQuality(blocks_smooth, angleDeviations; cmax=15)
+    display(qualityPlot)
 end
