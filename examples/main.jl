@@ -1,5 +1,6 @@
 include("airfoil/AirfoilExample.jl")
 include("plotter/metric_grid_plotter.jl")
+include("plotter/angle_deviation.jl")
 
 
 ##############################################
@@ -125,19 +126,19 @@ tol::Float64=1e-6
 
 use_top_wall::Bool=true 
 s_top::Float64=-1
-a_decay_top::Float64=0.8
-b_decay_top::Float64=0.8
+a_decay_top::Float64=0.4
+b_decay_top::Float64=0.4
 
 use_left_wall::Bool=true 
 s_left::Float64=-1
-a_decay_left::Float64=0.8
-b_decay_left::Float64=0.8
+a_decay_left::Float64=0.4
+b_decay_left::Float64=0.4
 
 
 use_right_wall::Bool=true
 s_right::Float64=-1
-a_decay_right::Float64=0.8
-b_decay_right::Float64=0.8
+a_decay_right::Float64=0.4
+b_decay_right::Float64=0.4
 
 use_bottom_wall::Bool=true 
 s_bottom::Float64=-1
@@ -255,7 +256,7 @@ runSolver = true
 saveplots = false
 case = 4
 
-@info "runSolver = $runSolver, press enter to continue ..."
+@info "runSolver = $runSolver"
 
 if case == 1
     params = SimParams(use_left_wall = false,
@@ -337,42 +338,12 @@ if saveplots
 end
 
 
-function PlotGridQuality(blocks, angleDeviations; cmax=15)
-    p = plot()
-    for block_index in 1:length(blocks)
-        
-        # --- Extract Data for the chosen block ---
-        x = blocks[block_index][1, :, :]
-        y = blocks[block_index][2, :, :]
-        data = angleDeviations[block_index]
-
-        # --- Create the Plot ---
-        p = heatmap(
-            x, y, data,
-            aspect_ratio = :equal,
-            title = "Angle Deviation from 90° (Block $(block_index))",
-            xlabel = "X",
-            ylabel = "Y",
-            colorbar_title = "Deviation (°)",
-            color = :plasma,  # A perceptually uniform colormap
-            clims = (0, cmax)
-        )
-
-        # --- Overlay the Grid Lines ---
-        # Plotting x and y overlays the horizontal lines.
-        # Plotting the transpose (x' and y') overlays the vertical lines.
-        plot!(p, x, y, legend=false, linecolor=:black, linewidth=0.5)
-        plot!(p, x', y', legend=false, linecolor=:black, linewidth=0.5)
-    end
-    return p
-end
-
-
 
 postProcessing = true
 
+@info "postProcessing = $postProcessing"
 if postProcessing
     angleDeviations = ComputeAngleDeviation(blocks_smooth)
-    qualityPlot = PlotGridQuality(blocks_smooth, angleDeviations; cmax=15)
+    qualityPlot = PlotGridAngleDeviation(blocks_smooth, angleDeviations)
     display(qualityPlot)
 end
