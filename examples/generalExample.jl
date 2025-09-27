@@ -3,9 +3,12 @@ using DelimitedFiles
 using MAT: matread
 
 include("../src/GridGeneration.jl")
-include("airfoil/data/GetAirfoilSetup.jl")
-include("airfoil/metric/GetMetric.jl")
-include("plotter/plot_grid.jl")
+
+include("airfoil/airfoil.jl")
+include("rectangle/rectangle.jl")
+
+
+case  = :airfoil  # :rectangle
 
 ##########################################
 ##########################################
@@ -25,7 +28,14 @@ where boundary is saved in [top, right, bottom, left] format.
 ###################
 #   Airfoil Grid  #
 ###################
-initialGrid, bndInfo, interInfo = GetAirfoilSetup(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3, type =:cgrid)
+if case == :airfoil
+    initialGrid, bndInfo, interInfo = GetAirfoilSetup(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3, type =:cgrid)
+elseif case == :rectangle
+    initDomain = GetRectangleDomain()
+    initialGrid = GridGeneration.TFI(initDomain)
+    bndInfo = Any[]
+    interInfo = Any[]
+end
 
 
 ##########################################
@@ -42,9 +52,13 @@ Can either provide the filepath or use custom metric function.
 ###################
 #  Airfoil Metric #
 ###################
-problem = 6
-M = GetMetric(problem; scale = 0.05)
-
+if case == :airfoil
+    problem = 6
+    M = GetAirfoilMetric(problem; scale = 0.05)
+elseif case == :rectangle
+    problem = 1
+    M = GetRectangleMetric(problem; scale = 10000)
+end
 
 
 ##############################################

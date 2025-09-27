@@ -5,9 +5,8 @@
 - problem 3: trailing edge
 - problem 4: leading edge and trailing edge
 - problem 5: for fun
-- problem 6: real metric
 """
-function GetAirfoilMetric(problem = 1; scale = 4000)
+function GetRectangleMetric(problem = 1; scale = 4000)
     if problem == 1
         M11 = scale
         M22 = scale
@@ -70,15 +69,6 @@ function GetAirfoilMetric(problem = 1; scale = 4000)
             )
 
         return metricFunction1(x,y) .+ metricFunction2(x,y) .+ metricFunction3(x,y) .+ metricFunction4(x,y)
-    elseif problem == 6
-        # set up metric data
-        metricPath = "examples/airfoil/metric/A-airfoil_grid_data.mat"
-        # load metric
-        metricData = matread(metricPath)
-        # set up metric function
-        tree, refs = GridGeneration.setup_metric_tree(metricData)
-        M = (x,y) -> scale * GridGeneration.find_nearest_kd(metricData, tree, refs, x, y)
-        return M
     else
         error("Unknown problem type: $problem")
     end
