@@ -18,3 +18,7 @@ and include in your script:
 ```julia
 using GridGeneration
 ```
+
+## Example
+
+See an example script at [general example](examples/generalExample.jl)
