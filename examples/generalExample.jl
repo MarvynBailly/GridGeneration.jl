@@ -95,17 +95,3 @@ params = GridGeneration.SimParams(
 ##############################################
 
 smoothBlocks, blocks, bndInfo, interInfo, finalErrors, finalIterations = GridGeneration.GenerateGrid(initialGrid, bndInfo, interInfo, M, params=params)
-
-
-
-
-# pSmooth = plot()
-
-# for i in 1:length(blocks)
-#     plot_grid(smoothBlocks[i][1, :, :], smoothBlocks[i][2, :, :], "Block Elliptic Grid Case", plt=pSmooth, c = RGB(0.0, 0.0, 0.0))
-# end
-
-# pZoom = deepcopy(pSmooth)
-# plot!(pZoom, xlims=(0.5, 1.5), ylims=(-0.3, 0.3))
-# p = plot(pSmooth, pZoom, layout = (1,2), size=(1200, 600))
-# savefig(p, "examples/generalExample.pdf")
