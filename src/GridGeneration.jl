@@ -1,8 +1,6 @@
 module GridGeneration
 
-
 include("types.jl")
-export SimParams, EllipticParams
 
 
 include("numerics/NumSolver.jl")

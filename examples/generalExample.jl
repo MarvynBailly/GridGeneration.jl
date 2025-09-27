@@ -53,90 +53,38 @@ M = GetMetric(problem; scale = 0.05)
 ##############################################
 
 """
-Define parameters 
-
+Define parameters
 """
-###################
-#  Split Params  #
-###################
-
-# should the method split
-useSplitting = true
 # define split locations using the indices of the initial grid 
 splitLocations::Vector{Vector{Int}} = [
     [ 300 , 400],                           # split along the x axis
     [ 30 ]                                  # split along the y axis
 ]
 
-###################
-#  Edge Solver Params  #
-###################
-# should the method solve along the edges
-useEdgeSolver = true
-# which edge solver to use
-boundarySolver = :analytic  # :analytic or :numeric
 
-
-
-###################
-# Smooth Params  #
-###################
-# should the method smooth
-useSmoothing = true
-
-# which smoothing method to use
-smoothMethod = :ellipticSS 
-
-# solver parameters 
-max_iter::Int=5000
-tol::Float64=1e-6
-ω::Float64=0.2
-
-# verbose
-ellipticSolverVerbose::Bool=false
-
-#### SS parameters
-# SS forcing terms
-useLeftWall, useRightWall, useTopWall, useBottomWall = false, false, true, true
-
-# SS decay parameters
-a_decay_top::Float64=0.4
-b_decay_top::Float64=0.4
-
-a_decay_left::Float64=0.4
-b_decay_left::Float64=0.4
-
-
-a_decay_right::Float64=0.4
-b_decay_right::Float64=0.4
-
-a_decay_bottom::Float64=0.4
-b_decay_bottom::Float64=0.4
-
-
-# create parameter struct
-# find a way to have this be automatic and just allow the user to change what they want
-params = SimParams(
-    useSplitting = useSplitting, 
+# set up the parameters 
+params = GridGeneration.SimParams(
+    useSplitting = true, 
     splitLocations = splitLocations, 
-    useEdgeSolver = useEdgeSolver, 
-    boundarySolver = boundarySolver,
-    useSmoothing = useSmoothing, 
-    smoothMethod = smoothMethod,
-    elliptic = EllipticParams(
-        max_iter = max_iter, tol = tol, ω = ω,
-        useTopWall = useTopWall, useBottomWall = useBottomWall, useLeftWall = useLeftWall, useRightWall = useRightWall,
-        a_decay_left = a_decay_left, b_decay_left = b_decay_left,
-        a_decay_right = a_decay_right, b_decay_right = b_decay_right,
-        a_decay_top = a_decay_top, b_decay_top = b_decay_top,
-        a_decay_bottom = a_decay_bottom, b_decay_bottom = b_decay_bottom,
-        verbose = ellipticSolverVerbose
+    useEdgeSolver = true, 
+    boundarySolver = :analytic,     # :numeric
+    useSmoothing = true,
+    smoothMethod = :ellipticSS,
+    elliptic = GridGeneration.EllipticParams(
+        max_iter = 5000, 
+        tol = 1e-6, 
+        ω = 0.2,
+        useTopWall = true, 
+        useBottomWall = true,
+        useLeftWall = true, 
+        useRightWall = true,
+        a_decay_left = 0.4, b_decay_left = 0.4,
+        a_decay_right = 0.4, b_decay_right = 0.4,
+        a_decay_top = 0.4, b_decay_top = 0.4,
+        a_decay_bottom = 0.4, b_decay_bottom = 0.4,
+        verbose = false
     )
 )
-
-
-
-
 
 
 ##############################################
