@@ -1,3 +1,4 @@
+using LinearAlgebra
 using MAT: matread
 
 include("airfoil/AirfoilExample.jl")
@@ -242,10 +243,51 @@ function ComputeAngleDeviation(blocks)
     return angleDeviations
 end
 
+function ComputeMetricMisfit(M, blocks)
+    # Compute the metric misfit for each block
+    # m = l * M * l
+    metricMisfitsHor = []
+    metricMisfitsVer = []
+    for block in blocks
+        x = block[1, :, :]
+        y = block[2, :, :]
+        nrows, ncols = size(x)
+        
+        # Initialize a matrix to store the misfit for each cell corner.
+        # The result will be (nrows-1, ncols-1), so the last row/col will be 0.
+        misfitsHor = zeros(nrows, ncols)
+        misfitsVer = zeros(nrows, ncols)
 
+        # Vector 1: Along the xi-direction (horizontal grid lines)
+        #  (i,j) to (i,j+1)
+        v1_x = x[1:end-1, 2:end]   - x[1:end-1, 1:end-1]
+        v1_y = y[1:end-1, 2:end]   - y[1:end-1, 1:end-1]
 
+        # Vector 2: Along the eta-direction (vertical grid lines)
+        #  (i,j) to (i+1,j)
+        v2_x = x[2:end,   1:end-1] - x[1:end-1, 1:end-1]
+        v2_y = y[2:end,   1:end-1] - y[1:end-1, 1:end-1]
 
+        for i in 1:(nrows-1)
+            for j in 1:(ncols-1)
+                # Get the metric tensor at the cell corner
+                M_tensor = M(x[i,j], y[i,j])
+                M_mat = [M_tensor[1] 0.0; 0.0 M_tensor[2]]
 
+                # v1 
+                l1 = [v1_x[i,j]; v1_y[i,j]]
+                # v2
+                l2 = [v2_x[i,j]; v2_y[i,j]]
+
+                misfitsHor[i,j] = l1' * M_mat * l1
+                misfitsVer[i,j] = l2' * M_mat * l2
+            end
+        end
+        push!(metricMisfitsHor, misfitsHor)
+        push!(metricMisfitsVer, misfitsVer)
+    end
+    return metricMisfitsHor, metricMisfitsVer
+end
 
 
 
@@ -254,7 +296,7 @@ end
 ##############################################
 #################### Main ####################
 ##############################################
-runSolver = true
+runSolver = false
 saveplots = false
 case = 4
 
@@ -313,6 +355,11 @@ for i in 1:length(blocks)
     plot_grid(blocks_smooth[i][1, :, :], blocks_smooth[i][2, :, :], "Block Elliptic Grid Case $case", plt=pSmooth, c = RGB(0.0, 0.0, 0.0))
 end
 
+
+plot!(pSmooth, xlims=(-0.5, 0.5), ylims=(-0.3, 0.3))
+# savefig(pSmooth, "fixed_s-$case.pdf")
+# savefig(pSmooth, "interpolated_s-$case.pdf")
+
 finalPlot = plot(pInit, pSmooth, layout=(1,2), size=(1200,600))
 display(finalPlot)
 
@@ -346,6 +393,16 @@ postProcessing = true
 @info "postProcessing = $postProcessing"
 if postProcessing
     angleDeviations = ComputeAngleDeviation(blocks_smooth)
-    qualityPlot = PlotGridAngleDeviation(blocks_smooth, angleDeviations)
-    display(qualityPlot)
+    qualityPlot = PlotGridAngleDeviationPDF(blocks_smooth, angleDeviations, "Angle Deviation from 90°")
+    # display(qualityPlot)
+
+    metricMisfitsHor, metricMisfitsVer = ComputeMetricMisfit(M, blocks_smooth)
+    misfitPlotHor = PlotGridAngleDeviationPDF(blocks_smooth, metricMisfitsHor, "Metric Misfit Horizontal")
+    # display(misfitPlotHor)
+    misfitPlotVer = PlotGridAngleDeviationPDF(blocks_smooth, metricMisfitsVer, "Metric Misfit Vertical")
+    # display(misfitPlotVer)
+
+    savefig(qualityPlot, ".images/a_angle_deviation_case_$case.pdf")
+    savefig(misfitPlotHor, ".images/a_metric_misfit_hor_case_$case.pdf")
+    savefig(misfitPlotVer, ".images/a_metric_misfit_ver_case_$case.pdf")
 end

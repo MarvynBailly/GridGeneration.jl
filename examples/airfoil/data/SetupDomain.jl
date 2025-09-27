@@ -1,11 +1,12 @@
-function SetupDomain(airfoil, radius, vertN, horzN; type = "cgrid")
+function SetupDomain(airfoilData, radius, vertN, horzN; type =:cgrid)
+    
 
     # add a point to be cut off 
     horzN = horzN + 1  
     # throw away the last column
-    airfoil = airfoil[:, 1:2]
+    airfoil = airfoilData[:, 1:2]
 
-    if type == "cgrid"
+    if type ==:cgrid
         # build the C-grid around the airfoil
         airfoilBoundary = BuildCGrid(airfoil, radius, vertN)
 

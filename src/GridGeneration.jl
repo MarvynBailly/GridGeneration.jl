@@ -1,5 +1,10 @@
 module GridGeneration
 
+
+include("types.jl")
+export SimParams, EllipticParams
+
+
 include("numerics/NumSolver.jl")
 include("numerics/EllipticSolver.jl")
 
@@ -18,4 +23,9 @@ include("blocksplitting/BoundaryUtils.jl")
 include("blocksplitting/InterfaceUtils.jl")
 include("blocksplitting/SplittingFunctions.jl")
 include("blocksplitting/SolveAllBlocks.jl")
+
+include("smoothing/SmoothBlocks.jl")
+
+
+
 end

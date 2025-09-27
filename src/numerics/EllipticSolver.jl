@@ -53,7 +53,7 @@ end
 Computes the forcing terms at the wall boundary (j=N)
 to enforce orthogonality and spacing. 
 """
-function compute_forcing_eta(x::Matrix, y::Matrix, sold::Float64, a_decay::Float64, b_decay::Float64; wall::Int = 1)
+function compute_forcing_eta(x::Matrix, y::Matrix, a_decay::Float64, b_decay::Float64; wall::Int = 1)
     @assert wall == size(x,2) || wall == 1 "wall must be either 1 (bottom) or Nj (top)"
     
     Ni, Nj = size(x)
@@ -79,6 +79,7 @@ function compute_forcing_eta(x::Matrix, y::Matrix, sold::Float64, a_decay::Float
 
     for i in 2:Ni-1
         s = s_vec[i]
+        # s = min(s1, s2)
 
         # 1. Derivatives along the boundary (ξ-derivatives)
         x_xi   = (x[i+1, wall] - x[i-1, wall]) / 2.0
@@ -125,7 +126,7 @@ end
 Computes the forcing terms at the wall boundary (i=1 or N)
 to enforce orthogonality and spacing. 
 """
-function compute_forcing_xi(x::Matrix, y::Matrix, sold::Float64, a_decay::Float64, b_decay::Float64; wall::Int = 1)
+function compute_forcing_xi(x::Matrix, y::Matrix, a_decay::Float64, b_decay::Float64; wall::Int = 1)
     @assert wall == 1 || wall == size(x, 1) "wall must be either 1 (left) or Ni (right)"
     
     Ni, Nj = size(x)
@@ -156,6 +157,8 @@ function compute_forcing_xi(x::Matrix, y::Matrix, sold::Float64, a_decay::Float6
 
     for j in 2:Nj-1
         s = s_vec[j]
+        # s = min(s1, s2)
+
         # 1. Derivatives along the boundary (η-derivatives)
         x_eta   = (x[wall, j+1] - x[wall, j-1]) / 2.0
         y_eta   = (y[wall, j+1] - y[wall, j-1]) / 2.0
@@ -200,22 +203,14 @@ end
 """
 Main iterative solver for the elliptic grid generation equations using SOR.
 """
-function EllipticSolver(; x::Matrix, y::Matrix,
-                        max_iter::Int=2000, tol::Float64=1e-6, ω::Float64=1.7, 
-                        s_left::Float64=0.02, a_decay_left::Float64=0.5, b_decay_left::Float64=0.5, 
-                        s_right::Float64=0.02, a_decay_right::Float64=0.5, b_decay_right::Float64=0.5,
-                        s_top::Float64=0.02, a_decay_top::Float64=0.5, b_decay_top::Float64=0.5,
-                        s_bottom::Float64=0.02, a_decay_bottom::Float64=0.5, b_decay_bottom::Float64=0.5,
-                        use_top_wall::Bool=true, use_bottom_wall::Bool=true, use_left_wall::Bool=true, use_right_wall::Bool=true,
-                        verbose::Bool=false
-                              )
+function EllipticSolver(x::Matrix, y::Matrix; params)
     function verbose_print(msg)
-        if verbose
+        if params.verbose
             println(msg)
         end
     end
 
-    @info "Applying forcing terms at walls: Top: $use_top_wall, Bottom: $use_bottom_wall, Left: $use_left_wall, Right: $use_right_wall"
+    # @info "Applying forcing terms at walls: Top: $useTopWall, Bottom: $useBottomWall, Left: $useLeftWall, Right: $useRightWall"
 
     Ni, Nj = size(x)
     error = 0
@@ -223,29 +218,29 @@ function EllipticSolver(; x::Matrix, y::Matrix,
 
 
     verbose_print("Starting SOR iterations...")
-    for iter in 1:max_iter
+    for iter in 1:params.max_iter
         finalIter = iter
         RHS_x_full = zeros(Ni, Nj)
         RHS_y_full = zeros(Ni, Nj)
-        
-        if use_top_wall
-            RHS_x_top, RHS_y_top = compute_forcing_eta(x, y, s_top, a_decay_top, b_decay_top, wall = Nj)
+
+        if params.useTopWall
+            RHS_x_top, RHS_y_top = compute_forcing_eta(x, y, params.a_decay_top, params.b_decay_top, wall = Nj)
             RHS_x_full .+= RHS_x_top
             RHS_y_full .+= RHS_y_top
         end
-        if use_bottom_wall
-            RHS_x_bottom, RHS_y_bottom = compute_forcing_eta(x, y, s_bottom, a_decay_bottom, b_decay_bottom, wall = 1)
+        if params.useBottomWall
+            RHS_x_bottom, RHS_y_bottom = compute_forcing_eta(x, y, params.a_decay_bottom, params.b_decay_bottom, wall = 1)
             RHS_x_full .+= RHS_x_bottom
             RHS_y_full .+= RHS_y_bottom
         end
-        if use_left_wall
-            RHS_x_left, RHS_y_left = compute_forcing_xi(x, y, s_left, a_decay_left, b_decay_left, wall = 1)
+        if params.useLeftWall
+            RHS_x_left, RHS_y_left = compute_forcing_xi(x, y, params.a_decay_left, params.b_decay_left, wall = 1)
             RHS_x_full .+= RHS_x_left
             RHS_y_full .+= RHS_y_left
 
         end
-        if use_right_wall
-            RHS_x_right, RHS_y_right = compute_forcing_xi(x, y, s_right, a_decay_right, b_decay_right, wall = Ni)
+        if params.useRightWall
+            RHS_x_right, RHS_y_right = compute_forcing_xi(x, y, params.a_decay_right, params.b_decay_right, wall = Ni)
             RHS_x_full .+= RHS_x_right
             RHS_y_full .+= RHS_y_right
         end
@@ -266,7 +261,7 @@ function EllipticSolver(; x::Matrix, y::Matrix,
                 term_xieta_x = 0.5 * beta[i,j] * (x[i+1,j+1] - x[i-1,j+1] - x[i+1,j-1] + x[i-1,j-1])
                 
                 x_new = (term_xixi_x + term_etaeta_x - term_xieta_x + RHS_x_full[i,j]) / denom
-                x[i, j] = (1 - ω) * x[i, j] + ω * x_new
+                x[i, j] = (1 - params.ω) * x[i, j] + params.ω * x_new
 
                 # --- Y Equation ---
                 term_xixi_y = alpha[i,j] * (y[i+1,j] + y[i-1,j])
@@ -274,7 +269,7 @@ function EllipticSolver(; x::Matrix, y::Matrix,
                 term_xieta_y = 0.5 * beta[i,j] * (y[i+1,j+1] - y[i-1,j+1] - y[i+1,j-1] + y[i-1,j-1])
                 
                 y_new = (term_xixi_y + term_etaeta_y - term_xieta_y + RHS_y_full[i,j]) / denom
-                y[i, j] = (1 - ω) * y[i, j] + ω * y_new
+                y[i, j] = (1 - params.ω) * y[i, j] + params.ω * y_new
             end
         end
 
@@ -284,11 +279,11 @@ function EllipticSolver(; x::Matrix, y::Matrix,
         if iter % 50 == 0
             verbose_print("Iter: $iter, Error: $error")
         end
-        if error < tol
+        if error < params.tol
             verbose_print("Convergence reached at iteration $iter with error $error.")
             break
         end
-        if iter == max_iter
+        if iter == params.max_iter
             verbose_print("Warning: Maximum iterations reached without convergence.")
         end
     end
