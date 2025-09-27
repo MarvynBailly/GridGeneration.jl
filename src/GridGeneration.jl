@@ -1,7 +1,7 @@
 module GridGeneration
 
 include("types.jl")
-
+include("main.jl")
 
 include("numerics/NumSolver.jl")
 include("numerics/EllipticSolver.jl")
@@ -23,7 +23,6 @@ include("blocksplitting/SplittingFunctions.jl")
 include("blocksplitting/SolveAllBlocks.jl")
 
 include("smoothing/SmoothBlocks.jl")
-
 
 
 end

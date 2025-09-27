@@ -29,7 +29,7 @@ struct SimParams
 end
 
 
-```
+"""
 GridGeneration.EllipticParams
 - max_iter::Int # maximum number of iterations
 - tol::Float64 # tolerance for convergence
@@ -47,7 +47,7 @@ GridGeneration.EllipticParams
 - a_decay_bottom::Float64 # decay parameter for bottom wall forcing
 - b_decay_bottom::Float64 # decay parameter for bottom wall forcing
 - verbose::Bool # whether to print convergence information
-```
+"""
 function EllipticParams(; max_iter::Int=5000, tol::Float64=1e-6, ω::Float64=0.2,
                  useTopWall::Bool=false, useBottomWall::Bool=true, useLeftWall::Bool=false, useRightWall::Bool=false,
                  a_decay_left::Float64=0.4, b_decay_left::Float64=0.4,
@@ -65,7 +65,7 @@ function EllipticParams(; max_iter::Int=5000, tol::Float64=1e-6, ω::Float64=0.2
                     verbose)
 end
 
-```
+"""
 GridGeneration.SimParams
 - useSplitting::Bool # whether to use block splitting
 - splitLocations::Vector{Vector{Int}} # locations to split the grid, defined using indices of the initial grid
@@ -74,7 +74,7 @@ GridGeneration.SimParams
 - useSmoothing::Bool # whether to use smoothing on the final grid
 - smoothMethod::Symbol # :ellipticSS, which smoothing method to use
 - elliptic::EllipticParams # parameters for the elliptic solver if using elliptic smoothing
-```
+"""
 function SimParams(; useSplitting::Bool=true, 
             splitLocations::Vector{Vector{Int}}=Vector{Vector{Int}}(), 
             useEdgeSolver::Bool=true, boundarySolver::Symbol=:none,

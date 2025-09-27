@@ -5,6 +5,7 @@ using MAT: matread
 include("../src/GridGeneration.jl")
 include("airfoil/data/GetAirfoilSetup.jl")
 include("airfoil/metric/GetMetric.jl")
+include("plotter/plot_grid.jl")
 
 ##########################################
 ##########################################
@@ -89,27 +90,22 @@ params = GridGeneration.SimParams(
 
 ##############################################
 ##############################################
-#              Run the Method                 #
+#              Run the Method                #
 ##############################################
 ##############################################
 
+smoothBlocks, blocks, bndInfo, interInfo, finalErrors, finalIterations = GridGeneration.GenerateGrid(initialGrid, bndInfo, interInfo, M, params=params)
 
 
 
-function MAIN(initialGrid, bndInfo, interInfo, M; params=params)
-    if params.useSplitting
-        blocks, bndInfo, interInfo = GridGeneration.SplitBlock(initialGrid, params.splitLocations, bndInfo, interInfo)
-    end
-    if params.useEdgeSolver
-        blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(M, blocks, bndInfo, interInfo; solver=params.boundarySolver)
-    end
 
-    if params.useSmoothing
-        smoothBlocks, finalErrors, finalIterations = GridGeneration.SmoothBlocks(blocks; solver=params.smoothMethod, params=params.elliptic)
-    end
+# pSmooth = plot()
 
-    return smoothBlocks, blocks, bndInfo, interInfo
-end
+# for i in 1:length(blocks)
+#     plot_grid(smoothBlocks[i][1, :, :], smoothBlocks[i][2, :, :], "Block Elliptic Grid Case", plt=pSmooth, c = RGB(0.0, 0.0, 0.0))
+# end
 
-
-MAIN(initialGrid, bndInfo, interInfo, M, params=params)
+# pZoom = deepcopy(pSmooth)
+# plot!(pZoom, xlims=(0.5, 1.5), ylims=(-0.3, 0.3))
+# p = plot(pSmooth, pZoom, layout = (1,2), size=(1200, 600))
+# savefig(p, "examples/generalExample.pdf")

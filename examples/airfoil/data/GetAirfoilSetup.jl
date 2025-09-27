@@ -28,5 +28,5 @@ function GetAirfoilSetup(; airfoilPath = "examples/airfoil/A-airfoil.txt", radiu
 
     interInfo = Any[]
 
-    return initialGrid, bndInfo, interInfo
+    return airfoilGrid, bndInfo, interInfo
 end
