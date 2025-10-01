@@ -1,6 +1,6 @@
 function SolveAllBlocks(metric, blocks, bndInfo, interInfo; solver =:analytic)
     blockDirOptN = similar(blocks)
-
+    
     for i in 1:length(blockDirOptN)
         blockDirOptN[i] = [-1,-1]
     end

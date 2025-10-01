@@ -78,6 +78,8 @@ function make_getMetric(airfoil;
     floor::Real = 1e-4,
     profile::Symbol = :rational,
     closed_airfoil::Bool = true,
+    x_forcing::Bool = false,
+    y_forcing::Bool = false
 )
     ax, ay = origin_center
     @inline contrib(d, A, ℓ, p) = profile === :rational ? A / (1 + (d/ℓ)^p) :
@@ -94,6 +96,12 @@ function make_getMetric(airfoil;
         c_hot = A_origin  == 0 ? 0.0 : contrib(d_hot, A_origin,  ℓ_origin,  p_origin)
 
         M = floor + c_air + c_hot
-        return (M, M)   # isotropic metric: diag(M, M)
+        if x_forcing
+            return (M, 0.0)
+        elseif y_forcing
+            return (0.0, M)
+        else
+            return (M, M)   # isotropic metric: diag(M, M)
+        end
     end
 end

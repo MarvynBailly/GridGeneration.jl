@@ -5,13 +5,24 @@ function SmoothBlocks(blocks; solver=:ellipticSS, params)
 
     if solver == :ellipticSS
         for i in eachindex(blocks)
-            xr, yr, finalError, finalIter = GridGeneration.EllipticSolver(blocks[i][1, :, :], blocks[i][2, :, :], params = params) 
+            if params[i].skipBlock
+                @info "Skipping block $i as per parameters."
+                smoothBlocks[i] = blocks[i]
+                finalErrors[i] = 0.0
+                finalIterations[i] = 0
+                continue
+            end
+
+
+            xr, yr, finalError, finalIter = GridGeneration.EllipticSolver(blocks[i][1, :, :], blocks[i][2, :, :], params = params[i]) 
 
             smoothBlocks[i] = permutedims(cat(xr, yr, dims=3), (3,1,2))
             finalErrors[i] = finalError
             finalIterations[i] = finalIter
         end
     end
+     
+    @info "Smoothing convergence: $finalErrors"
     
     return smoothBlocks, finalErrors, finalIterations
 end

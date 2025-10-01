@@ -1,4 +1,5 @@
 struct EllipticParams
+    skipBlock::Bool
     max_iter::Int
     tol::Float64
     ω::Float64
@@ -48,7 +49,7 @@ GridGeneration.EllipticParams
 - b_decay_bottom::Float64 # decay parameter for bottom wall forcing
 - verbose::Bool # whether to print convergence information
 """
-function EllipticParams(; max_iter::Int=5000, tol::Float64=1e-6, ω::Float64=0.2,
+function EllipticParams(; skipBlock::Bool=false, max_iter::Int=5000, tol::Float64=1e-6, ω::Float64=0.2,
                  useTopWall::Bool=false, useBottomWall::Bool=true, useLeftWall::Bool=false, useRightWall::Bool=false,
                  a_decay_left::Float64=0.4, b_decay_left::Float64=0.4,
                  a_decay_right::Float64=0.4, b_decay_right::Float64=0.4,
@@ -56,6 +57,7 @@ function EllipticParams(; max_iter::Int=5000, tol::Float64=1e-6, ω::Float64=0.2
                  a_decay_bottom::Float64=0.4, b_decay_bottom::Float64=0.4,
                  verbose::Bool=false) 
                  return EllipticParams(
+                    skipBlock,
                     max_iter, tol, ω,
                     useTopWall, useBottomWall, useLeftWall, useRightWall,
                     a_decay_left, b_decay_left,
