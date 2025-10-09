@@ -1,11 +1,11 @@
 """
-SplitBlock(block, splitLocations, bndInfo, interInfo)
-Function to split a single block grid into multiple blocks based on specified split locations along x and y axes.
+Split single block grid into multiple blocks based on specified split locations.
+
 Inputs:
-- block: 3D array representing the grid to be split (dimensions: (ni, nj, nk))
-- splitLocations: Array of two arrays, where the first array contains x-axis split indices and
-
-
+- block: 3D array representing grid (dimensions: (ni, nj, nk))
+- splitLocations: Array of two arrays [x-splits, y-splits] as grid indices
+- bndInfo: Boundary condition dictionary
+- interInfo: Interface connectivity dictionary
 """
 function SplitBlock(block, splitLocations, bndInfo, interInfo)
     blocks = []
@@ -17,7 +17,6 @@ function SplitBlock(block, splitLocations, bndInfo, interInfo)
     interfaces = []
     for j in 1:length(vertSplits)-1
         for i in 1:length(horzSplits)-1
-            # println("Splitting block: ", blockId, " at i: ", i, " j: ", j)
             ni = horzSplits[i+1] - horzSplits[i] + 1
             nj = vertSplits[j+1] - vertSplits[j] + 1
             nk = 1
@@ -25,7 +24,7 @@ function SplitBlock(block, splitLocations, bndInfo, interInfo)
             subblock = block[:, horzSplits[i]:horzSplits[i+1], vertSplits[j]:vertSplits[j+1]]
             push!(blocks, subblock) 
 
-            # get boundary info 
+            # Get boundary info
             blockInfo = Dict(
                 "block" => blockId,
                 "start" => (horzSplits[i], vertSplits[j]),
@@ -35,8 +34,7 @@ function SplitBlock(block, splitLocations, bndInfo, interInfo)
             boundaries = GridGeneration.GetTouchingBoundaries(blockInfo, bndInfo)
             append!(blockBoundaries, boundaries)
             
-            # get interface info
-            # if not at the end, look forward to the next block
+            # Get interface info - look forward to next block if not at end
             if i < length(horzSplits) - 1
                 blockBId = blockId + 1
                 push!(interfaces, Dict(

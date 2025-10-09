@@ -18,33 +18,32 @@ end
 
 
 """ 
-Function to convert a 1D boundary to a 2D representation
-- project `points` onto the `boundary` defined by `xs`
+Project 1D solution points onto 2D boundary curve.
+Converts arc-length parametrization back to physical coordinates.
 """
 function ProjectBoundary1Dto2D(boundary, sol)
     N = size(boundary, 2)
-    # step 1: arc length cumulative xs
+    
+    # Compute cumulative arc length
     seglen = sqrt.((diff(boundary[1, :])).^2 .+ (diff(boundary[2, :])).^2)
     xs = [0.0; cumsum(seglen)]
     totalL = xs[end]
 
-    # sanity check: sol should be in [0, totalL]
     @assert all(sol .>= 0) && all(sol .<= totalL + 1e-12)
 
     projected = zeros(2, length(sol))
 
     j = 1
     for (k, s) in enumerate(sol)
-        # step 3: find interval
+        # Find interval containing s
         while j < length(xs) && xs[j+1] < s
             j += 1
         end
         if j == length(xs)
             projected[:, k] .= boundary[:, end]
         else
-            # step 4: relative position within interval
+            # Linear interpolation within interval
             θ = (s - xs[j]) / (xs[j+1] - xs[j])
-            # step 5: interpolate boundary point
             projected[:, k] .= (1-θ) * boundary[:, j] + θ * boundary[:, j+1]
         end
     end

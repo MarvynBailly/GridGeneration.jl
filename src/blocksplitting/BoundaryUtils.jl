@@ -1,9 +1,7 @@
+"""
+Update boundary information with new block sizes.
+"""
 function UpdateBndInfo!(bndInfo, blocks; verbose=false)
-    # Description: Update the boundary and interface information with the new sizes of the blocks
-    # Input: bndInfo, interInfo, blocks
-    # Output: updated bndInfo, interInfo
-    
-    
     for bc in bndInfo
         if verbose
             println("Updating boundary condition: ", bc["name"])
@@ -23,7 +21,7 @@ function UpdateBndInfo!(bndInfo, blocks; verbose=false)
                 println("Face start: ", face["start"], " end: ", face["end"])
             end
 
-            # update the start and end positions
+            # Update start and end positions
             start = face["start"]
             end_ = face["end"]
 
