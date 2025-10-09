@@ -1,6 +1,3 @@
-using Plots
-
-
 """
 Calculates the metric terms α, β, γ and the Jacobian J.
 Uses central differences for the interior and one-sided for boundaries.
