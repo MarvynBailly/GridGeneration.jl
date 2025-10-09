@@ -11,7 +11,7 @@ export GenerateGrid
 export SimParams, EllipticParams
 
 # Interpolation functions
-export TFI, TFI_2D_Hermite
+export TFI
 
 # Metric utilities (for custom metric definition)
 export make_getMetric, setup_metric_tree, find_nearest_kd
