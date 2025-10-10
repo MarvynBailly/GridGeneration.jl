@@ -3,6 +3,7 @@ using DelimitedFiles
 using MAT: matread
 
 include("../src/GridGeneration.jl")
+using .GridGeneration
 
 include("airfoil/airfoil.jl")
 include("rectangle/rectangle.jl")
@@ -21,7 +22,7 @@ Define the initial grid here:
 - boundary conditions
 - interfaces
 
-Note that an initial grid can be generated using GridGeneration.TFI(boundary) 
+Note that an initial grid can be generated using TFI(boundary) 
 where boundary is saved in [top, right, bottom, left] format. 
 """
 
@@ -32,7 +33,7 @@ if case == :airfoil
     initialGrid, bndInfo, interInfo = GetAirfoilSetup(airfoilPath = "examples/airfoil/data/A-airfoil.txt", radius = 3, type =:cgrid)
 elseif case == :rectangle
     initDomain = GetRectangleDomain()
-    initialGrid = GridGeneration.TFI(initDomain)
+    initialGrid = TFI(initDomain)
     bndInfo = Any[]
     interInfo = Any[]
 end
@@ -78,14 +79,14 @@ splitLocations::Vector{Vector{Int}} = [
 
 
 # set up the parameters 
-params = GridGeneration.SimParams(
+params = SimParams(
     useSplitting = true, 
     splitLocations = splitLocations, 
     useEdgeSolver = true, 
     boundarySolver = :analytic,     # :numeric
     useSmoothing = true,
     smoothMethod = :ellipticSS,
-    elliptic = GridGeneration.EllipticParams(
+    elliptic = EllipticParams(
         max_iter = 5000, 
         tol = 1e-6, 
         ω = 0.2,
@@ -108,4 +109,4 @@ params = GridGeneration.SimParams(
 ##############################################
 ##############################################
 
-smoothBlocks, blocks, bndInfo, interInfo, finalErrors, finalIterations = GridGeneration.GenerateGrid(initialGrid, bndInfo, interInfo, M, params=params)
+smoothBlocks, blocks, bndInfo, interInfo, finalErrors, finalIterations = GenerateGrid(initialGrid, bndInfo, interInfo, M, params=params)
