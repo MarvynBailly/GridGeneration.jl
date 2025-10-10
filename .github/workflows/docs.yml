@@ -25,7 +25,7 @@ jobs:
           version: '1.10'
 
       - name: Install dependencies
-        run: julia --project=docs -e 'import Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); Pkg.precompile()'
+        run: julia --project=. -e 'import Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); Pkg.precompile()'
 
       - name: Run test suite
         run: julia --project=. test/runtest.jl
