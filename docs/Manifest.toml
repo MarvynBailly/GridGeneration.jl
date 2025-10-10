@@ -119,10 +119,10 @@ uuid = "f8c6e375-362e-5223-8a59-34ff63f689eb"
 version = "2.50.1+0"
 
 [[deps.GridGeneration]]
-deps = ["Documenter", "NearestNeighbors"]
-path = "C:\\Users\\admin\\Documents\\GitHub\\GridGeneration\\docs\\.."
+deps = ["Documenter", "LinearAlgebra", "NearestNeighbors"]
+path = "C:\\Users\\admin\\Documents\\GitHub\\GridGeneration\\"
 uuid = "a45aac3a-c828-4b24-bd97-84998539262e"
-version = "1.0.0"
+version = "3.0.1"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "PrecompileTools", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
