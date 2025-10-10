@@ -5,3 +5,5 @@ Manifest.toml
 # vscode stuff
 .vscode
 .vscode/*
+
+copilot-instructions.md
