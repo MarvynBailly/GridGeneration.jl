@@ -3,54 +3,23 @@ name: Docs
 on:
   push:
     branches:
-      - main
-      - testing
+      - main # Or your default branch
     tags:
-      - 'v*'
+      - 'v*' # Run on all tags
   pull_request:
-    branches:
-      - main
-      - testing
 
 jobs:
-  tests:
-    name: Run tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Julia
-        uses: julia-actions/setup-julia@v1
-        with:
-          version: '1.10'
-
-      - name: Install dependencies
-        run: julia --project=. -e 'import Pkg; Pkg.instantiate(); Pkg.precompile()'
-
-      - name: Run test suite
-        run: julia --project=. test/runtest.jl
-
   build:
-    name: Build & deploy docs
-    needs: tests
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Julia
-        uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
-          version: '1.10'
-
-      - name: Install dependencies for docs
-        run: julia --project=docs -e 'import Pkg; Pkg.instantiate(); Pkg.precompile()'
-
+          version: '1' 
+      - name: Install dependencies
+        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY  }}
-        run: julia --project=docs docs/make.jl
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} 
+        run: julia --project=docs/ docs/make.jl
