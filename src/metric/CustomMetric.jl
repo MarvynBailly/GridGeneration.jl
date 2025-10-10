@@ -86,11 +86,14 @@ function make_getMetric(airfoil;
 
     return function (x::Real, y::Real)
         # distances
-        d_air = dist_to_polyline(x, y, airfoil; closed=closed_airfoil)
+        if airfoil === nothing
+            d_air = 0
+            c_air = 0.0
+        else
+            d_air = dist_to_polyline(x, y, airfoil; closed=closed_airfoil)
+            c_air = A_airfoil == 0 ? 0.0 : contrib(d_air, A_airfoil, ℓ_airfoil, p_airfoil)
+        end
         d_hot = hypot(x - ax, y - ay)                # distance to (a,b)
-
-        # contributions
-        c_air = A_airfoil == 0 ? 0.0 : contrib(d_air, A_airfoil, ℓ_airfoil, p_airfoil)
         c_hot = A_origin  == 0 ? 0.0 : contrib(d_hot, A_origin,  ℓ_origin,  p_origin)
 
         M = floor + c_air + c_hot

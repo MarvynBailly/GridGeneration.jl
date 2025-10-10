@@ -15,7 +15,7 @@ function GetOptNEdgePair(edgeA, edgeB, M; solver=:analytic)
     optNB = GridGeneration.ComputeOptimalNumberofPoints(solB, metricFuncB)
 
     optN = max(optNA, optNB)
-    @info "Optimal N for edge pair: $optN"
+    # @info "Optimal N for edge pair: $optN"
     
     return optN
 end
