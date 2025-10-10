@@ -1,7 +1,7 @@
 name = "GridGeneration"
 uuid = "a45aac3a-c828-4b24-bd97-84998539262e"
 authors = ["Marvyn Bailly marvyn@marvyn.com"]
-version = "3.0.1"
+version = "3.0.2"
 repo = "https://github.com/MarvynBailly/GridGeneration"
 
 [deps]

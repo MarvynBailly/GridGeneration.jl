@@ -2,7 +2,7 @@
 
 julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "4912e01085f28f63ccb5ec5f051c21a89170264a"
+project_hash = "17cf0f77904e9990ca36ad16e833e8601604b51c"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -120,7 +120,7 @@ version = "2.50.1+0"
 
 [[deps.GridGeneration]]
 deps = ["Documenter", "LinearAlgebra", "NearestNeighbors"]
-path = "C:\\Users\\admin\\Documents\\GitHub\\GridGeneration\\"
+path = "C:\\Users\\admin\\Documents\\GitHub\\GridGeneration"
 uuid = "a45aac3a-c828-4b24-bd97-84998539262e"
 version = "3.0.1"
 
