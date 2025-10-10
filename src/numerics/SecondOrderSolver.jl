@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 include("Thomas.jl")
 
 function residual(u, f, h)
@@ -14,6 +12,7 @@ function residual(u, f, h)
 end
 
 function SolveSecondOrder(f, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbose=false)
+    
     h = 1.0 / N
 
     u = collect(xs)  # initial guess: linear

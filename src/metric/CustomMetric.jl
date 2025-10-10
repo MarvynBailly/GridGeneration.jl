@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 # Smooth, positive, decaying profiles
 @inline w_rational(d, A, ℓ, p) = A / (1 + (d/ℓ)^p)
 @inline w_gauss(d, A, ℓ)      = A * exp(-(d/ℓ)^2)

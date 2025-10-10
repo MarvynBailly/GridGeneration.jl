@@ -1,6 +1,5 @@
 using Test
 using GridGeneration
-using LinearAlgebra
 
 @testset "GridGeneration.jl" begin
     
