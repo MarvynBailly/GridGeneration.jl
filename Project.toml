@@ -1,18 +1,22 @@
 name = "GridGeneration"
 uuid = "a45aac3a-c828-4b24-bd97-84998539262e"
 authors = ["Marvyn Bailly marvyn@marvyn.com"]
-version = "3.0.0"
 repo = "https://github.com/MarvynBailly/GridGeneration"
+version = "3.0.0"
 
 [deps]
+Blink = "ad839575-38b3-5650-b840-f874b8c74a25"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+Interact = "c601a237-2ae4-5e1e-952c-7a85b0c7eef1"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
+WebIO = "0f1e0344-ec1d-5b48-a673-e5cf874b6c29"
 
 [compat]
-julia = "1.10.4"
 Documenter = "v1.14.1"
 NearestNeighbors = "v0.4.22"
+julia = "1.10.4"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

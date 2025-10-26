@@ -1,9 +1,5 @@
-include("visualize.jl")
-
-using Statistics
-
 function convert_2D_to_3D(mesh2D, extrusion_length=0.1, n_layers=2)
-    mesh3D = []
+    mesh3D = similar(mesh2D)
 
     for block2D in mesh2D
         # X2D, Y2D = block2D
@@ -24,7 +20,9 @@ function convert_2D_to_3D(mesh2D, extrusion_length=0.1, n_layers=2)
         end
 
         # Push the block into the 3D mesh
-        push!(mesh3D, [X3D, Y3D, Z3D])
+        # push!(mesh3D, [X3D, Y3D, Z3D])
+        # save as [dim,x,y,z]
+        push!(mesh3D, [X3D, Y3D, Z3D])  
     end
     return mesh3D
 end
@@ -261,12 +259,12 @@ function create_turtle_grid(blocks, num_hor_blocks, filename; extrusion_length =
 
     @info "Turtle grid written to $filename"
 
-    if showPlots
-        visualizer_interface(blocks, interfaces)
-        visualizer_boundaries(blocks, boundaries)
-        p1 = visualize_grid(mesh3d, interfaces, boundaries)
-        p2 = visualize_grid_3D(mesh3d, interfaces, boundaries)
-        p = plot(p1, p2, layout = @layout [a b])
-        display(p)
-    end
+    # if showPlots
+    #     visualizer_interface(blocks, interfaces)
+    #     visualizer_boundaries(blocks, boundaries)
+    #     p1 = visualize_grid(mesh3d, interfaces, boundaries)
+    #     p2 = visualize_grid_3D(mesh3d, interfaces, boundaries)
+    #     p = plot(p1, p2, layout = @layout [a b])
+    #     display(p)
+    # end
 end

@@ -1,3 +1,5 @@
+using LinearAlgebra
+
 """
 Calculates the metric terms α, β, γ and the Jacobian J.
 Uses central differences for the interior and one-sided for boundaries.
@@ -95,8 +97,8 @@ function compute_forcing_eta(x::Matrix, y::Matrix, a_decay::Float64, b_decay::Fl
     # Propagate boundary forcing terms into domain with exponential decay
     for j in 1:Nj
         eta_dist = abs(j - wall) # Distance from the wall
-        RHS_x_full[:, j] = 1000 * RHS_x .* exp(-a_decay * eta_dist)
-        RHS_y_full[:, j] = 1000 * RHS_y .* exp(-b_decay * eta_dist)
+        RHS_x_full[:, j] = 10 * RHS_x .* exp(-a_decay * eta_dist)
+        RHS_y_full[:, j] = 10 * RHS_y .* exp(-b_decay * eta_dist)
     end
 
     return RHS_x_full, RHS_y_full
