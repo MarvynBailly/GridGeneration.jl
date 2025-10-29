@@ -60,7 +60,7 @@ function GetTouchingBoundaries(block::Dict, bndInfo)
 
     for bnd in bndInfo
         name = bnd["name"]
-        for face in bnd["faceInfo"]
+        for face in bnd["faces"]
             faceStart = face["start"];  faceEnd = face["end"]
             i1, j1 = faceStart[1], faceStart[2]
             i2, j2 = faceEnd[1],   faceEnd[2]

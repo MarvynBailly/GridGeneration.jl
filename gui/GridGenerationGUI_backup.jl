@@ -14,8 +14,8 @@ function populate_control_panel!(parent_layout::GridLayout)
     Label(parent_layout[2, 1:2], "Splits Locations", font = :bold, halign = :left, padding=(10,0,10,20), valign=:top)
     Label(parent_layout[3, 1], "I-splits (e.g., 10,25)", halign=:left, valign=:top, padding=(10,0,0,0))
     Label(parent_layout[3, 2], "J-splits (e.g., 8)")
-    widgets[:i_splits] = Textbox(parent_layout[4, 1], placeholder="none")
-    widgets[:j_splits] = Textbox(parent_layout[4, 2], placeholder="none")
+    widgets[:i_splits] = Textbox(parent_layout[4, 1], placeholder="none", defocus_on_submit=true)
+    widgets[:j_splits] = Textbox(parent_layout[4, 2], placeholder="none", defocus_on_submit=true)
 
     Label(parent_layout[5, 1:2], "Boundary Solver Parameters", font = :bold, halign = :left, padding=(10,0,10,20), valign=:top)
     Label(parent_layout[6, 1], "Edge Solver Type:", halign=:left, padding=(10,0,0,0))
@@ -56,13 +56,13 @@ end
 
 function populate_button_panel!(parent_layout)
     btns = Dict{Symbol, Any}()
-    
+
     btns[:split_domain] = Button(parent_layout[1, 1], label = "Split Domain")
     btns[:edge_solve] = Button(parent_layout[1, 2], label = "Solve Edges")
     btns[:smooth_grid] = Button(parent_layout[1, 3], label = "Smooth Grid")
     btns[:save_grid] = Button(parent_layout[1, 4], label = "Save Grid")
     btns[:reset_view] = Button(parent_layout[1, 5], label = "Reset View")
-    
+
     # highlight_layout = parent_layout[2, 1] = GridLayout()
     btns[:highlight_boundaries] = Toggle(parent_layout[1, 6], active = false)
     Label(parent_layout[1, 7], "Highlight Boundaries", halign=:left, padding=(0,0,0,0))
@@ -120,7 +120,7 @@ function plot_blocks_with_highlighting!(ax::Axis, blocks_obs::Observable, highli
         for block in blocks
             X, Y = block[1,:,:], block[2,:,:]
             nx, ny = size(X)
-            
+
             # Horizontal lines
             for j in 1:ny
                 is_boundary = (j == 1 || j == ny)
@@ -130,7 +130,7 @@ function plot_blocks_with_highlighting!(ax::Axis, blocks_obs::Observable, highli
                     push!(all_colors, color)
                 end
             end
-            
+
             # Vertical lines
             for i in 1:nx
                 is_boundary = (i == 1 || i == nx)
@@ -141,12 +141,12 @@ function plot_blocks_with_highlighting!(ax::Axis, blocks_obs::Observable, highli
                 end
             end
         end
-        
+
         segments_obs[] = all_points
         colors_obs[] = all_colors
         autolimits!(ax)
     end
-    
+
     linesegments!(ax, segments_obs, color = colors_obs, linewidth=1.0)
     notify(blocks_obs) # Trigger initial plot
 end
@@ -155,7 +155,7 @@ end
 # --- Data Loading ---
 ########################################
 s = 1000
-M = (x,y) -> [s * x, s]
+M = (x,y) -> [s * x^2, s]
 height = 2.0; width  = 4.0
 num_points_height = 50; num_points_width  = 100
 top = hcat(range(0, stop=width, length=num_points_width), fill(height, num_points_width))
@@ -164,10 +164,10 @@ right = hcat(fill(width, num_points_height), range(0, stop=height, length=num_po
 left = hcat(fill(0.0, num_points_height), range(0, stop=height, length=num_points_height))
 initial_block = GridGeneration.TFI([top, right, bottom, left])
 initialBndInfo = []
-push!(initialBndInfo, Dict("name"=>"bottom", "faceInfo" => [Dict("block" => 1, "start"=> [1,1,1], "end"=>[num_points_width,1,1])]))
-push!(initialBndInfo, Dict("name"=>"right", "faceInfo" => [Dict("block" => 1, "start"=> [num_points_width,1,1], "end"=>[num_points_width,num_points_height,1])]))
-push!(initialBndInfo, Dict("name"=>"top", "faceInfo" => [Dict("block" => 1, "start"=> [1,num_points_height,1], "end"=>[num_points_width,num_points_height,1])]))
-push!(initialBndInfo, Dict("name"=>"left", "faceInfo" => [Dict("block" => 1, "start"=> [1,1,1], "end"=>[1,num_points_height,1])]))
+push!(initialBndInfo, Dict("name"=>"bottom", "faces" => [Dict("block" => 1, "start"=> [1,1,1], "end"=>[num_points_width,1,1])]))
+push!(initialBndInfo, Dict("name"=>"right", "faces" => [Dict("block" => 1, "start"=> [num_points_width,1,1], "end"=>[num_points_width,num_points_height,1])]))
+push!(initialBndInfo, Dict("name"=>"top", "faces" => [Dict("block" => 1, "start"=> [1,num_points_height,1], "end"=>[num_points_width,num_points_height,1])]))
+push!(initialBndInfo, Dict("name"=>"left", "faces" => [Dict("block" => 1, "start"=> [1,1,1], "end"=>[1,num_points_height,1])]))
 initialInterfaceInfo = []
 initialGrid = [initial_block]
 
@@ -251,6 +251,10 @@ on(tool[:split_domain].clicks) do _
     generated_blocks[] = new_blocks
     generated_bndInfo[] = new_bnd_info
     generated_interfaceInfo[] = new_inter_info
+    # set the stored_strings back to empty
+    controls[:i_splits].stored_string[] = ""
+    controls[:j_splits].stored_string[] = ""
+    println("Domain splitting complete. Generated $(length(new_blocks)) block(s).")
 end
 
 on(tool[:edge_solve].clicks) do _
@@ -301,4 +305,3 @@ on(controls[:j_splits].stored_string) do s
 end
 
 fig
-
