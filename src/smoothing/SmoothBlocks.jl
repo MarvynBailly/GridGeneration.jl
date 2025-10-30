@@ -7,7 +7,6 @@ function SmoothBlocks(blocks; solver=:ellipticSS, params)
     finalIterations = Vector{Int}(undef, length(blocks))
 
     if solver == :ellipticSS
-            println("here")
 
         for i in eachindex(blocks)
             if params[i].skipBlock

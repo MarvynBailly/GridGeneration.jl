@@ -72,9 +72,40 @@ function setup_turtle_grid_domain(metricFieldFile, gridFolder)
     metricData, datatype, gridfile = GridGeneration.readTurtleFields(metricFieldFile)
     gridfile = joinpath(gridFolder, gridfile)
     blocks, centers, Xfa, interfaceInfo, bndInfo = GridGeneration.ImportTurtleGrid(gridfile)
-    
     tree, refs = GridGeneration.setup_metric_tree(centers)
     M = (x, y) -> GridGeneration.find_nearest_kd(metricData, tree, refs, x, y)
+
+    # Convert from 0-based (Turtle/Fortran) to 1-based (Julia) indexing
+    # and rename "faceInfo" to "faces"
+    for bnd in bndInfo
+        # Rename faceInfo to faces
+        if haskey(bnd, "faceInfo")
+            bnd["faces"] = bnd["faceInfo"]
+            delete!(bnd, "faceInfo")
+        end
+        
+        # Remove redundant nbrFaces field
+        if haskey(bnd, "nbrFaces")
+            delete!(bnd, "nbrFaces")
+        end
+        
+        # Convert 0-based to 1-based indexing
+        for face in bnd["faces"]
+            face["block"] = face["block"] + 1  # Convert block ID
+            face["start"] = face["start"] .+ 1  # Convert start indices
+            face["end"] = face["end"] .+ 1      # Convert end indices
+        end
+    end
+    
+    # Convert interface info from 0-based to 1-based
+    for itf in interfaceInfo
+        itf["blockA"] = itf["blockA"] + 1
+        itf["blockB"] = itf["blockB"] + 1
+        itf["start_blkA"] = itf["start_blkA"] .+ 1
+        itf["end_blkA"] = itf["end_blkA"] .+ 1
+        itf["start_blkB"] = itf["start_blkB"] .+ 1
+        itf["end_blkB"] = itf["end_blkB"] .+ 1
+    end
     
     return blocks, bndInfo, interfaceInfo, M
 end

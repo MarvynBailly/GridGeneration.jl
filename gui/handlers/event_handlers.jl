@@ -11,7 +11,8 @@ Parses split locations from textboxes and calls GridGeneration.SplitBlock.
 """
 function setup_split_domain_handler!(button, controls, initialGrid, initialBndInfo, initialInterfaceInfo,
                                       split_blocks, split_bndInfo, split_interfaceInfo, 
-                                      generated_blocks, generated_bndInfo, generated_interfaceInfo, 
+                                      generated_blocks, generated_bndInfo, generated_interfaceInfo,
+                                      final_blocks, final_bndInfo, final_interfaceInfo,
                                       console_obs)
     on(button.clicks) do _
         # Get which block to split
@@ -47,12 +48,17 @@ function setup_split_domain_handler!(button, controls, initialGrid, initialBndIn
         generated_blocks[] = split_block
         generated_bndInfo[] = split_bnd_info
         generated_interfaceInfo[] = split_inter_info
+        final_blocks[] = split_block
+        final_bndInfo[] = split_bnd_info
+        final_interfaceInfo[] = split_inter_info
 
         # clear split inputs
         controls[:i_splits].stored_string[] = ""
         controls[:j_splits].stored_string[] = ""
         controls[:i_splits].displayed_string[] = "none"
         controls[:j_splits].displayed_string[] = "none"
+
+
 
         log_to_console(console_obs, "Domain splitting complete. Generated $(length(generated_blocks[])) block(s).")
     end
@@ -64,15 +70,19 @@ end
 Set up the event handler for the Solve Edges button.
 Solves the grid edges using the selected solver method.
 """
-function setup_edge_solve_handler!(button, controls, M, generated_blocks, generated_bndInfo, generated_interfaceInfo, console_obs)
+function setup_edge_solve_handler!(button, controls, M, 
+    split_blocks, split_bndInfo, split_interfaceInfo,
+    generated_blocks, generated_bndInfo, generated_interfaceInfo, 
+    final_blocks, final_bndInfo, final_interfaceInfo,
+    console_obs)
     on(button.clicks) do _
         edge_type = controls[:edge_solver].selection[]
         solver_sym = edge_type == "analytic" ? :analytic : :numerical
         
-        current_blocks = generated_blocks[]
-        current_bnd_info = generated_bndInfo[]
-        current_inter_info = generated_interfaceInfo[]
-        
+        current_blocks = split_blocks[]
+        current_bnd_info = split_bndInfo[]
+        current_inter_info = split_interfaceInfo[]
+
         log_to_console(console_obs, "Solving edges for $(length(current_blocks)) block(s) using $solver_sym solver...")
         
         SolvedBlocks, SolvedBndInfo, solvedInterInfo = GridGeneration.SolveAllBlocks(
@@ -82,11 +92,14 @@ function setup_edge_solve_handler!(button, controls, M, generated_blocks, genera
             deepcopy(current_inter_info); 
             solver=solver_sym
         )
-        
+
         generated_blocks[] = SolvedBlocks
         generated_bndInfo[] = SolvedBndInfo
         generated_interfaceInfo[] = solvedInterInfo
-        
+        final_blocks[] = SolvedBlocks
+        final_bndInfo[] = SolvedBndInfo
+        final_interfaceInfo[] = solvedInterInfo
+
         log_to_console(console_obs, "Edge solving complete.")
     end
 end
@@ -96,7 +109,7 @@ end
 
 Set up the event handler for the Smooth Grid button.
 """
-function setup_smooth_grid_handler!(button, controls, generated_blocks, smoothed_blocks, elliptic_params_obs, console_obs)
+function setup_smooth_grid_handler!(button, controls, generated_blocks, final_blocks, elliptic_params_obs, console_obs)
     on(button.clicks) do _
         smooth_type = controls[:smoothing_type].selection[]
         if smooth_type == "Elliptic-SS"
@@ -111,10 +124,8 @@ function setup_smooth_grid_handler!(button, controls, generated_blocks, smoothed
         log_to_console(console_obs, "Smoothing grid for $(length(current_blocks)) block(s) using $solver_sym smoothing...")
 
         smoothBlocks, finalErrors, finalIterations = GridGeneration.SmoothBlocks(current_blocks; solver=solver_sym, params=elliptic_params)
-        smoothed_blocks[] = smoothBlocks
-        # generated_blocks[] = smoothBlocks
-        # generated_bndInfo[] = finalErrors
-        # generated_interfaceInfo[] = finalIterations
+        
+        final_blocks[] = smoothBlocks
 
         for i in eachindex(finalErrors)
             log_to_console(console_obs, "Block $i:")
@@ -151,6 +162,65 @@ Clears all text from the console.
 function setup_clear_console_handler!(button, console_obs)
     on(button.clicks) do _
         clear_console(console_obs)
+    end
+end
+
+"""
+    setup_reset_all_handler!(button, controls, initialGrid, initialBndInfo, initialInterfaceInfo,
+                             generated_blocks, generated_bndInfo, generated_interfaceInfo,
+                             smoothed_blocks, elliptic_params_obs, console_obs)
+
+Set up the event handler for the Reset All button.
+Resets all grids to initial state and all parameters to default values.
+"""
+function setup_reset_all_handler!(button, controls, 
+                                    initialGrid, initialBndInfo, initialInterfaceInfo,
+                                    split_blocks, split_bndInfo, split_interfaceInfo,
+                                   generated_blocks, generated_bndInfo, generated_interfaceInfo,
+                                   final_blocks, final_bndInfo, final_interfaceInfo,
+                                   elliptic_params_obs, console_obs)
+    on(button.clicks) do _
+        # Reset all grid observables to initial state
+        split_blocks[] = deepcopy(initialGrid)
+        split_bndInfo[] = deepcopy(initialBndInfo)
+        split_interfaceInfo[] = deepcopy(initialInterfaceInfo)
+        generated_blocks[] = deepcopy(initialGrid)
+        generated_bndInfo[] = deepcopy(initialBndInfo)
+        generated_interfaceInfo[] = deepcopy(initialInterfaceInfo)
+        final_blocks[] = deepcopy(initialGrid)
+        final_bndInfo[] = deepcopy(initialBndInfo)
+        final_interfaceInfo[] = deepcopy(initialInterfaceInfo)
+
+
+
+        # Reset elliptic parameters to defaults
+        elliptic_params_obs[] = [GridGeneration.EllipticParams() for _ in 1:length(initialGrid)]
+        
+        # Reset control panel parameters to defaults
+        controls[:max_iter].displayed_string[] = "5000"
+        controls[:tolerance].displayed_string[] = "1e-5"
+        controls[:omega].displayed_string[] = "0.2"
+        
+        controls[:forcing_left_a].displayed_string[] = "0.4"
+        controls[:forcing_left_b].displayed_string[] = "0.4"
+        controls[:forcing_right_a].displayed_string[] = "0.4"
+        controls[:forcing_right_b].displayed_string[] = "0.4"
+        controls[:forcing_bottom_a].displayed_string[] = "0.4"
+        controls[:forcing_bottom_b].displayed_string[] = "0.4"
+        controls[:forcing_top_a].displayed_string[] = "0.4"
+        controls[:forcing_top_b].displayed_string[] = "0.4"
+        
+        # Reset split textboxes
+        controls[:i_splits].displayed_string[] = "none"
+        controls[:i_splits].stored_string[] = "none"
+        controls[:j_splits].displayed_string[] = "none"
+        controls[:j_splits].stored_string[] = "none"
+        
+        # Reset block selectors to Block 1
+        controls[:block_selector].selection[] = "Block 1"
+        controls[:split_block_selector].selection[] = "Block 1"
+        
+        log_to_console(console_obs, "Reset all grids and parameters to initial state.")
     end
 end
 
@@ -300,7 +370,7 @@ function setup_block_parameter_sync!(controls, elliptic_params_obs, generated_bl
     on(controls[:forcing_top_a].stored_string) do _; update_params(); end
     on(controls[:forcing_top_b].stored_string) do _; update_params(); end
     
-    # When blocks change (after split/solve), update block selector options
+    # When blocks change (after split/solve), update smoothing block selector options
     on(generated_blocks_obs) do blocks
         if !isnothing(blocks) && isa(blocks, Vector) && !isempty(blocks)
             num_blocks = length(blocks)
@@ -320,9 +390,39 @@ function setup_block_parameter_sync!(controls, elliptic_params_obs, generated_bl
                 # Trim extra params
                 elliptic_params_obs[] = current_params[1:num_blocks]
             end
-            
-            # Also update split block selector options
-            controls[:split_block_selector].options[] = block_options
         end
+    end
+end
+
+"""
+    setup_split_block_selector!(controls, initialGrid)
+
+Set up the split block selector to show initial grid blocks and update
+the I-splits and J-splits labels with the index ranges of the selected block.
+"""
+function setup_split_block_selector!(controls, initialGrid)
+    # When split block selector changes, update the labels with index ranges
+    on(controls[:split_block_selector].selection) do selection
+        block_str = string(selection)
+        block_num = parse(Int, split(block_str, " ")[end])
+        
+        if block_num <= length(initialGrid)
+            block = initialGrid[block_num]
+            ni = size(block, 2)  # i-direction size
+            nj = size(block, 3)  # j-direction size
+            
+            # Update labels with valid index ranges (1 to ni-1 for splits, etc.)
+            controls[:i_splits_label][] = "I-splits (2 to $(ni-1))"
+            controls[:j_splits_label][] = "J-splits (2 to $(nj-1))"
+        end
+    end
+    
+    # Initialize with Block 1 ranges
+    if !isempty(initialGrid)
+        block = initialGrid[1]
+        ni = size(block, 2)
+        nj = size(block, 3)
+        controls[:i_splits_label][] = "I-splits (2 to $(ni-1))"
+        controls[:j_splits_label][] = "J-splits (2 to $(nj-1))"
     end
 end

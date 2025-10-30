@@ -43,7 +43,7 @@ M = create_default_metric(1000)
 
 # Alternative: Load from Turtle grid files
 # Uncomment the following lines to use Turtle grid data instead:
-#
+
 # metricFieldFile = "step/BFstepTest_entropy.metric"
 # gridFolder = "step/coarseGrids"
 # initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
@@ -51,12 +51,14 @@ M = create_default_metric(1000)
 # )
 
 
+
+
 # ========================================
 # === GUI Layout Setup ===
 # ========================================
 
 set_theme!(theme_light())
-fig = Figure(size = (1800, 1200))
+fig = Figure(size = (1800, 1000), backgroundcolor = RGBf(0.85, 0.85, 0.85))  # Light gray background
 
 # Main layout: 3 columns [controls | plots | console]
 left_layout = fig[1, 1] = GridLayout(tellwidth = false, halign = :left, valign = :top)
@@ -88,8 +90,28 @@ Box(center_layout[2, 1], linestyle = :solid, strokecolor = :black, cornerradius 
 # ========================================
 
 ax_initial = Axis(plot_panel[1, 1], aspect = DataAspect(), title = "Initial Grid (TFI)")
-ax_generated = Axis(plot_panel[2, 1], aspect = DataAspect(), title = "Generated Grid")
-ax_smoothed = Axis(plot_panel[3, 1], aspect = DataAspect(), title = "Smoothed Grid")
+ax_generated = Axis(plot_panel[2, 1], aspect = DataAspect(), title = "Split/Edge Solved Grid")
+ax_final = Axis(plot_panel[3, 1], aspect = DataAspect(), title = "Final Grid")
+
+# Create overlay panel for highlight toggle in top right corner
+overlay_panel = GridLayout(plot_panel[1, 1], 
+                          tellwidth = false, 
+                          tellheight = false,
+                          halign = :right,
+                          valign = :top)
+
+# Add semi-transparent background box for the overlay
+overlay_box = Box(overlay_panel[1, 1:2], 
+                  color = RGBAf(1, 1, 1, 0.8),
+                  strokecolor = :gray50,
+                  cornerradius = 10,
+                  )
+
+# Create toggle and label in the overlay
+highlight_toggle = Toggle(overlay_panel[1, 1], active = false)
+Label(overlay_panel[1, 2], "Highlight", 
+      halign = :left, 
+      padding = (5, 10, 5, 10))
 
 # ========================================
 # === Observables ===
@@ -103,6 +125,8 @@ elliptic_params_obs = Observable([GridGeneration.EllipticParams() for _ in 1:len
 
 # Grid observables
 initial_blocks_obs = Observable(deepcopy(initialGrid))
+initial_bndInfo_obs = Observable(deepcopy(initialBndInfo))
+initial_interfaceInfo_obs = Observable(deepcopy(initialInterfaceInfo))
 
 split_blocks = Observable(deepcopy(initialGrid))
 split_bndInfo = Observable(deepcopy(initialBndInfo))
@@ -112,24 +136,20 @@ generated_blocks = Observable(deepcopy(initialGrid))
 generated_bndInfo = Observable(deepcopy(initialBndInfo))
 generated_interfaceInfo = Observable(deepcopy(initialInterfaceInfo))
 
-
-smoothed_blocks = Observable(deepcopy(initialGrid))
+final_blocks = Observable(deepcopy(initialGrid))
+final_bndInfo = Observable(deepcopy(initialBndInfo))
+final_interfaceInfo = Observable(deepcopy(initialInterfaceInfo))
 
 # Split line preview observables
 i_split_lines = Observable(Point2f[])
 j_split_lines = Observable(Point2f[])
 
-# Boundary/Interface observables for initial plot
-initial_bndInfo_obs = Observable(deepcopy(initialBndInfo))
-initial_interfaceInfo_obs = Observable(deepcopy(initialInterfaceInfo))
-
 # ========================================
 # === UI Component Setup ===
 # ========================================
 
-controls = populate_control_panel!(control_panel)
+controls = populate_control_panel!(control_panel, initialGrid)
 tool = populate_button_panel!(tool_bar)
-highlight_toggle = tool[:highlight_boundaries]
 
 # Create console panel
 console = create_console_panel!(console_panel, console_text)
@@ -159,13 +179,13 @@ plot_blocks_with_highlighting!(
     generated_interfaceInfo
 )
 
-# Smoothed grid plot with reactive boundary info
+# final grid plot with reactive boundary info
 plot_blocks_with_highlighting!(
-    ax_smoothed, 
-    smoothed_blocks, 
+    ax_final, 
+    final_blocks, 
     highlight_toggle.active,
-    generated_bndInfo, 
-    generated_interfaceInfo
+    final_bndInfo, 
+    final_interfaceInfo
 )
 
 # Add split line previews to initial plot
@@ -182,17 +202,16 @@ setup_split_domain_handler!(
     initialGrid, initialBndInfo, initialInterfaceInfo,
     split_blocks, split_bndInfo, split_interfaceInfo,
     generated_blocks, generated_bndInfo, generated_interfaceInfo,
+    final_blocks, final_bndInfo, final_interfaceInfo,
     console_text
 )
 
 # Edge solve handler
 setup_edge_solve_handler!(
-    tool[:edge_solve],
-    controls,
-    M,
-    generated_blocks,
-    generated_bndInfo,
-    generated_interfaceInfo,
+    tool[:edge_solve], controls, M,
+    split_blocks, split_bndInfo, split_interfaceInfo,
+    generated_blocks, generated_bndInfo, generated_interfaceInfo,
+    final_blocks, final_bndInfo, final_interfaceInfo,
     console_text
 )
 
@@ -201,7 +220,7 @@ setup_smooth_grid_handler!(
     tool[:smooth_grid],
     controls,
     generated_blocks,
-    smoothed_blocks,
+    final_blocks,
     elliptic_params_obs,
     console_text
 )
@@ -211,18 +230,32 @@ setup_reset_view_handler!(
     tool[:reset_view],
     ax_initial,
     ax_generated,
-    ax_smoothed
+    ax_final
 )
 
 # Clear console handler
 setup_clear_console_handler!(tool[:clear_console], console_text)
+
+# Reset all handler
+setup_reset_all_handler!(
+    tool[:reset_all],
+    controls,
+    initialGrid, initialBndInfo, initialInterfaceInfo,
+    split_blocks, split_bndInfo, split_interfaceInfo,
+    generated_blocks, generated_bndInfo, generated_interfaceInfo,
+    final_blocks, final_bndInfo, final_interfaceInfo,
+    elliptic_params_obs, console_text
+)
 
 # Split line preview handlers
 setup_split_line_preview!(controls[:i_splits], i_split_lines, initialGrid, :i)
 setup_split_line_preview!(controls[:j_splits], j_split_lines, initialGrid, :j)
 
 # Block parameter synchronization handler
-setup_block_parameter_sync!(controls, elliptic_params_obs, generated_blocks, console_text)
+setup_block_parameter_sync!(controls, elliptic_params_obs, generated_blocks,console_text)
+
+# Split block selector handler (for initial grid only)
+setup_split_block_selector!(controls, initialGrid)
 
 # ========================================
 # === Display Figure ===

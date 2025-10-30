@@ -19,62 +19,70 @@ Returns a dictionary of widgets with the following keys:
 - `:forcing_bottom_a`, `:forcing_bottom_b` - Wall forcing parameters for bottom boundary
 - `:forcing_top_a`, `:forcing_top_b` - Wall forcing parameters for top boundary
 """
-function populate_control_panel!(parent_layout::GridLayout)
+function populate_control_panel!(parent_layout::GridLayout, initialGrid)
     widgets = Dict{Symbol, Any}()
 
     # Title
     Label(parent_layout[1, 1:2], "Parameters", font = :bold, halign = :center, 
-          padding=(10,0,0,10), valign=:top)
+          padding=(5,0,0,5), valign=:top)
     
     # === Split Locations Section ===
     Label(parent_layout[2, 1:2], "Splits Locations", font = :bold, halign = :left, 
-          padding=(10,0,10,20), valign=:top)
+          padding=(5,0,5,10), valign=:top)
     
     # Block selector for split locations
-    Label(parent_layout[3, 1], "Block to Split:", halign=:left, padding=(10,0,0,0))
-    widgets[:split_block_selector] = Menu(parent_layout[3, 2], options = ["Block 1"], 
-                                           default = "Block 1")
+    num_blocks = length(initialGrid)
+    block_options = ["Block $i" for i in 1:num_blocks]
+
+    Label(parent_layout[3, 1], "Block to Split:", halign=:left, padding=(5,0,0,0))
+    widgets[:split_block_selector] = Menu(parent_layout[3, 2], options = block_options, 
+                                           default = block_options[1])
     
-    Label(parent_layout[4, 1], "I-splits (e.g., 10,25)", halign=:left, valign=:top, 
-          padding=(10,0,0,0))
-    Label(parent_layout[4, 2], "J-splits (e.g., 8)")
+    init_block = initialGrid[1]
+    widgets[:i_splits_label] = Observable("I-splits ($(size(init_block, 2)-1) - $(size(init_block, 3)-1))")
+    widgets[:j_splits_label] = Observable("J-splits (e.g., 8)")
+
+    Label(parent_layout[4, 1], text = widgets[:i_splits_label], halign=:left, valign=:top, 
+          padding=(5,0,0,0))
+    Label(parent_layout[4, 2], text = widgets[:j_splits_label], halign=:left, valign=:top, 
+          padding=(5,0,0,0))
     widgets[:i_splits] = Textbox(parent_layout[5, 1], placeholder="none", defocus_on_submit=true)
     widgets[:j_splits] = Textbox(parent_layout[5, 2], placeholder="none", defocus_on_submit=true)
 
     # === Boundary Solver Section ===
     Label(parent_layout[6, 1:2], "Boundary Solver Parameters", font = :bold, halign = :left, 
-          padding=(10,0,10,20), valign=:top)
-    Label(parent_layout[7, 1], "Edge Solver Type:", halign=:left, padding=(10,0,0,0))
+          padding=(5,0,5,10), valign=:top)
+    Label(parent_layout[7, 1], "Edge Solver Type:", halign=:left, padding=(5,0,0,0))
     widgets[:edge_solver] = Menu(parent_layout[7, 2], options = ["analytic", "numerical"], 
                                   default = "analytic")
 
     # === Smoothing Parameters Section ===
     Label(parent_layout[8, 1:2], "Smoothing Parameters", font = :bold, halign = :left, 
-          padding=(10,0,10,20), valign=:top)
+          padding=(5,0,5,10), valign=:top)
     
     # Block selector for multi-block smoothing parameters
-    Label(parent_layout[9, 1], "Block:", halign=:left, padding=(10,0,0,0))
-    widgets[:block_selector] = Menu(parent_layout[9, 2], options = ["Block 1"], 
-                                     default = "Block 1")
+    Label(parent_layout[9, 1], "Block:", halign=:left, padding=(5,0,0,0))
+    widgets[:block_selector] = Menu(parent_layout[9, 2], options = block_options, 
+                                     default = block_options[1])
     
-    Label(parent_layout[10, 1], "Smoothing Type:", halign=:left, padding =(10,0,0,0))
+    Label(parent_layout[10, 1], "Smoothing Type:", halign=:left, padding =(5,0,0,0))
     widgets[:smoothing_type] = Menu(parent_layout[10, 2], options = ["Elliptic-SS"], 
                                      default = "Elliptic-SS")
 
-    Label(parent_layout[11, 1], "Max Iterations:", padding=(10,0,0,0))
+    Label(parent_layout[11, 1], "Max Iterations:", padding=(5,0,0,0))
     widgets[:max_iter] = Textbox(parent_layout[11, 2], placeholder="5000", validator=Int, stored_string="5000")
     
-    Label(parent_layout[12, 1], "Tolerance:", padding=(10,0,0,0))
+    Label(parent_layout[12, 1], "Tolerance:", padding=(5,0,0,0))
     widgets[:tolerance] = Textbox(parent_layout[12, 2], placeholder="1e-5", validator=Float64, stored_string="1e-5")
 
-    Label(parent_layout[13, 1], "Omega:", halign=:left, padding=(10,0,0,0))
+    Label(parent_layout[13, 1], "Omega:", halign=:left, padding=(5,0,0,0))
     widgets[:omega] = Textbox(parent_layout[13, 2], placeholder="0.2", validator=Float64, stored_string="0.2")
 
     # === Wall Forcing Parameters Section ===
     Label(parent_layout[14, 1:2], "Wall Forcing Parameters", font = :bold, halign = :left, 
-          padding=(10,0,10,20))
+          padding=(5,0,5,10))
     
-    forcing_grid = parent_layout[14, 1:2] = GridLayout()
+    forcing_grid = parent_layout[15, 1:2] = GridLayout()
     Label(forcing_grid[1, 2], "a", halign=:center)
     Label(forcing_grid[1, 3], "b", halign=:center)
     
@@ -110,8 +118,8 @@ Returns a dictionary of buttons and toggles with the following keys:
 - `:smooth_grid` - Button to trigger grid smoothing
 - `:save_grid` - Button to save the current grid
 - `:reset_view` - Button to reset axis limits
-- `:highlight_boundaries` - Toggle to highlight domain boundaries
 - `:clear_console` - Button to clear the console output
+- `:reset_all` - Button to reset all grids and parameters to initial state
 """
 function populate_button_panel!(parent_layout)
     btns = Dict{Symbol, Any}()
@@ -121,11 +129,8 @@ function populate_button_panel!(parent_layout)
     btns[:smooth_grid] = Button(parent_layout[1, 3], label = "Smooth Grid")
     btns[:save_grid] = Button(parent_layout[1, 4], label = "Save Grid")
     btns[:reset_view] = Button(parent_layout[1, 5], label = "Reset View")
-
-    btns[:highlight_boundaries] = Toggle(parent_layout[1, 6], active = false)
-    Label(parent_layout[1, 7], "Highlight Boundaries", halign=:left, padding=(0,0,0,0))
-    
-    btns[:clear_console] = Button(parent_layout[1, 8], label = "Clear Console")
+    btns[:clear_console] = Button(parent_layout[1, 6], label = "Clear Console")
+    btns[:reset_all] = Button(parent_layout[1, 7], label = "Reset All")
 
     return btns
 end

@@ -238,6 +238,7 @@ function SplitMultiBlock(blocks::Vector, splitRequests, bndInfo, interInfo)
     end
     # Propagate splits across interfaces
     allSplits = PropagateSplits(blocks, splitRequests, bndInfo, interInfo)
+    # println(allSplits)
     # Split each block and collect results
     allNewBlocks = []
     blockMapping = Dict{Int, Vector{Int}}()  # oldBlockId => [newBlockIds...]

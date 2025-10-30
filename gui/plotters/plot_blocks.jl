@@ -155,7 +155,7 @@ function plot_blocks_with_highlighting!(ax::Axis, blocks_obs, highlight_obs,
                                 end
                             end
                         catch e
-                            @warn "Failed to extract boundary face for block $blkid: $e"
+                            @warn "Failed to extract boundary face for block $blkid"#: $e"
                         end
                     end
                 end
@@ -177,7 +177,7 @@ function plot_blocks_with_highlighting!(ax::Axis, blocks_obs, highlight_obs,
                             end
                         end
                     catch e
-                        @warn "Failed to extract interface for block $blkA: $e"
+                        @warn "Failed to extract interface for block $blkA"#: $e"
                     end
                 end
             end
