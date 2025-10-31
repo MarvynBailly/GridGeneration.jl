@@ -10,7 +10,7 @@ Add the package to your project:
 
 ```julia
 using Pkg
-Pkg.add("GridGeneration.jl")
+Pkg.add("GridGeneration")
 ```
 
 and include in your script:
