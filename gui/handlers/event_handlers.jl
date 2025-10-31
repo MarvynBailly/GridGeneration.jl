@@ -105,7 +105,7 @@ function setup_edge_solve_handler!(button, controls, M,
 end
 
 """
-    smooth_grid_handler!(button, controls, M, generated_blocks, generated_bndInfo, generated_interfaceInfo, console_obs)
+    setup_smooth_grid_handler!(button, controls, M, generated_blocks, generated_bndInfo, generated_interfaceInfo, console_obs)
 
 Set up the event handler for the Smooth Grid button.
 """
@@ -133,6 +133,47 @@ function setup_smooth_grid_handler!(button, controls, generated_blocks, final_bl
             log_to_console(console_obs, "  Iterations: $(finalIterations[i])")
         end
         log_to_console(console_obs, "Smoothing complete.")
+    end
+end
+
+"""
+    setup_save_grid_handler!(button, final_blocks, final_bndInfo, final_interfaceInfo, console_obs)
+
+Set up the event handler for the Save Grid button.
+Saves the final grid to a .grid file using write_turtle_grid.
+
+# Arguments
+- `button`: The save grid button widget
+- `final_blocks`: Observable containing the final grid blocks
+- `final_bndInfo`: Observable containing the final boundary information
+- `final_interfaceInfo`: Observable containing the final interface information
+- `console_obs`: Observable for console logging
+"""
+function setup_save_grid_handler!(button, final_blocks, final_bndInfo, final_interfaceInfo, console_obs)
+    on(button.clicks) do _
+        # Get current grid data
+        blocks = final_blocks[]
+        bndInfo = final_bndInfo[]
+        interfaceInfo = final_interfaceInfo[]
+        
+        # Generate filename with timestamp
+        timestamp = Dates.format(Dates.now(), "yyyymmdd_HHMMSS")
+        filename = "grid_$(timestamp).grid"
+        
+        log_to_console(console_obs, "Saving grid to $filename...")
+        log_to_console(console_obs, "  - $(length(blocks)) block(s)")
+        log_to_console(console_obs, "  - $(length(interfaceInfo)) interface(s)")
+        log_to_console(console_obs, "  - $(length(bndInfo)) boundary type(s)")
+
+        # extrusion
+        extrusion_length = 0.1
+        k_layers = 20
+        mesh3D, bndInfo3D, interfaceInfo3D = GridGeneration.convert_2D_to_3D(blocks, bndInfo, interfaceInfo, extrusion_length, k_layers)
+
+        # write .grid file
+        GridGeneration.write_turtle_grid(mesh3D, interfaceInfo3D, bndInfo3D, filename)
+
+        log_to_console(console_obs, "Grid saved successfully to $filename")
     end
 end
 

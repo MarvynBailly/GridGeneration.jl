@@ -682,11 +682,11 @@ Load domain from Turtle grid files and optionally fix uneven interfaces.
 - `initialInterfaceInfo`: Interface information dictionary
 - `M`: Metric function for the domain
 """
-function setup_turtle_grid_domain(metricFieldFile, gridFolder; fix_uneven_interfaces=true)
+function setup_turtle_grid_domain(metricFieldFile, gridFile; fix_uneven_interfaces=true)
     # Load Turtle grid data
     metricData, datatype, gridfile = GridGeneration.readTurtleFields(metricFieldFile)
-    gridfile = joinpath(gridFolder, gridfile)
-    blocks, centers, Xfa, interfaceInfo, bndInfo = GridGeneration.ImportTurtleGrid(gridfile)
+    # gridfile = joinpath(gridFolder, gridfile)
+    blocks, centers, Xfa, interfaceInfo, bndInfo = GridGeneration.ImportTurtleGrid(gridFile)
     
     # Setup metric field
     tree, refs = GridGeneration.setup_metric_tree(centers)

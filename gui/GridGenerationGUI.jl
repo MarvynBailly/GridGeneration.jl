@@ -45,9 +45,11 @@ include("setup/domain_setup.jl")
 # Uncomment the following lines to use Turtle grid data instead:
 
 metricFieldFile = "step/BFstepTest_entropy.metric"
-gridFolder = "step/coarseGrids"
+# gridFile = "step/coarseGrids/BFstep_4.41M_coarseIJK.grid"
+gridFile = "grid_20251030_221406.grid"
+
 initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
-    metricFieldFile, gridFolder
+    metricFieldFile, gridFile
 )
 
 
@@ -222,6 +224,15 @@ setup_smooth_grid_handler!(
     generated_blocks,
     final_blocks,
     elliptic_params_obs,
+    console_text
+)
+
+# Save grid handler
+setup_save_grid_handler!(
+    tool[:save_grid],
+    final_blocks,
+    final_bndInfo,
+    final_interfaceInfo,
     console_text
 )
 
