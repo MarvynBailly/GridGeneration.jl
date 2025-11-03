@@ -2,7 +2,8 @@
 Solve all blocks with optimal point distribution based on metric field.
 """
 function SolveAllBlocks(metric, blocks, bndInfo, interInfo; solver =:analytic)
-    blockDirOptN = similar(blocks)
+    # blockDirOptN = similar(blocks)
+    blockDirOptN = Vector{Vector{Int}}(undef, length(blocks))
     
     for i in 1:length(blockDirOptN)
         blockDirOptN[i] = [-1,-1]

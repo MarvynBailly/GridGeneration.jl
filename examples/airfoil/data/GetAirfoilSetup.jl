@@ -20,7 +20,7 @@ function GetAirfoilSetup(; airfoilPath = "examples/airfoil/A-airfoil.txt", radiu
         type = type
     )
 
-    initialGrid = TFI(boundary)
+    initialGrid = GridGeneration.TFI(boundary)
 
     airfoilGrid = initialGrid[:, 101:end-100,:]
     

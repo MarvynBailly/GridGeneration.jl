@@ -210,6 +210,7 @@ function ImportTurtleGrid(gridfilename::String)
     Xno, Xcv, Xfa,interfaceInfo,bndInfo = readTurtleGrid(gridfilename)
     
     Xno2D = [Xno_blk[1:2,:,:,1] for Xno_blk in Xno]
+    Xcv2D = [Xcv_blk[1:2,:,:,1] for Xcv_blk in Xcv]
 
-    return Xno2D, interfaceInfo, bndInfo
+    return Xno2D, Xcv2D, Xfa, interfaceInfo, bndInfo
 end

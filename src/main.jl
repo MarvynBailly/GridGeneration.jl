@@ -29,3 +29,7 @@ function GenerateGrid(initialGrid, bndInfo, interInfo, M; params=params)
         return smoothBlocks, blocksNew, bndInfoNew, interInfoNew, finalErrors, finalIterations
     end
 end
+
+
+
+

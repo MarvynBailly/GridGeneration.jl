@@ -1,10 +1,7 @@
-include("visualize.jl")
-
-using Statistics
-
-function convert_2D_to_3D(mesh2D, extrusion_length=0.1, n_layers=2)
+function convert_2D_to_3D(mesh2D, bndInfo2d, interfaceInfo2d, extrusion_length=0.1, n_layers=2)
     mesh3D = []
 
+    # extrude each block
     for block2D in mesh2D
         # X2D, Y2D = block2D
         X2D, Y2D = block2D[1,:,:], block2D[2,:,:]
@@ -23,162 +20,108 @@ function convert_2D_to_3D(mesh2D, extrusion_length=0.1, n_layers=2)
             Z3D[:,:,k] .= (k-1)*extrusion_length
         end
 
-        # Push the block into the 3D mesh
-        push!(mesh3D, [X3D, Y3D, Z3D])
+        # save as array [dim, X3D, Y3D, Z3D]
+        block3d = zeros(3, ni, nj, nk)
+        block3d[1, :, :, :] .= X3D
+        block3d[2, :, :, :] .= Y3D
+        block3d[3, :, :, :] .= Z3D
+        push!(mesh3D, block3d)
     end
-    return mesh3D
+
+    # convert interface and bnd info to 0 based indexing for 3D
+    # extrude bnd and interface info
+    bndInfo3D = convert_bndInfo_to_0based_3D(bndInfo2d, n_layers)
+    interfaceInfo3D = convert_interfaceInfo_to_0based_3D(interfaceInfo2d, n_layers)
+
+
+    # add symmetric interfaces at top and bottom
+    for (i, block) in enumerate(mesh3D)
+        ni, nj, nk = size(block[1,:,:,:]) .- 1
+        # Add interfaces at bottom (k=0) and top (k=nk)
+        interface = Dict{String, Any}()
+        interface["blockA"] = i - 1
+        interface["blockB"] = i - 1
+        interface["start_blkA"] = [0, 0, 0]
+        interface["end_blkA"] = [ni, nj, 0]
+        interface["start_blkB"] = [0, 0, nk]
+        interface["end_blkB"] = [ni, nj, nk]
+        # compute the offset from the top layer to the bottom layer
+        offset = [0.0, 0.0, extrusion_length * (nk)]
+        interface["offset"] = offset
+        interface["angle"] = 0.0
+        push!(interfaceInfo3D, interface)
+    end
+
+    return mesh3D, bndInfo3D, interfaceInfo3D
 end
 
-function generate_interfaces(mesh, nblocks_horizontal)
-    interfaces = []
+"""
+    convert_bndInfo_to_0based_3D(bndInfo2d, n_layers)
 
-    num_blocks = length(mesh)
+Convert 2D boundary information from 1-based to 0-based indexing and add k-dimension.
 
-    # p = plot(legend=false)
-    for blk_idx in 1:num_blocks
-        X,Y,Z = mesh[blk_idx]
-        ni, nj, nk = size(X).-1
-        blk_num = blk_idx - 1 # zero-based indexing 
+# Arguments
+- `bndInfo2d`: Boundary information with 1-based indexing (Julia format)
+- `n_layers`: Number of layers in k-direction
 
-        # println("Block number: ", blk_num, " with size: ", ni, nj, nk)
-
-        col = (blk_idx - 1) % nblocks_horizontal + 1  # column position
-        row = (blk_idx - 1) ÷ nblocks_horizontal + 1  # row position
-
-        # println("Row: ", row, " Column: ", col)
-
-        # for k in 1:nk
-            # look up 
-            if col < nblocks_horizontal
-                right_blk_num = blk_num + 1
-
-                push!(interfaces, Dict(
-                    "blockA"=>blk_num, "start_blkA"=>[0,nj,0], "end_blkA"=>[ni,nj,nk],
-                    "blockB"=>right_blk_num, "start_blkB"=>[0,0,0], "end_blkB"=>[ni,0,nk],
-                    "offset"=>[0.0,0.0,0.0], "angle"=>0.0))
-            end
-            # left
-            if (blk_idx + nblocks_horizontal) <= num_blocks
-                top_blk_num = blk_num + nblocks_horizontal
-                push!(interfaces, Dict(
-                    "blockA"=>blk_num, "start_blkA"=>[ni,0,0], "end_blkA"=>[ni,nj,nk],
-                    "blockB"=>top_blk_num, "start_blkB"=>[0,0,0], "end_blkB"=>[0,nj,nk],
-                    "offset"=>[0.0,0.0,0.0], "angle"=>0.0))
-            end
-        # end
-    end
-
-    return interfaces
-end
-
-function generate_boundaries(mesh, nblocks_horizontal)
-    boundaries = Dict(
-        "BCInflow" => [],
-        "BCOutflow" => [],
-        "BCWall" => [],
-    )
-
-    num_blocks = length(mesh)
-    nblocks_vertical = num_blocks ÷ nblocks_horizontal
-
-    # Add boundary condition across k=0
-    for blk_idx in 1:4
-        println("Block number: ", blk_idx)
-        X, Y, Z = mesh[blk_idx]
-        ni, nj, nk = size(X) .- 1
-        blk_num = blk_idx - 1 
-        push!(boundaries["BCWall"], Dict(
-            "block" => blk_num,
-            "start" => [0, 0, 0],
-            "end"   => [ni, nj, 0]
-        ))
-    end
-
-    # Add boundary condition across k=top
-    for blk_idx in 1:4
-        X, Y, Z = mesh[blk_idx]
-        ni, nj, nk = size(X) .- 1
-        blk_num = blk_idx - 1 
-        push!(boundaries["BCWall"], Dict(
-            "block" => blk_num,
-            "start" => [0, 0, nk],
-            "end"   => [ni, nj, nk]
-        ))
-    end
-
-
-    # Explicitly identify blocks on right wall
-    for blk_idx in (num_blocks - nblocks_horizontal + 1):num_blocks
-        X, Y, Z = mesh[blk_idx]
-        ni, nj, nk = size(X) .- 1
-        blk_num = blk_idx - 1  # zero-based indexing
-
-        # for k in 1:nk
-            push!(boundaries["BCOutflow"], Dict(
-                "block" => blk_num,
-                "start" => [ni, 0, 0],
-                "end"   => [ni, nj, nk]
-            ))
-        # end
-    end
-
-    # Explicitly identify blocks on left wall
-    for blk_idx in 1:nblocks_horizontal
-        X, Y, Z = mesh[blk_idx]
-        ni, nj, nk = size(X) .- 1
-        blk_num = blk_idx - 1  # zero-based indexing
-
-        # for k in 1:nk
-            push!(boundaries["BCInflow"], Dict(
-                "block" => blk_num,
-                "start" => [0, 0, 0],
-                "end"   => [0, nj, nk]
-            ))
-        # end
-    end
-
-    # Explicitly identify blocks on bottom wall
-    for blk_idx in 1:nblocks_horizontal:nblocks_horizontal*nblocks_vertical
-        X, Y, Z = mesh[blk_idx]
-        ni, nj, nk = size(X) .- 1
-        blk_num = blk_idx - 1  # zero-based indexing
-
-        # for k in 1:nk
-            push!(boundaries["BCWall"], Dict(
-                "block" => blk_num,
-                "start" => [0, 0, 0],
-                "end"   => [ni, 0, nk]
-            ))
-        # end
-    end
-
-    # Explicitly identify blocks on top wall
-    for blk_idx in nblocks_horizontal:nblocks_horizontal:nblocks_horizontal*nblocks_vertical
-        X, Y, Z = mesh[blk_idx]
-        ni, nj, nk = size(X) .- 1
-        blk_num = blk_idx - 1  # zero-based indexing
-
-        # for k in 1:nk
-            push!(boundaries["BCWall"], Dict(
-                "block" => blk_num,
-                "start" => [0, nj, 0],
-                "end"   => [ni, nj, nk]
-            ))
-        # end
-    end
-
-
-
-
-    # --- Convert dictionary to list ---
-    boundary_list = []
-    for (name, faces) in boundaries
-        if !isempty(faces)
-            push!(boundary_list, Dict("name"=>name, "faces"=>faces))
+# Returns
+- `bndInfo3D`: Boundary information with 0-based indexing and k-dimension
+"""
+function convert_bndInfo_to_0based_3D(bndInfo2d, n_layers)
+    bndInfo3D = deepcopy(bndInfo2d)
+    
+    for bnd in bndInfo3D
+        for face in bnd["faces"]
+            # Convert block ID from 1-based to 0-based
+            face["block"] = face["block"] - 1
+            
+            # Convert start and end indices from 1-based to 0-based
+            face["start"] = face["start"] .- 1
+            face["end"] = face["end"] .- 1
+            
+            # Add k-dimension (from 0 to n_layers-1)
+            face["start"] = [face["start"][1], face["start"][2], 0]
+            face["end"] = [face["end"][1], face["end"][2], n_layers - 1]
         end
     end
+    
+    return bndInfo3D
+end
 
-    return boundary_list
+"""
+    convert_interfaceInfo_to_0based_3D(interfaceInfo2d, n_layers)
+
+Convert 2D interface information from 1-based to 0-based indexing and add k-dimension.
+
+# Arguments
+- `interfaceInfo2d`: Interface information with 1-based indexing (Julia format)
+- `n_layers`: Number of layers in k-direction
+
+# Returns
+- `interfaceInfo3D`: Interface information with 0-based indexing and k-dimension
+"""
+function convert_interfaceInfo_to_0based_3D(interfaceInfo2d, n_layers)
+    interfaceInfo3D = deepcopy(interfaceInfo2d)
+    
+    for itf in interfaceInfo3D
+        # Convert block IDs from 1-based to 0-based
+        itf["blockA"] = itf["blockA"] - 1
+        itf["blockB"] = itf["blockB"] - 1
+        
+        # Convert start and end indices from 1-based to 0-based
+        itf["start_blkA"] = itf["start_blkA"] .- 1
+        itf["end_blkA"] = itf["end_blkA"] .- 1
+        itf["start_blkB"] = itf["start_blkB"] .- 1
+        itf["end_blkB"] = itf["end_blkB"] .- 1
+        
+        # Add k-dimension (from 0 to n_layers-1)
+        itf["start_blkA"] = [itf["start_blkA"][1], itf["start_blkA"][2], 0]
+        itf["end_blkA"] = [itf["end_blkA"][1], itf["end_blkA"][2], n_layers - 1]
+        itf["start_blkB"] = [itf["start_blkB"][1], itf["start_blkB"][2], 0]
+        itf["end_blkB"] = [itf["end_blkB"][1], itf["end_blkB"][2], n_layers - 1]
+    end
+    
+    return interfaceInfo3D
 end
 
 function write_turtle_grid(mesh, interfaces, boundaries, filename)
@@ -199,7 +142,7 @@ function write_turtle_grid(mesh, interfaces, boundaries, filename)
 
         # size of each block
         for blk in mesh
-            write(fid, collect(Int32, size(blk[1]) .- 1))
+            write(fid, collect(Int32, size(blk)[2:4] .- 1))
         end
 
         # Interfaces
@@ -222,27 +165,20 @@ function write_turtle_grid(mesh, interfaces, boundaries, filename)
             end
             name_bytes = collect(codeunits(name))
 
-            # Ensure exact length of IO_NAME_LENGTH
-            # name_bytes = collect(codeunits(name))
-            # if length(name_bytes) > IO_NAME_LENGTH
-            #     name_bytes = name_bytes[1:IO_NAME_LENGTH]
-            # else
-            #     name_bytes = vcat(name_bytes, zeros(UInt8, IO_NAME_LENGTH - length(name_bytes)))
-            # end
             write(fid, name_bytes)
             write(fid, Int32(length(bnd["faces"])))
             for face in bnd["faces"]
                 write(fid, Int32(face["block"]), Int32.(face["start"]), Int32.(face["end"]))
             end
         end
-        # Node coordinates (k,j,i ordering, exactly like MATLAB)
+        # Node coordinates (k,j,i ordering for each dimension, matching Turtle format)
         for d in 1:3
             for blk in mesh
-                ni, nj, nk = size(blk[d])
+                ni, nj, nk = size(blk)[2:4]
                 for i in 1:ni
                     for j in 1:nj
                         for k in 1:nk
-                            write(fid, blk[d][i,j,k])
+                            write(fid, blk[d,i,j,k])
                         end
                     end
                 end
@@ -261,12 +197,12 @@ function create_turtle_grid(blocks, num_hor_blocks, filename; extrusion_length =
 
     @info "Turtle grid written to $filename"
 
-    if showPlots
-        visualizer_interface(blocks, interfaces)
-        visualizer_boundaries(blocks, boundaries)
-        p1 = visualize_grid(mesh3d, interfaces, boundaries)
-        p2 = visualize_grid_3D(mesh3d, interfaces, boundaries)
-        p = plot(p1, p2, layout = @layout [a b])
-        display(p)
-    end
+    # if showPlots
+    #     visualizer_interface(blocks, interfaces)
+    #     visualizer_boundaries(blocks, boundaries)
+    #     p1 = visualize_grid(mesh3d, interfaces, boundaries)
+    #     p2 = visualize_grid_3D(mesh3d, interfaces, boundaries)
+    #     p = plot(p1, p2, layout = @layout [a b])
+    #     display(p)
+    # end
 end

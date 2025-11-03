@@ -1,0 +1,18 @@
+\frametitle{Returning to Julia}
+We can preform block splitting in GridGeneration.jl using the function call:
+  \begin{lstlisting}[language=Julia]
+using GridGeneration
+
+split_locations = [[i_indices], [j_indices]]
+split_dict = Dict(block_num => split_locations) //which block to split
+
+split_block, split_bnd_info, split_inter_info = GridGeneration.SplitMultiBlock(
+    initialGrid, split_dict, initialBndInfo,  initialInterfaceInfo,
+)
+
+edge_solved_blocks, edge_solved_bndInfo, edge_solved_interInfo = GridGeneration.SolveAllBlocks(
+    M, edge_solved_blocks, edge_solved_bndInfo, edge_solved_interInfo;
+    solver=params.boundarySolver
+)
+  \end{lstlisting}
+

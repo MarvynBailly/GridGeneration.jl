@@ -136,12 +136,14 @@ function PropagateSplits(blocks::Vector, splitRequests::Dict{Int, Vector{Vector{
     end
     
     # Add initial user-requested splits
+
     for (blockId, splits) in splitRequests
         if blockId > 0 && blockId <= numBlocks
             splitReqs[blockId][1] = sort(unique(vcat(splitReqs[blockId][1], splits[1])))
             splitReqs[blockId][2] = sort(unique(vcat(splitReqs[blockId][2], splits[2])))
         end
     end
+
     
     # Propagate splits iteratively until no new splits are added
     changed = true
@@ -234,10 +236,9 @@ function SplitMultiBlock(blocks::Vector, splitRequests, bndInfo, interInfo)
         end
         splitRequests = splitDict
     end
-    
     # Propagate splits across interfaces
     allSplits = PropagateSplits(blocks, splitRequests, bndInfo, interInfo)
-    
+    # println(allSplits)
     # Split each block and collect results
     allNewBlocks = []
     blockMapping = Dict{Int, Vector{Int}}()  # oldBlockId => [newBlockIds...]
