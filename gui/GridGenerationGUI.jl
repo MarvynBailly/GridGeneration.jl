@@ -30,29 +30,34 @@ include("setup/domain_setup.jl")
 # ========================================
 
 # Create rectangular domain with default metric
-# width = 4.0
-# height = 2.0
-# num_points_width = 100
-# num_points_height = 50
+width = 4.0
+height = 2.0
+num_points_width = 100
+num_points_height = 50
 
-# initialGrid, initialBndInfo, initialInterfaceInfo = setup_rectangle_domain(
-#     width, height, num_points_width, num_points_height
-# )
+initialGrid, initialBndInfo, initialInterfaceInfo = setup_rectangle_domain(
+    width, height, num_points_width, num_points_height
+)
 
-# M = create_default_metric(1000)
+M = create_default_metric(1000)
 
 # Alternative: Load from Turtle grid files
 # Uncomment the following lines to use Turtle grid data instead:
 
-metricFieldFile = "step/BFstepTest_entropy.metric"
-# gridFile = "step/coarseGrids/BFstep_4.41M_coarseIJK.grid"
-gridFile = "grid_20251030_221406.grid"
+# metricFieldFile = "step/BFstepTest_entropy.metric"
+# # gridFile = "step/coarseGrids/BFstep_4.41M_coarseIJK.grid"
+# gridFile = "grid_20251030_221406.grid"
 
-initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
-    metricFieldFile, gridFile
-)
+# initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
+#     metricFieldFile, gridFile
+# )
 
-
+# load in airfoil example
+# include("../examples/airfoil/airfoil.jl")
+# initialGrid, initialBndInfo, initialInterfaceInfo = GetAirfoilSetup(airfoilPath = "../examples/airfoil/data/A-airfoil.txt", radius = 3, type =:cgrid)
+# initialGrid = [initialGrid]
+# example = 1
+# M = GetAirfoilMetric(example; scale = 0.05)
 
 
 # ========================================
