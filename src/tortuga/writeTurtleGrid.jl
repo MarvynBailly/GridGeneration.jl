@@ -166,8 +166,8 @@ function write_turtle_grid(mesh, interfaces, boundaries, filename)
             name_bytes = collect(codeunits(name))
 
             write(fid, name_bytes)
-            write(fid, Int32(length(bnd["faces"])))
-            for face in bnd["faces"]
+            write(fid, Int32(length(bnd["faceInfo"])))
+            for face in bnd["faceInfo"]
                 write(fid, Int32(face["block"]), Int32.(face["start"]), Int32.(face["end"]))
             end
         end

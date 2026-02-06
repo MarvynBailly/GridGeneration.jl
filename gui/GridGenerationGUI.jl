@@ -44,13 +44,13 @@ M = create_default_metric(1000)
 # Alternative: Load from Turtle grid files
 # Uncomment the following lines to use Turtle grid data instead:
 
-# metricFieldFile = "step/BFstepTest_entropy.metric"
-# # gridFile = "step/coarseGrids/BFstep_4.41M_coarseIJK.grid"
-# gridFile = "grid_20251030_221406.grid"
+metricFieldFile = "step/BFstepTest_entropy.metric"
+# gridFile = "step/coarseGrids/BFstep_4.41M_coarseIJK.grid"
+gridFile = "grid_20251030_221406.grid"
 
-# initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
-#     metricFieldFile, gridFile
-# )
+initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
+    metricFieldFile, gridFile
+)
 
 # load in airfoil example
 # include("../examples/airfoil/airfoil.jl")
