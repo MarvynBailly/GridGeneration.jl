@@ -19,6 +19,9 @@ export SolveAllBlocks, SmoothBlocks
 # Block splitting
 export SplitMultiBlock
 
+# Grid quality
+export ComputeAngleDeviation
+
 # Metric utilities (for custom metric definition)
 export make_getMetric, setup_metric_tree, find_nearest_kd
 
@@ -60,6 +63,8 @@ include("tortuga/TurtleDomain.jl")
 
 
 include("smoothing/SmoothBlocks.jl")
+
+include("quality/GridQuality.jl")
 
 
 end

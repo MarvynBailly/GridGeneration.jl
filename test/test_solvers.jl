@@ -65,6 +65,35 @@ using GridGeneration
         @test minimum(J) > 0
     end
 
+    @testset "Line Gauss-Seidel sweep" begin
+        # Same discrete equations as point SOR: both converge to the same grid
+        Ni, Nj = 40, 30
+        x = zeros(Ni, Nj); y = zeros(Ni, Nj)
+        for j in 1:Nj, i in 1:Ni
+            ξ = (i - 1) / (Ni - 1); η = (j - 1) / (Nj - 1)
+            x[i, j] = ξ + 0.08sin(2pi * η) * sin(pi * ξ)
+            y[i, j] = η^1.5 + 0.05sin(pi * ξ) * sin(pi * η)
+        end
+
+        @test EllipticParams(sweep=:line).ω == 0.3
+        @test EllipticParams().sweep == :point
+        @test_throws ArgumentError EllipticParams(sweep=:zebra)
+
+        unforced = (useBottomWall=false, max_iter=50000, tol=1e-10)
+        xp, yp, _, ip = G.EllipticSolver(copy(x), copy(y); params=EllipticParams(; unforced...))
+        xl, yl, el, il = G.EllipticSolver(copy(x), copy(y); params=EllipticParams(; sweep=:line, ω=1.3, unforced...))
+        @test el < 1e-10
+        @test il < ip / 10
+        @test maximum(abs.(xl .- xp)) < 1e-6 && maximum(abs.(yl .- yp)) < 1e-6
+
+        forced = (useTopWall=true, useBottomWall=true, useLeftWall=true, useRightWall=true, max_iter=50000, tol=1e-9)
+        xp, yp, _, ip = G.EllipticSolver(copy(x), copy(y); params=EllipticParams(; forced...))
+        xl, yl, el, il = G.EllipticSolver(copy(x), copy(y); params=EllipticParams(; sweep=:line, forced...))
+        @test el < 1e-9
+        @test il < ip
+        @test maximum(abs.(xl .- xp)) < 1e-5 && maximum(abs.(yl .- yp)) < 1e-5
+    end
+
     @testset "SmoothBlocks parameter forms" begin
         N = 6
         grid = TFI([[range(0, 1, length=N) ones(N)], [ones(N) range(0, 1, length=N)],

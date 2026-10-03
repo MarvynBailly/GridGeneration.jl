@@ -14,7 +14,7 @@ using Plots
 
 include(joinpath(@__DIR__, "airfoil", "airfoil.jl"))
 include(joinpath(@__DIR__, "rectangle", "rectangle.jl"))
-include(joinpath(@__DIR__, "..", "plotters", "plot_grid.jl"))
+include(joinpath(@__DIR__, "plotting", "plot_grid.jl"))
 
 
 case  = :airfoil  # :rectangle

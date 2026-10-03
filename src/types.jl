@@ -16,6 +16,7 @@ struct EllipticParams
     a_decay_bottom::Float64
     b_decay_bottom::Float64
     verbose::Bool
+    sweep::Symbol
 end
 
 
@@ -34,7 +35,8 @@ end
 GridGeneration.EllipticParams
 - max_iter::Int # maximum number of iterations
 - tol::Float64 # tolerance for convergence
-- ω::Float64 # relaxation factor
+- sweep::Symbol # :point (point SOR, default) or :line (alternating ξ/η line Gauss-Seidel with Thomas solves)
+- ω::Float64 # relaxation factor (default 0.2 for :point, 0.3 for :line; :line tolerates ω up to ~1.5 when no wall forcing is used)
 - useTopWall::Bool # whether to apply forcing on the top wall
 - useBottomWall::Bool # whether to apply forcing on the bottom wall
 - useLeftWall::Bool # whether to apply forcing on the left wall
@@ -49,13 +51,15 @@ GridGeneration.EllipticParams
 - b_decay_bottom::Float64 # decay parameter for bottom wall forcing
 - verbose::Bool # whether to print convergence information
 """
-function EllipticParams(; skipBlock::Bool=false, max_iter::Int=5000, tol::Float64=1e-6, ω::Float64=0.2,
+function EllipticParams(; skipBlock::Bool=false, max_iter::Int=5000, tol::Real=1e-6,
+                 sweep::Symbol=:point, ω::Real=(sweep == :line ? 0.3 : 0.2),
                  useTopWall::Bool=false, useBottomWall::Bool=true, useLeftWall::Bool=false, useRightWall::Bool=false,
                  a_decay_left::Float64=0.4, b_decay_left::Float64=0.4,
                  a_decay_right::Float64=0.4, b_decay_right::Float64=0.4,
                  a_decay_top::Float64=0.4, b_decay_top::Float64=0.4,
                  a_decay_bottom::Float64=0.4, b_decay_bottom::Float64=0.4,
                  verbose::Bool=false) 
+                 sweep in (:point, :line) || throw(ArgumentError("sweep must be :point or :line, got :$sweep"))
                  return EllipticParams(
                     skipBlock,
                     max_iter, tol, ω,
@@ -64,7 +68,7 @@ function EllipticParams(; skipBlock::Bool=false, max_iter::Int=5000, tol::Float6
                     a_decay_right, b_decay_right,
                     a_decay_top, b_decay_top,
                     a_decay_bottom, b_decay_bottom,
-                    verbose)
+                    verbose, sweep)
 end
 
 """

@@ -11,6 +11,7 @@ using GridGeneration
     include("test_projections.jl")
     include("test_numerics.jl")
     include("test_solvers.jl")
+    include("test_quality.jl")
     include("test_blocks.jl")
     include("test_multiblock_splitting.jl")
     include("test_multiblock_orientation.jl")

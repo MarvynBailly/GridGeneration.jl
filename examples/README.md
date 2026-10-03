@@ -29,4 +29,9 @@ julia --project=examples examples/generalExample.jl
 A metric is any function `M(x, y) -> (M11, M22)` giving the diagonal metric tensor at a point;
 `GridGeneration.make_getMetric` builds distance-based metrics around a polyline and/or a hotspot.
 
+`plotting/` has Plots.jl helpers: `plot_grid`/`plot_blocks` (grid lines),
+`plot_blocks_interfaces_boundaries` (connectivity), `plot_scalar_field` (metric fields), and
+`PlotGridAngleDeviation` (colour cells by `ComputeAngleDeviation`). Include the file you need,
+e.g. `include("examples/plotting/plot_grid.jl")`.
+
 `archive/` holds old prototypes that no longer run against the current API.

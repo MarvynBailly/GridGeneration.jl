@@ -276,6 +276,29 @@ With under-relaxation (omega = 0.2), expect O(N^2) to O(N^3) iterations for an N
 grid, giving total complexity of O(N^4) to O(N^5). This is why the solver can be slow
 for large grids -- a multigrid approach would reduce this to O(N^2 log N).
 
+### 4.6 Line Gauss-Seidel Option (`sweep = :line`)
+
+`EllipticParams(sweep = :line)` solves the same discrete equations by alternating line
+sweeps: each xi-line is solved implicitly in i (tridiagonal: -alpha, 2(alpha+gamma), -alpha)
+with the j-neighbours and cross-derivative terms taken from the latest values, then each
+eta-line implicitly in j (-gamma, 2(alpha+gamma), -gamma). Metrics and forcing are frozen
+within an iteration. Because the fixed point is the same, both sweeps converge to the same
+grid.
+
+Measured on a skewed 60x40 test grid (tol = 1e-8):
+
+| Case | point SOR (omega = 0.2) | line (best stable omega) |
+|------|-------------------------|--------------------------|
+| No wall forcing | 24775 iterations | 222 iterations (omega = 1.6) |
+| Forcing on all four walls | 18110 iterations | 2883 iterations (omega = 0.3) |
+
+Without forcing the line sweep tolerates over-relaxation (omega up to ~1.6). With wall
+forcing it does not: the forcing is recomputed from the current grid each iteration, and
+for omega >= 0.5 the iteration stops converging. The default for `:line` is therefore
+omega = 0.3. On the strongly forced airfoil example the line sweep converged 3 of 6 blocks
+within 5000 iterations (point SOR: none) but was not uniformly better, so `:point` remains
+the default.
+
 ---
 
 ## 5. Wall Forcing for Orthogonality

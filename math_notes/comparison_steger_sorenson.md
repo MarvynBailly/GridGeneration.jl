@@ -369,6 +369,10 @@ block boundaries.
 
 1. **Line Gauss-Seidel**: Replace point SOR with a Thomas-algorithm-based line solver.
    This would allow over-relaxation and reduce iteration counts by 10-100x.
+   *Partly done:* `EllipticParams(sweep = :line)` adds alternating line Gauss-Seidel for the
+   current equations (100x fewer iterations without forcing, ~6x with wall forcing, where
+   omega must stay <= 0.3). Proper P,Q control functions (item 5) are likely needed before
+   over-relaxation works with forcing.
 
 2. **Prescribed wall spacing**: Allow user to specify s(xi) along each boundary rather
    than interpolating from corner spacings.

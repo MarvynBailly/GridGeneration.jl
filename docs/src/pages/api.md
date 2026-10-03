@@ -21,6 +21,12 @@ TFI
 SplitMultiBlock
 ```
 
+## Grid quality
+
+```@docs
+ComputeAngleDeviation
+```
+
 ## Metric utilities
 
 ```@docs
