@@ -14,4 +14,5 @@ using GridGeneration
     include("test_blocks.jl")
     include("test_multiblock_splitting.jl")
     include("test_integration.jl")
+    include("test_tortuga.jl")
 end

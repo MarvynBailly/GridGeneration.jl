@@ -1,3 +1,13 @@
+"""
+    convert_2D_to_3D(blocks, bndInfo, interInfo, extrusion_length=0.1, n_layers=2)
+        -> (mesh3D, bndInfo3D, interInfo3D)
+
+Extrude 2D blocks (`[2, Ni, Nj]` arrays) into `n_layers` layers spaced `extrusion_length`
+apart in z, giving `[3, Ni, Nj, n_layers]` blocks. Boundary and interface information is
+converted from the package's 1-based 2D form to Tortuga's 0-based 3D form, and a periodic
+k-direction self-interface is added for every block. The result can be passed to
+[`write_turtle_grid`](@ref).
+"""
 function convert_2D_to_3D(mesh2D, bndInfo2d, interfaceInfo2d, extrusion_length=0.1, n_layers=2)
     mesh3D = []
 
@@ -124,6 +134,14 @@ function convert_interfaceInfo_to_0based_3D(interfaceInfo2d, n_layers)
     return interfaceInfo3D
 end
 
+"""
+    write_turtle_grid(mesh, interfaces, boundaries, filename)
+
+Write a 3D multi-block grid to a Tortuga (`.grid`) file. `mesh` is a vector of
+`[3, Ni, Nj, Nk]` blocks and `interfaces`/`boundaries` use Tortuga's 0-based indexing,
+as returned by [`convert_2D_to_3D`](@ref). Boundaries read with [`ImportTurtleGrid`](@ref)
+(which stores faces under `"faceInfo"`) can also be written back directly.
+"""
 function write_turtle_grid(mesh, interfaces, boundaries, filename)
     # Takes in mesh, a collection of blocks stored in (x,y,z) format, and writes the mesh to a .mesh file in the format of the turtle grid.
     
@@ -166,8 +184,10 @@ function write_turtle_grid(mesh, interfaces, boundaries, filename)
             name_bytes = collect(codeunits(name))
 
             write(fid, name_bytes)
-            write(fid, Int32(length(bnd["faceInfo"])))
-            for face in bnd["faceInfo"]
+            # convert_2D_to_3D produces "faces"; readTurtleGrid produces "faceInfo"
+            faces = haskey(bnd, "faces") ? bnd["faces"] : bnd["faceInfo"]
+            write(fid, Int32(length(faces)))
+            for face in faces
                 write(fid, Int32(face["block"]), Int32.(face["start"]), Int32.(face["end"]))
             end
         end

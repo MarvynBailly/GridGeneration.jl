@@ -1,8 +1,10 @@
 """
+    SplitBlock(block, splitLocations, bndInfo, interInfo) -> (blocks, bndInfo, interInfo)
+
 Split single block grid into multiple blocks based on specified split locations.
 
 Inputs:
-- block: 3D array representing grid (dimensions: (ni, nj, nk))
+- block: grid array of size `[2, Ni, Nj]`
 - splitLocations: Array of two arrays [x-splits, y-splits] as grid indices
 - bndInfo: Boundary condition dictionary
 - interInfo: Interface connectivity dictionary

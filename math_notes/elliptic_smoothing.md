@@ -254,17 +254,15 @@ steps, ensuring the nonlinear metric feedback remains stable.
 
 ### 4.4 Convergence Criterion
 
-Convergence is measured by the L2 norm of the displacement in x-coordinates:
+Convergence is measured by the larger of the L2 norms of the x- and y-displacements:
 
 ```
-error = || x^{n+1} - x^n ||_2 = sqrt( sum_{i,j} (x^{n+1}[i,j] - x^n[i,j])^2 )
+error = max( || x^{n+1} - x^n ||_2 , || y^{n+1} - y^n ||_2 )
 ```
 
 The iteration terminates when `error < tol` (default: 1e-6) or after `max_iter`
-iterations (default: 5000).
-
-**Note**: Only x-displacement is monitored, not y. This is a simplification; in practice,
-both should converge together since they are driven by similar metric coefficients.
+iterations (default: 5000). Reaching `max_iter` without converging emits a warning, and a
+non-finite update (divergence) raises an error.
 
 ### 4.5 Iteration Complexity
 
@@ -376,11 +374,21 @@ x_eta_desired involves a correction proportional to the difference. The factor o
 
 ### 5.4 Boundary Metric Coefficients
 
-At the wall, the metric coefficients use the **desired** derivatives:
+At the wall, the metric coefficients use the **desired** derivatives. Recall that alpha
+multiplies the xi-xi term and equals |r_eta|^2, while gamma multiplies the eta-eta term and
+equals |r_xi|^2. At an eta-wall (bottom/top) the wall-normal direction is eta, so:
 
 ```
 alpha_b = x_eta_desired^2 + y_eta_desired^2 = s^2
 gamma_b = x_xi^2 + y_xi^2
+```
+
+At a xi-wall (left/right) the roles swap: the along-wall tangent is r_eta and the desired
+wall-normal derivative is r_xi, so:
+
+```
+alpha_b = x_eta^2 + y_eta^2
+gamma_b = x_xi_desired^2 + y_xi_desired^2 = s^2
 ```
 
 Note that beta_b = 0 by construction (orthogonality enforced), so the mixed-derivative

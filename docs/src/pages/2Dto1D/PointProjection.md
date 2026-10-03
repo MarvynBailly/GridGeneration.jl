@@ -1,4 +1,10 @@
 # Projecting Points
+
+!!! note "Earlier API"
+    The snippets in Step 2 use an earlier API (`SolveODE(M, Mx, N, a, b)`, `ComputeOptimalSpacing`,
+    `build_interps_linear`). The current equivalents are `GridGeneration.SolveODE(m, xs; solver)`,
+    `GridGeneration.ComputeOptimalNumberofPoints(sol, m)` and `GridGeneration.LinearInterpolate(xs, values)`;
+    see [Single Block with No Splitting](../SingleBlock/nosplitting.md) for the full current algorithm.
 ## 2D to 1D Projection
 
 Suppose we wish to solve the grid spacing along a discrete boundary $\Gamma$ given by the points $\gamma_i \in \R^2$ for $i=1,2,\dots, n$ where $n$ is the total number of points along the boundary. In-between each point is a linear interpolation $\Gamma_i$ for $i=1,2,\dots,n-1$ which defines the piecewise-continuous boundary $\Gamma$. That is

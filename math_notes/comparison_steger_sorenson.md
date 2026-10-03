@@ -243,10 +243,11 @@ switch between solver phases.
 
 ### This Implementation
 
-Only monitors L2 norm of x-displacement:
+Monitors the larger of the L2 norms of the x- and y-displacements, warns when `max_iter`
+is reached, and errors on a non-finite update:
 
 ```julia
-error = norm(x - x_old)
+err = max(norm(x - x_old), norm(y - y_old))
 ```
 
 This is adequate for detecting convergence but doesn't distinguish between:
@@ -361,7 +362,7 @@ block boundaries.
 3. **Under-relaxation instead of over-relaxation** -- necessary due to point SOR
 4. **Direct RHS forcing instead of separate P,Q control functions** -- minor accuracy impact
 5. **Linear spacing interpolation instead of prescribed s(xi)** -- less control over wall spacing
-6. **Single convergence metric** (L2 norm of x only) -- less diagnostic information
+6. **Single displacement-based convergence metric** (max of x and y L2 norms) -- no grid-quality diagnostics
 7. **Independent block smoothing** -- no inter-block coupling for derivative continuity
 
 ### Suggested Improvements (in priority order)
@@ -372,7 +373,7 @@ block boundaries.
 2. **Prescribed wall spacing**: Allow user to specify s(xi) along each boundary rather
    than interpolating from corner spacings.
 
-3. **Monitor both x and y convergence**: Track max(norm(x-x_old), norm(y-y_old)).
+3. ~~**Monitor both x and y convergence**: Track max(norm(x-x_old), norm(y-y_old)).~~ Done.
 
 4. **Coarse-fine sequencing**: Add a simple two-level multigrid for large grids.
 

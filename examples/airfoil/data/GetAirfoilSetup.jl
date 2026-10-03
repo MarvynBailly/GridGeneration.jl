@@ -3,10 +3,13 @@ using DelimitedFiles
 include("SetupDomain.jl")
 include("GetBoundary.jl")
 
-function GetAirfoilSetup(; airfoilPath = "examples/airfoil/A-airfoil.txt", radius = 3, cutN = 100, type =:cgrid)
-    """
-    Get the initial grid for the airfoil.
-    """
+"""
+    GetAirfoilSetup(; airfoilPath, radius = 3, cutN = 100, type = :cgrid)
+
+Build the initial single-block grid around the airfoil, plus its boundary conditions.
+Returns `(airfoilGrid, bndInfo, interInfo)`.
+"""
+function GetAirfoilSetup(; airfoilPath = joinpath(@__DIR__, "A-airfoil.txt"), radius = 3, cutN = 100, type =:cgrid)
 
     # read the airfoil data
     airfoilData = readdlm(airfoilPath, '\t', skipstart=1)

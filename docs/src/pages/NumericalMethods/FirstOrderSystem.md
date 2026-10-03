@@ -1,4 +1,10 @@
 # Numerical Methods - First Order System
+
+!!! note "Historical approach"
+    This page records an earlier approach. The DifferentialEquations.jl-based solver shown here
+    (`SolveODE(M, M_u1, N, x0, x1)`) is no longer part of the package. The current 1D solvers are
+    `GridGeneration.SolveODE(m, xs; solver = :analytic | :numeric)` and `SolveODEFixedN(m, xs, N; solver)`;
+    see [Semi-Analytical Method](./SemiAnalyticalMethod.md) and [Second Order BVP](./SecondOrderBVP.md).
 We wish to solve the ODE
 
 $\boxed{8 \sigma^4  M^2 x_s^2 x_{ss}  + 4 \sigma^4  M M_x x_s^4 + 4\sigma^2 m^2 M x_{ss} + 2 \sigma^2 m M_x x_s^2  = 0.}$

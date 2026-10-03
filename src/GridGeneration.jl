@@ -13,11 +13,17 @@ export SimParams, EllipticParams
 # Interpolation functions
 export TFI
 
+# Pipeline stages
+export SolveAllBlocks, SmoothBlocks
+
 # Block splitting
 export SplitMultiBlock
 
 # Metric utilities (for custom metric definition)
 export make_getMetric, setup_metric_tree, find_nearest_kd
+
+# Tortuga grid I/O
+export ImportTurtleGrid, readTurtleFields, convert_2D_to_3D, write_turtle_grid
 
 # ============================================================================
 # Implementation Files

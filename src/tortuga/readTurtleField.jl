@@ -13,12 +13,12 @@ defined on the grid blocks.
 - `filename::String`: The path to the turtle file.
 
 # Returns
-A `NamedTuple` containing:
+A tuple `(data, datatype, gridfile)`:
 - `data::Dict{String, Any}`: A dictionary mapping variable names to their data arrays.
 - `datatype::Dict{String, Int}`: A dictionary mapping variable names to their type identifiers.
 - `gridfile::String`: The name of the associated grid file as stored in the header.
 
-Returns `nothing` if a critical error occurs (e.g., wrong file format).
+Throws an error if the file is not a supported Turtle field file.
 """
 function readTurtleFields(filename::String)
     # --- Parameters from Turtle_parameters.h ---
@@ -55,8 +55,7 @@ function readTurtleFields(filename::String)
                 swap_endian = true
                 println("File is non-native endian. Will swap byte order.")
             else
-                @error "Cannot find correct endian. Terminating reading of grid..."
-                return nothing
+                error("$filename is not a Turtle field file (bad magic number)")
             end
         end
 
@@ -75,8 +74,7 @@ function readTurtleFields(filename::String)
         # --- Read Header ---
         version = read_scalar(fid, Int32)
         if version < 20000
-            @error "Error: this version of grid file not compatible. It only reads tortuga2 files."
-            return nothing
+            error("$filename has field file version $version; only tortuga2 files (version >= 20000) are supported")
         end
 
         nbrBlocks = read_scalar(fid, Int32)

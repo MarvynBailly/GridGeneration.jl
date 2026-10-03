@@ -28,10 +28,15 @@ The main entry point that:
 - Assembles all components
 - Displays the GUI window
 
-**Usage:**
-```julia
-include("GridGenerationGUI.jl")
+**Usage** (from the repository root):
+```bash
+julia --project=gui -e 'using Pkg; Pkg.instantiate()'   # once
+julia --project=gui -i gui/GridGenerationGUI.jl
 ```
+
+The GUI loads a Tortuga grid and metric field set by `gridFile` and `metricFieldFile` near the top
+of `GridGenerationGUI.jl` (paths relative to `gui/`). These data files are large and not tracked in
+git; copy them into `gui/` or point the variables at your own files. Saved grids go to `gui/output/`.
 
 ### `components/ui_components.jl`
 UI widget creation and layout functions:

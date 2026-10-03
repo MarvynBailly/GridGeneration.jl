@@ -31,8 +31,7 @@ function readTurtleGrid(gridfilename::String)
                 swap_endian = true
                 println("File is non-native endian. Swapping byte order.")
             else
-                @error "Cannot find correct endian. Terminating."
-                return
+                error("$gridfilename is not a Turtle grid file (bad magic number)")
             end
         end
 
@@ -48,8 +47,7 @@ function readTurtleGrid(gridfilename::String)
         # --- Read Header ---
         version = read_scalar(fid, Int32)
         if version < 20000
-            @error "This version of grid file is not compatible. It only reads tortuga2 files."
-            return
+            error("$gridfilename has grid file version $version; only tortuga2 files (version >= 20000) are supported")
         end
 
         nbrBlocks, nbrInterfaces, nbrBoundaries = [read_scalar(fid, Int32) for _ in 1:3]
@@ -197,15 +195,20 @@ end
 """
     ImportTurtleGrid(gridfilename::String)
 
-A simplified interface to read a Turtle grid file and extract 2D node coordinates
-along with interface and boundary information.
+Read a Turtle grid file and extract the 2D (first k-layer) node and cell-centre
+coordinates along with interface and boundary information.
 
 # Arguments
 - `gridfilename::String`: Path to the grid file.
 
 # Returns
-- `Xno2D`, `interfaceInfo`, `bndInfo`
-""" 
+`(Xno2D, Xcv2D, Xfa, interfaceInfo, bndInfo)`:
+- `Xno2D`: vector of `[2, Ni, Nj]` node-coordinate blocks
+- `Xcv2D`: vector of `[2, Ni-1, Nj-1]` cell-centre blocks
+- `Xfa`: face coordinates as read from the file
+- `interfaceInfo`, `bndInfo`: connectivity with Tortuga's 0-based indices
+  (boundary faces are stored under `"faceInfo"`)
+"""
 function ImportTurtleGrid(gridfilename::String)
     Xno, Xcv, Xfa,interfaceInfo,bndInfo = readTurtleGrid(gridfilename)
     

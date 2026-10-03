@@ -1,3 +1,6 @@
+# ARCHIVED PROTOTYPE: standalone elliptic-smoother experiment kept for reference.
+# It predates the package API (it defines its own EllipticParams and calls an undefined
+# GetAirfoilGrid) and does not run as-is. Use GridGeneration.EllipticSolver / SmoothBlocks instead.
 using Plots
 using LinearAlgebra
 

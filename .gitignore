@@ -1,4 +1,6 @@
 docs/build
+# generated from math_notes/ by docs/make.jl
+docs/src/pages/Theory/
 
 Manifest.toml
 
@@ -11,6 +13,7 @@ CLAUDE.md
 *.grid
 *.metric
 gui/output/
+examples/output/
 
 # LaTeX build artifacts
 *.aux

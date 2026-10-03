@@ -32,37 +32,37 @@ The metric field is queried during ODE solving to adapt grid point distribution.
 ## Critical Workflows
 
 ### Running Tests
-```julia
-# From Julia REPL at project root
-using Pkg; Pkg.activate(".")
-include("test/runtest.jl")
+```bash
+julia --project=. -e 'using Pkg; Pkg.test()'
 ```
-Tests are modular: `test_exports.jl`, `test_interpolators.jl`, `test_multiblock_splitting.jl`, etc.
+Tests are modular (`test_solvers.jl`, `test_integration.jl`, `test_multiblock_splitting.jl`, `test_tortuga.jl`, ...),
+orchestrated by `test/runtests.jl`, and include Aqua.jl quality checks.
 
 ### Building Documentation
-```julia
-# From docs/ directory
-using Pkg; Pkg.activate(".")
-include("make.jl")
+```bash
+julia --project=docs -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()'   # once
+julia --project=docs docs/make.jl
 ```
-Docs use Documenter.jl with examples in `docs/src/pages/`. Built output in `docs/build/`.
+Docs use Documenter.jl with sources in `docs/src/pages/`; output goes to `docs/build/` (ignored).
+`docs/src/pages/Theory/` is generated from `math_notes/` by `make.jl` (edit the notes, not the copies).
+`checkdocs = :exports`, so every exported symbol needs a docstring listed in `docs/src/pages/api.md`.
 
 ### Example Execution Pattern
 See `examples/generalExample.jl` for canonical workflow:
 1. Define domain boundaries (use helper functions in `examples/airfoil/data/` or `examples/rectangle/data/`)
 2. Create initial grid via `TFI(boundary)`
-3. Define metric field `M` (custom or from file)
+3. Define metric field `M(x, y) -> (M11, M22)` (custom or from file)
 4. Configure `SimParams` and `EllipticParams`
 5. Call `GenerateGrid(initialGrid, bndInfo, interInfo, M; params=params)`
 
-Returns: `(smoothBlocks, blocks, bndInfo, interInfo, finalErrors, finalIterations)`
+Returns a NamedTuple `(smoothBlocks, blocks, bndInfo, interInfo, finalErrors, finalIterations)`.
+Run examples with `julia --project=examples examples/generalExample.jl` (see `examples/README.md`).
 
 ### Interactive GUI
-Two GUI versions available in `examples/gui/`:
-- **GLMakie GUI** (`GridGenerationGUI.jl`): Native desktop app with fast OpenGL rendering
-- **Web GUI** (`GridGenerationWebGUI.jl`): Browser-based interface using Interact.jl + Blink.jl
-
-Launch via `julia launcher.jl` from `examples/gui/` directory. Provides interactive controls for domain loading, split selection, solver configuration, and real-time visualization.
+A GLMakie desktop GUI lives in `gui/` (`gui/GridGenerationGUI.jl`, with its own `gui/Project.toml`).
+Launch with `julia --project=gui gui/GridGenerationGUI.jl`. It loads a Tortuga grid and metric field
+from `gui/` (these large data files are not tracked in git) and saves grids to `gui/output/`.
+Provides interactive controls for split selection, solver configuration, and visualization.
 
 ## Project-Specific Patterns
 
@@ -81,7 +81,7 @@ Example from `examples/airfoil/data/GetBoundary.jl` shows structure.
 
 ### Solver Selection Logic
 - **Analytic solver** (`src/numerics/AnalyticSolver.jl`): Semi-analytic integration via cumulative trapezoidal rule, suitable for smooth metrics
-- **Numeric solver** (Thomas algorithm): For more complex boundary conditions
+- **Numeric solver** (`src/numerics/SecondOrderSolver.jl`): fixed-point iteration with a Thomas tridiagonal solve and under-relaxation (ω = 0.5)
 - Choice affects `SolveAllBlocks()` and `GetOptNEdgePair()` behavior
 
 ### Elliptic Forcing Parameters
@@ -93,26 +93,30 @@ Example from `examples/airfoil/data/GetBoundary.jl` shows structure.
 ## Module Exports & API
 **Main entry point**: `GenerateGrid()`
 **Public types**: `SimParams`, `EllipticParams`
+**Pipeline stages**: `SplitMultiBlock()`, `SolveAllBlocks()`, `SmoothBlocks()`
 **Utilities**: `TFI()`, `make_getMetric()`, `setup_metric_tree()`, `find_nearest_kd()`
+**Tortuga I/O**: `ImportTurtleGrid()`, `readTurtleFields()`, `convert_2D_to_3D()`, `write_turtle_grid()`
 
 Private functions use `GridGeneration.` prefix. See `src/GridGeneration.jl` for complete export list.
 
 ## Development Notes
-- **No CI beyond docs deployment**: Run tests manually before commits
-- **Documenter assets**: GIFs in `docs/src/assets/gifs/`, images in `docs/src/assets/images/`
-- **Julia version**: Locked to 1.10.4 in `Project.toml`
-- **Dependencies**: Minimal (LinearAlgebra, NearestNeighbors, Documenter)
+- **CI**: `.github/workflows/CI.yml` runs `Pkg.test()` on Julia 1.10 and 1; `Docs.yml` builds/deploys docs; CompatHelper and TagBot are configured
+- **Documenter assets**: GIFs in `docs/src/assets/gifs/`, images in `docs/src/assets/images/` (prefer PNG over SVG for dense meshes)
+- **Julia version**: `julia = "1.10"` compat in `Project.toml`
+- **Dependencies**: Minimal (LinearAlgebra, NearestNeighbors); tests also use Aqua, Statistics, Test
 
 ### Common Pitfalls
 1. Grid array indexing: Remember `[coord, i, j]` not `[i, j, coord]`
-2. Boundary order: Always [top, right, bottom, left] or TFI will produce incorrect grids
+2. Boundary order: Always [top, right, bottom, left], and every edge runs left→right / bottom→top, or TFI will produce a twisted grid
 3. Split locations: Indices refer to the **initial grid** before any splitting
 4. Interface orientation: Vertical interfaces have varying i-index, horizontal have varying j-index
 
 ## File Organization Logic
 - `src/`: Core module with subdirectories by functionality (numerics, interpolators, blocksplitting, metric, projections, smoothing)
 - `examples/`: Complete use cases with domain setup and metric definition
-- `test/`: One test file per major component, orchestrated by `runtest.jl`
+- `test/`: One test file per major component, orchestrated by `runtests.jl`
+- `gui/`: GLMakie GUI (separate environment)
+- `math_notes/`: Theory notes, published into the docs' Theory section
 - `docs/`: Documenter.jl setup with markdown sources in `src/pages/`
 
 When adding features, follow existing subdirectory patterns and update relevant test files.
