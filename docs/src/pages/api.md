@@ -32,6 +32,8 @@ find_nearest_kd
 ## Tortuga grid I/O
 
 ```@docs
+setup_turtle_grid_domain
+load_turtle_grid
 ImportTurtleGrid
 readTurtleFields
 convert_2D_to_3D

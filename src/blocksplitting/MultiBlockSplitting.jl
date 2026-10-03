@@ -362,93 +362,61 @@ function SplitMultiBlock(blocks::Vector, splitRequests, bndInfo, interInfo)
         # Determine interface orientation
         orientation = GetInterfaceOrientation(oldInter)
         
-        if orientation == 1  # Horizontal interface (blocks side-by-side, j varies along interface)
-            # The interface runs in the j-direction
-            # Need to match j-segments between the two blocks
-            # i-position is fixed at the interface
-            
-            # For horizontal interface, only the edge i-segments touch the interface:
-            # - BlockA: rightmost i-segment (i = numIsegsA) touches the interface
-            # - BlockB: leftmost i-segment (i = 1) touches the interface
-            
-            # Block A's j-segments should match Block B's j-segments
-            if numJsegsA == numJsegsB
-                # Iterate through all j-segments (these align along the interface)
-                for jSeg in 1:numJsegsA
-                    # Only the edge i-segments connect across the interface
-                    iSegA = numIsegsA  # Rightmost segment of A touches the interface
-                    iSegB = 1           # Leftmost segment of B touches the interface
-                    
-                    # Calculate sub-block index (row-major order: [i, j])
-                    idxA = (jSeg - 1) * numIsegsA + iSegA
-                    idxB = (jSeg - 1) * numIsegsB + iSegB
-                    
-                    if idxA <= length(newIdsA) && idxB <= length(newIdsB)
-                        newInter = copy(oldInter)
-                        newInter["blockA"] = newIdsA[idxA]
-                        newInter["blockB"] = newIdsB[idxB]
-                        
-                        # Get dimensions of the new sub-blocks
-                        blockA = allNewBlocks[newIdsA[idxA]]
-                        blockB = allNewBlocks[newIdsB[idxB]]
-                        NxA = size(blockA, 2); NyA = size(blockA, 3)
-                        NxB = size(blockB, 2); NyB = size(blockB, 3)
-                        
-                        # For horizontal interface (j varies), i is fixed at edge
-                        # BlockA is on the left (i=Nx), BlockB is on the right (i=1)
-                        newInter["start_blkA"] = [NxA, 1, 1]
-                        newInter["end_blkA"] = [NxA, NyA, 1]
-                        newInter["start_blkB"] = [1, 1, 1]
-                        newInter["end_blkB"] = [1, NyB, 1]
-                        
-                        push!(newInterInfo, newInter)
-                    end
-                end
+        # Each side of the interface lies on one edge of its block (left/right for a
+        # j-running interface, bottom/top for an i-running one), and the two sides may run
+        # in opposite directions. Only the sub-blocks along that edge touch the interface.
+        sA0, eA0 = oldInter["start_blkA"], oldInter["end_blkA"]
+        sB0, eB0 = oldInter["start_blkB"], oldInter["end_blkB"]
+        along = orientation == 1 ? 2 : 1      # index that varies along the interface
+        across = 3 - along                    # index that is fixed (which edge)
+        farA = sA0[across] != 1               # A on its right/top edge (else left/bottom)
+        farB = sB0[across] != 1
+        revA = sA0[along] > eA0[along]        # A's indices run backwards along the interface
+        revB = sB0[along] > eB0[along]
+
+        numAlongA = along == 1 ? numIsegsA : numJsegsA
+        numAlongB = along == 1 ? numIsegsB : numJsegsB
+        if numAlongA != numAlongB
+            @warn "Interface between blocks $oldA and $oldB has $numAlongA vs $numAlongB segments after splitting; dropping it"
+            continue
+        end
+
+        # sub-block index (row-major [i, j]) of segment `seg` along the edge
+        function edge_subblock(seg, far, numIsegs, numJsegs)
+            if along == 1   # i varies along the interface; edge is j = 1 or j = Nj
+                jSeg = far ? numJsegs : 1
+                return (jSeg - 1) * numIsegs + seg
+            else            # j varies; edge is i = 1 or i = Ni
+                iSeg = far ? numIsegs : 1
+                return (seg - 1) * numIsegs + iSeg
             end
-            
-        else  # Vertical interface (blocks stacked vertically, i varies along interface)
-            # The interface runs in the i-direction
-            # Need to match i-segments between the two blocks
-            # j-position is fixed at the interface
-            
-            # For vertical interface, only the edge j-segments touch the interface:
-            # - BlockA: topmost j-segment (j = numJsegsA) touches the interface
-            # - BlockB: bottommost j-segment (j = 1) touches the interface
-            
-            # Block A's i-segments should match Block B's i-segments
-            if numIsegsA == numIsegsB
-                # Iterate through all i-segments (these align along the interface)
-                for iSeg in 1:numIsegsA
-                    # Only the edge j-segments connect across the interface
-                    jSegA = numJsegsA  # Topmost segment of A touches the interface
-                    jSegB = 1           # Bottommost segment of B touches the interface
-                    
-                    # Calculate sub-block index (row-major order: [i, j])
-                    idxA = (jSegA - 1) * numIsegsA + iSeg
-                    idxB = (jSegB - 1) * numIsegsB + iSeg
-                    
-                    if idxA <= length(newIdsA) && idxB <= length(newIdsB)
-                        newInter = copy(oldInter)
-                        newInter["blockA"] = newIdsA[idxA]
-                        newInter["blockB"] = newIdsB[idxB]
-                        
-                        # Get dimensions of the new sub-blocks
-                        blockA = allNewBlocks[newIdsA[idxA]]
-                        blockB = allNewBlocks[newIdsB[idxB]]
-                        NxA = size(blockA, 2); NyA = size(blockA, 3)
-                        NxB = size(blockB, 2); NyB = size(blockB, 3)
-                        
-                        # For vertical interface (i varies), j is fixed at edge
-                        # BlockA is on the bottom (j=Ny), BlockB is on the top (j=1)
-                        newInter["start_blkA"] = [1, NyA, 1]
-                        newInter["end_blkA"] = [NxA, NyA, 1]
-                        newInter["start_blkB"] = [1, 1, 1]
-                        newInter["end_blkB"] = [NxB, 1, 1]
-                        
-                        push!(newInterInfo, newInter)
-                    end
-                end
-            end
+        end
+        # start/end indices on a sub-block of size (Nx, Ny)
+        function edge_indices(far, rev, Nx, Ny)
+            N = (Nx, Ny)
+            fixed = far ? N[across] : 1
+            lo, hi = rev ? (N[along], 1) : (1, N[along])
+            s = zeros(Int, 3); e = zeros(Int, 3)
+            s[across] = fixed; e[across] = fixed
+            s[along] = lo; e[along] = hi
+            s[3] = 1; e[3] = 1
+            return s, e
+        end
+
+        for segA in 1:numAlongA
+            segB = (revA == revB) ? segA : numAlongA - segA + 1
+            idxA = edge_subblock(segA, farA, numIsegsA, numJsegsA)
+            idxB = edge_subblock(segB, farB, numIsegsB, numJsegsB)
+            (idxA <= length(newIdsA) && idxB <= length(newIdsB)) || continue
+
+            newInter = copy(oldInter)
+            newInter["blockA"] = newIdsA[idxA]
+            newInter["blockB"] = newIdsB[idxB]
+            blockA = allNewBlocks[newIdsA[idxA]]
+            blockB = allNewBlocks[newIdsB[idxB]]
+            newInter["start_blkA"], newInter["end_blkA"] = edge_indices(farA, revA, size(blockA, 2), size(blockA, 3))
+            newInter["start_blkB"], newInter["end_blkB"] = edge_indices(farB, revB, size(blockB, 2), size(blockB, 3))
+            push!(newInterInfo, newInter)
         end
     end
     

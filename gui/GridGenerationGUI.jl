@@ -46,15 +46,17 @@ M = create_default_metric(1000)
 
 # Grid/metric data files are not tracked in git (they are large); place them under gui/ locally.
 metricFieldFile = joinpath(@__DIR__, "step", "BFstepTest_entropy.metric")
-# gridFile = joinpath(@__DIR__, "step", "coarseGrids", "BFstep_4.41M_coarseIJK.grid")
+# grid the metric field was computed on (its cells index the field)
+metricGridFile = joinpath(@__DIR__, "step", "coarseGrids", "BFstep_4.41M_coarseIJK.grid")
+# grid to regenerate (here a grid saved earlier from the GUI)
 gridFile = joinpath(@__DIR__, "grid_20251030_221406.grid")
 
-for f in (metricFieldFile, gridFile)
+for f in (metricFieldFile, metricGridFile, gridFile)
     isfile(f) || error("GUI input file not found: $f\nThese data files are not stored in the repository; copy them into gui/ or point gridFile/metricFieldFile at your own Turtle grid and metric.")
 end
 
 initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
-    metricFieldFile, gridFile
+    metricFieldFile, gridFile; metricGridFile = metricGridFile
 )
 
 # load in airfoil example
