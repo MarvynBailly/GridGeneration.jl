@@ -79,8 +79,12 @@ GridGeneration.SimParams
 """
 function SimParams(; useSplitting::Bool=true, 
             splitLocations::Vector{Vector{Int}}=Vector{Vector{Int}}(), 
-            useEdgeSolver::Bool=true, boundarySolver::Symbol=:none,
-            useSmoothing::Bool=true, smoothMethod::Symbol=:none,
+            useEdgeSolver::Bool=true, boundarySolver::Symbol=:analytic,
+            useSmoothing::Bool=true, smoothMethod::Symbol=:ellipticSS,
             elliptic::EllipticParams=EllipticParams())
+            boundarySolver in (:analytic, :numeric) ||
+                throw(ArgumentError("boundarySolver must be :analytic or :numeric, got :$boundarySolver"))
+            smoothMethod in (:ellipticSS,) ||
+                throw(ArgumentError("smoothMethod must be :ellipticSS, got :$smoothMethod"))
             return SimParams(useSplitting, splitLocations, useEdgeSolver, boundarySolver, useSmoothing, smoothMethod, elliptic)
 end

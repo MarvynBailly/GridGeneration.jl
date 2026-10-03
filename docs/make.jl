@@ -47,6 +47,8 @@ makedocs(
         ],
 
         "Multi-Block Grid Input" => Any["Multi-Block Input" => "pages/MultiBlock/multiblock.md"],
+
+        "API Reference" => "pages/api.md",
     ],
 
     # Optional quality gates once you’re ready:

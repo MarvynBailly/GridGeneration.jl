@@ -2,15 +2,9 @@
 CurrentModule = GridGeneration
 ```
 
-```@docs
-GridGeneration.EllipticParams
-GridGeneration.SimParams
-GridGeneration.TFI
-GridGeneration.make_getMetric
-GridGeneration.SplitMultiBlock
-```
-
 # GridGeneration.jl Documentation
+
+See the [API Reference](./pages/api.md) for the documented public functions and types.
 
 Welcome to the documentation and formulation for GridGeneration.jl
 

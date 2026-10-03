@@ -46,11 +46,11 @@ function SolveBlockFixedN(block, bndInfo, interInfo, metricFunc, optNs; solver=:
 
     left   = block[:, 1, :]
     right  = block[:, end, :]
-    projectedLeft, projectedRight = ProcessEdgePairFixedN(left, right, metricFunc, Ni)
+    projectedLeft, projectedRight = ProcessEdgePairFixedN(left, right, metricFunc, Ni; solver=solver)
 
     bottom = block[:, :, 1]
     top    = block[:, :, end]
-    projectedBottom, projectedTop = ProcessEdgePairFixedN(bottom, top, metricFunc, Nj)
+    projectedBottom, projectedTop = ProcessEdgePairFixedN(bottom, top, metricFunc, Nj; solver=solver)
 
     if tfi_method == :TFI
         computedBlock = GridGeneration.TFI([projectedTop', projectedRight', projectedBottom', projectedLeft'])

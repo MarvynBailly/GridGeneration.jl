@@ -13,11 +13,10 @@ end
 
 function SolveSecondOrder(f, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbose=false)
     
-    h = 1.0 / N
+    h = 1.0 / (N - 1)
 
-    u = collect(xs)  # initial guess: linear
-    u_new = similar(u)
-    
+    u = collect(xs)  # initial guess: input points
+
     resNorm = zeros(max_iter)
 
     # Storage for tridiagonal matrix
@@ -58,7 +57,7 @@ function SolveSecondOrder(f, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbo
         if verbose @info("Iteration $iter: norm = $(resNorm[iter])") end
 
         if resNorm[iter] < tol
-            @info("Converged in $iter iterations with norm $(resNorm[iter])")
+            @debug("Converged in $iter iterations with norm $(resNorm[iter])")
             resNorm = resNorm[1:iter]
             return u_new, resNorm
         end
@@ -66,6 +65,6 @@ function SolveSecondOrder(f, xs; N=100, omega=0.5, max_iter=100, tol=1e-8, verbo
         u = (1 - omega) * u + omega * u_new
     end
 
-    @info("Didn't converge with last norm $(resNorm[end])")
+    @warn("SolveSecondOrder didn't converge in $max_iter iterations (last residual norm $(resNorm[end]))")
     return u, resNorm
 end

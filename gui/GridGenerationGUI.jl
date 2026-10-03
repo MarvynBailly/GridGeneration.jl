@@ -10,7 +10,7 @@ Usage:
 """
 
 # === Library Imports ===
-include("C:\\Users\\admin\\Documents\\GitHub\\GridGeneration\\src\\GridGeneration.jl")
+include(joinpath(@__DIR__, "..", "src", "GridGeneration.jl"))
 using .GridGeneration
 
 using GLMakie

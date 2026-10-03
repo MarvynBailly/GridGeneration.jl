@@ -142,9 +142,9 @@ function compute_forcing_xi(x::Matrix, y::Matrix, a_decay::Float64, b_decay::Flo
         x_xixi = 0.5*(-7*x[wall, j] + 8*x[wall+dir*1, j] - x[wall+dir*2, j]) + dir*3*x_xi_desired
         y_xixi = 0.5*(-7*y[wall, j] + 8*y[wall+dir*1, j] - y[wall+dir*2, j]) + dir*3*y_xi_desired
 
-        # Boundary metrics
-        alpha_b = s^2
-        gamma_b = x_eta^2 + y_eta^2
+        # Boundary metrics: α = |r_η|² (along the wall), γ = |r_ξ|² = s² (desired wall-normal spacing)
+        alpha_b = x_eta^2 + y_eta^2
+        gamma_b = s^2
 
         # Compute final RHS for governing equations at boundary
         RHS_x_boundary[j] = -(alpha_b * x_xixi + gamma_b * x_etaeta)
@@ -174,7 +174,7 @@ function EllipticSolver(x::Matrix, y::Matrix; params)
     end
 
     Ni, Nj = size(x)
-    error = 0
+    err = 0.0
     finalIter = 0
 
 
@@ -208,6 +208,7 @@ function EllipticSolver(x::Matrix, y::Matrix; params)
         end
 
         x_old = copy(x)
+        y_old = copy(y)
         
         # Calculate metric terms based on current grid
         alpha, beta, gamma, J = calculate_metrics(x, y)
@@ -235,22 +236,24 @@ function EllipticSolver(x::Matrix, y::Matrix; params)
             end
         end
 
-        # Check for convergence
-        error = norm(x - x_old)
+        # Check for convergence (change in both coordinates)
+        err = max(norm(x - x_old), norm(y - y_old))
+
+        isfinite(err) || error("EllipticSolver diverged at iteration $iter (non-finite update); try a smaller ω or weaker wall forcing")
 
         if iter % 500 == 0
-            verbose_print("Iter: $iter, Error: $error")
+            verbose_print("Iter: $iter, Error: $err")
         end
-        if error < params.tol
-            verbose_print("Convergence reached at iteration $iter with error $error.")
+        if err < params.tol
+            verbose_print("Convergence reached at iteration $iter with error $err.")
             break
         end
         if iter == params.max_iter
-            verbose_print("Warning: Maximum iterations reached without convergence.")
+            @warn "EllipticSolver reached max_iter=$(params.max_iter) without converging (error $err > tol $(params.tol))"
         end
     end
-    
-    return x, y, error, finalIter
+
+    return x, y, err, finalIter
 end
 
 

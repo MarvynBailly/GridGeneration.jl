@@ -77,7 +77,7 @@ function setup_edge_solve_handler!(button, controls, M,
     console_obs)
     on(button.clicks) do _
         edge_type = controls[:edge_solver].selection[]
-        solver_sym = edge_type == "analytic" ? :analytic : :numerical
+        solver_sym = edge_type == "analytic" ? :analytic : :numeric
         
         current_blocks = split_blocks[]
         current_bnd_info = split_bndInfo[]
