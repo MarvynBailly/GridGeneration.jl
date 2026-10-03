@@ -44,9 +44,14 @@ M = create_default_metric(1000)
 # Alternative: Load from Turtle grid files
 # Uncomment the following lines to use Turtle grid data instead:
 
-metricFieldFile = "step/BFstepTest_entropy.metric"
-# gridFile = "step/coarseGrids/BFstep_4.41M_coarseIJK.grid"
-gridFile = "grid_20251030_221406.grid"
+# Grid/metric data files are not tracked in git (they are large); place them under gui/ locally.
+metricFieldFile = joinpath(@__DIR__, "step", "BFstepTest_entropy.metric")
+# gridFile = joinpath(@__DIR__, "step", "coarseGrids", "BFstep_4.41M_coarseIJK.grid")
+gridFile = joinpath(@__DIR__, "grid_20251030_221406.grid")
+
+for f in (metricFieldFile, gridFile)
+    isfile(f) || error("GUI input file not found: $f\nThese data files are not stored in the repository; copy them into gui/ or point gridFile/metricFieldFile at your own Turtle grid and metric.")
+end
 
 initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
     metricFieldFile, gridFile

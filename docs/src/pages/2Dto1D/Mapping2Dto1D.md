@@ -17,10 +17,10 @@ Putting everything together and using the analytical solver, we get the followin
 
 
 ### Uniform.
-![uniform](../../assets/images/PointProjection/ode_solution_uniform_local.svg)
+![uniform](../../assets/images/PointProjection/ode_solution_uniform_local.png)
 
 ### Clustering at $x=0.0$
-![x=0](../../assets/images/PointProjection/ode_solution_x=0_local.svg)
+![x=0](../../assets/images/PointProjection/ode_solution_x=0_local.png)
 
 
 Example with sparse sampling of the airfoil:
@@ -28,7 +28,7 @@ Example with sparse sampling of the airfoil:
 ![x=0](../../assets/images/PointProjection/ode_solution_sparse_x=0_local.svg)
 
 ### Clustering at $x=1$
-![x=1](../../assets/images/PointProjection/ode_solution_x=1_local.svg)
+![x=1](../../assets/images/PointProjection/ode_solution_x=1_local.png)
 
 Zooming in on the leading edge of the airfoil, we see a potential issue: the solution boundary is no longer aligned with the real boundary:
 
@@ -39,10 +39,10 @@ Zooming in on the leading edge of the airfoil, we see a potential issue: the sol
 
 Here we have real metric data:
 
-![real-metric](../../assets/images/PointProjection/ode_solution_real_metric.svg)
+![real-metric](../../assets/images/PointProjection/ode_solution_real_metric.png)
 
 Since the spacing of the points is hard to see, the difference of the 1D points is plotted in red. 
 
 Here we show real metric data but scaled down by $0.001$:
 
-![real-metric](../../assets/images/PointProjection/ode_solution_real_metric_sparser.svg)
+![real-metric](../../assets/images/PointProjection/ode_solution_real_metric_sparser.png)

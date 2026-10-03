@@ -4,6 +4,7 @@ using GridGeneration
 @testset "GridGeneration.jl" begin
 
     # Test modules organized by functionality
+    include("test_aqua.jl")
     include("test_exports.jl")
     include("test_parameters.jl")
     include("test_interpolators.jl")

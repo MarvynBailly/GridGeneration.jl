@@ -6,3 +6,20 @@ Manifest.toml
 .vscode
 .vscode/*
 CLAUDE.md
+
+# large grid / metric data files and GUI output
+*.grid
+*.metric
+gui/output/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.synctex.gz
+*.fdb_latexmk
+*.fls

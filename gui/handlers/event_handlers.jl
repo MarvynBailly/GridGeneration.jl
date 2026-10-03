@@ -158,7 +158,9 @@ function setup_save_grid_handler!(button, final_blocks, final_bndInfo, final_int
         
         # Generate filename with timestamp
         timestamp = Dates.format(Dates.now(), "yyyymmdd_HHMMSS")
-        filename = "grid_$(timestamp).grid"
+        outdir = joinpath(dirname(@__DIR__), "output")
+        mkpath(outdir)
+        filename = joinpath(outdir, "grid_$(timestamp).grid")
         
         log_to_console(console_obs, "Saving grid to $filename...")
         log_to_console(console_obs, "  - $(length(blocks)) block(s)")

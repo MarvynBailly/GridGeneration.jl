@@ -265,7 +265,7 @@ splitLocations = [
 
 yields:
 
-![test](../../assets/images/SingleBlock/split_example.svg)
+![test](../../assets/images/SingleBlock/split_example.png)
 
 ## Solve All Blocks Algorithm
 
@@ -441,4 +441,4 @@ blocks, bndInfo, interInfo = GridGeneration.SolveAllBlocks(metricFunc, blocks, b
 
 which yields
 
-![example1](../../assets/images/SingleBlock/examples1.svg)
+![example1](../../assets/images/SingleBlock/examples1.png)
