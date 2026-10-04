@@ -1,5 +1,12 @@
 """
-Solve all blocks with optimal point distribution based on metric field.
+    SolveAllBlocks(metric, blocks, bndInfo, interInfo; solver=:analytic)
+        -> (blocks, bndInfo, interInfo)
+
+Redistribute the edge points of every block according to `metric(x, y) -> (M11, M22)` and
+rebuild each block with [`TFI`](@ref). The optimal number of points in each direction is
+computed per edge pair and shared across neighbouring blocks so interfaces stay conforming.
+`solver` is `:analytic` or `:numeric`. Boundary and interface indices are updated to the
+new block sizes.
 """
 function SolveAllBlocks(metric, blocks, bndInfo, interInfo; solver =:analytic)
     # blockDirOptN = similar(blocks)

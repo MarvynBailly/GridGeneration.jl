@@ -6,6 +6,16 @@ struct PtRef
     j::Int
 end
 
+"""
+    setup_metric_tree(data) -> (tree, refs)
+    setup_metric_tree(blocks::Vector{Array{Float64,3}}) -> (tree, refs)
+
+Build a KD-tree over the points of a gridded metric field for nearest-neighbour lookup.
+`data` is a dictionary with per-block coordinate matrices `data["x"]` and `data["y"]`;
+alternatively pass the blocks directly as `[2, Ni, Nj]` arrays.
+`refs[k]` records the (block, i, j) index of the k-th point in the tree.
+Use with [`find_nearest_kd`](@ref).
+"""
 function setup_metric_tree(data)
     refs = PtRef[]
     coords = Float64[]
@@ -42,6 +52,12 @@ function setup_metric_tree(blocks::Array{Array{Float64,3},1})
 end
 
 
+"""
+    find_nearest_kd(data, tree, refs, xq, yq) -> [M11, M22]
+
+Return the diagonal metric components `[M11, M22]` stored in `data["M11"]`/`data["M22"]`
+at the grid point nearest to `(xq, yq)`. `tree` and `refs` come from [`setup_metric_tree`](@ref).
+"""
 function find_nearest_kd(data, tree::KDTree, refs, xq, yq)
     idxs, dists = knn(tree, [xq,yq], 1)   # 1‐NN
     ref = refs[idxs[1]]

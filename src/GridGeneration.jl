@@ -13,11 +13,21 @@ export SimParams, EllipticParams
 # Interpolation functions
 export TFI
 
+# Pipeline stages
+export SolveAllBlocks, SmoothBlocks
+
 # Block splitting
 export SplitMultiBlock
 
+# Grid quality
+export ComputeAngleDeviation
+
 # Metric utilities (for custom metric definition)
 export make_getMetric, setup_metric_tree, find_nearest_kd
+
+# Tortuga grid I/O
+export ImportTurtleGrid, readTurtleFields, convert_2D_to_3D, write_turtle_grid
+export load_turtle_grid, setup_turtle_grid_domain
 
 # ============================================================================
 # Implementation Files
@@ -49,9 +59,12 @@ include("blocksplitting/SolveAllBlocks.jl")
 include("tortuga/readTurtleField.jl")
 include("tortuga/readTurtleGrid.jl")
 include("tortuga/writeTurtleGrid.jl")
+include("tortuga/TurtleDomain.jl")
 
 
 include("smoothing/SmoothBlocks.jl")
+
+include("quality/GridQuality.jl")
 
 
 end

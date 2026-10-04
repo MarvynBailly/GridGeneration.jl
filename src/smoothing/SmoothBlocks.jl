@@ -1,7 +1,20 @@
 """
-Smooth grid blocks using elliptic PDE solver.
+    SmoothBlocks(blocks; solver=:ellipticSS, params)
+
+Smooth grid blocks using the elliptic PDE solver. `params` is either a single
+`EllipticParams` applied to every block or a vector with one `EllipticParams` per block.
+
+Returns `(smoothBlocks, finalErrors, finalIterations)`.
 """
 function SmoothBlocks(blocks; solver=:ellipticSS, params)
+    solver == :ellipticSS || throw(ArgumentError("Unknown smoothing method :$solver (expected :ellipticSS)"))
+
+    if params isa EllipticParams
+        params = fill(params, length(blocks))
+    end
+    length(params) == length(blocks) ||
+        throw(ArgumentError("got $(length(params)) EllipticParams for $(length(blocks)) blocks"))
+
     smoothBlocks = Vector{Array{Float64,3}}(undef, length(blocks))
     finalErrors = Vector{Float64}(undef, length(blocks))
     finalIterations = Vector{Int}(undef, length(blocks))

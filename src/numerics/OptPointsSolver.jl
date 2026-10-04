@@ -19,14 +19,19 @@ function ComputeOptimalNumberofPoints(x, M)
     # trapezoidal integration
     numer = 0.0
     denom = 0.0
-    @inbounds for i in 2:Nn-1
-        Δs   = s[i+1] - s[i]
-        p    = 0.5*(M(x[i-1])*x_s[i-1]^2 + M(x[i])*x_s[i]^2)
-        numer += p * Δs
-        denom += (p^2) * Δs
+    p_prev = M(x[1])*x_s[1]^2
+    @inbounds for i in 2:Nn
+        Δs   = s[i] - s[i-1]
+        p    = M(x[i])*x_s[i]^2
+        numer += 0.5*(p_prev + p) * Δs
+        denom += 0.5*(p_prev^2 + p^2) * Δs
+        p_prev = p
     end
 
+    (numer > 0 && denom > 0) || throw(ArgumentError("cannot compute the optimal number of points: metric integrals must be positive (got ∫p = $numer, ∫p² = $denom)"))
+
     sigma_opt = sqrt(numer / denom)
-    N_opt = floor(Int, 1/(sigma_opt))
+    # at least 3 points so one-sided second-order stencils remain valid
+    N_opt = max(3, floor(Int, 1/(sigma_opt)))
     return N_opt
 end

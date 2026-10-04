@@ -1,7 +1,28 @@
 docs/build
+# generated from math_notes/ by docs/make.jl
+docs/src/pages/Theory/
 
 Manifest.toml
 
 # vscode stuff
 .vscode
 .vscode/*
+CLAUDE.md
+
+# large grid / metric data files and GUI output
+*.grid
+*.metric
+gui/output/
+examples/output/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.synctex.gz
+*.fdb_latexmk
+*.fls

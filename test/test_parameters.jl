@@ -7,7 +7,12 @@ using GridGeneration
         params = SimParams()
         @test params isa SimParams
         @test params.useSplitting == true
-        @test params.boundarySolver == :none
+        @test params.boundarySolver == :analytic
+        @test params.smoothMethod == :ellipticSS
+
+        # Invalid solver symbols are rejected up front
+        @test_throws ArgumentError SimParams(boundarySolver = :numerical)
+        @test_throws ArgumentError SimParams(smoothMethod = :none)
         
         # Test with custom values
         params2 = SimParams(

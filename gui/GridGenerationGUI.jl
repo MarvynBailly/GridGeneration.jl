@@ -10,7 +10,7 @@ Usage:
 """
 
 # === Library Imports ===
-include("C:\\Users\\admin\\Documents\\GitHub\\GridGeneration\\src\\GridGeneration.jl")
+include(joinpath(@__DIR__, "..", "src", "GridGeneration.jl"))
 using .GridGeneration
 
 using GLMakie
@@ -44,13 +44,20 @@ M = create_default_metric(1000)
 # Alternative: Load from Turtle grid files
 # Uncomment the following lines to use Turtle grid data instead:
 
-# metricFieldFile = "step/BFstepTest_entropy.metric"
-# # gridFile = "step/coarseGrids/BFstep_4.41M_coarseIJK.grid"
-# gridFile = "grid_20251030_221406.grid"
+# Grid/metric data files are not tracked in git (they are large); place them under gui/ locally.
+metricFieldFile = joinpath(@__DIR__, "step", "BFstepTest_entropy.metric")
+# grid the metric field was computed on (its cells index the field)
+metricGridFile = joinpath(@__DIR__, "step", "coarseGrids", "BFstep_4.41M_coarseIJK.grid")
+# grid to regenerate (here a grid saved earlier from the GUI)
+gridFile = joinpath(@__DIR__, "grid_20251030_221406.grid")
 
-# initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
-#     metricFieldFile, gridFile
-# )
+for f in (metricFieldFile, metricGridFile, gridFile)
+    isfile(f) || error("GUI input file not found: $f\nThese data files are not stored in the repository; copy them into gui/ or point gridFile/metricFieldFile at your own Turtle grid and metric.")
+end
+
+initialGrid, initialBndInfo, initialInterfaceInfo, M = setup_turtle_grid_domain(
+    metricFieldFile, gridFile; metricGridFile = metricGridFile
+)
 
 # load in airfoil example
 # include("../examples/airfoil/airfoil.jl")

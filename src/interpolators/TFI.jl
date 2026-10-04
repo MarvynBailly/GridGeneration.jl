@@ -1,7 +1,24 @@
 """
-2D Transfinite interpolation (Coons patch).
-Input boundary with order: (top, right, bottom, left), each as an N×2 array.
-Returns X', Y' (matching your original orientation).
+    TFI(boundary) -> grid
+
+2D transfinite interpolation (Coons patch) of a block from its four edges.
+
+`boundary = [top, right, bottom, left]`, each an `N×2` array of `(x, y)` points. All edges run
+in the positive parameter direction: `top` and `bottom` from left to right (`N1` points each),
+`left` and `right` from bottom to top (`N2` points each), with matching corner points.
+
+Returns a `[2, N1, N2]` array: `grid[1, i, j]` and `grid[2, i, j]` are the x and y coordinates
+of node `(i, j)`, with `i` running along `bottom`/`top` and `j` along `left`/`right`.
+
+# Example
+```julia
+N = 5
+top    = [range(0, 1, length=N) ones(N)]
+right  = [ones(N) range(0, 1, length=N)]
+bottom = [range(0, 1, length=N) zeros(N)]
+left   = [zeros(N) range(0, 1, length=N)]
+grid = TFI([top, right, bottom, left])   # 2×5×5 uniform grid on the unit square
+```
 """
 function TFI(boundary)
     top, right, bottom, left = boundary
