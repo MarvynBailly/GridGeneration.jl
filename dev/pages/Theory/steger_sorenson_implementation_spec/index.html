@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Line Gauss-Seidel Spec (planned) · GridGeneration.jl</title><meta name="title" content="Line Gauss-Seidel Spec (planned) · GridGeneration.jl"/><meta property="og:title" content="Line Gauss-Seidel Spec (planned) · GridGeneration.jl"/><meta property="twitter:title" content="Line Gauss-Seidel Spec (planned) · GridGeneration.jl"/><meta name="description" content="Documentation for GridGeneration.jl."/><meta property="og:description" content="Documentation for GridGeneration.jl."/><meta property="twitter:description" content="Documentation for GridGeneration.jl."/><meta property="og:url" content="https://MarvynBailly.github.io/GridGeneration.jl/stable/pages/Theory/steger_sorenson_implementation_spec/"/><meta property="twitter:url" content="https://MarvynBailly.github.io/GridGeneration.jl/stable/pages/Theory/steger_sorenson_implementation_spec/"/><link rel="canonical" href="https://MarvynBailly.github.io/GridGeneration.jl/stable/pages/Theory/steger_sorenson_implementation_spec/"/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">GridGeneration.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><a class="tocitem" href="../../GettingStarted/">Getting Started</a></li><li><span class="tocitem">Ordinary Differential Equations</span><ul><li><a class="tocitem" href="../../ODE/ODEFormulation/">ODE Formulation</a></li><li><a class="tocitem" href="../../ODE/MathematicalWork/">Mathematical Work</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../Examples/airfoil/">Airfoil</a></li></ul></li><li><span class="tocitem">Numerical Methods</span><ul><li><a class="tocitem" href="../../NumericalMethods/FirstOrderSystem/">First Order System</a></li><li><a class="tocitem" href="../../NumericalMethods/SecondOrderBVP/">Second Order BVP ODE</a></li><li><a class="tocitem" href="../../NumericalMethods/SemiAnalyticalMethod/">Semi-Analytical Method</a></li></ul></li><li><span class="tocitem">2D to 1D Reformulation </span><ul><li><a class="tocitem" href="../../2Dto1D/Mapping2Dto1D/">Mapping 2D to 1D</a></li><li><a class="tocitem" href="../../2Dto1D/MetricReformulation/">Metric Reformulation</a></li><li><a class="tocitem" href="../../2Dto1D/PointProjection/">Projecting Points</a></li></ul></li><li><span class="tocitem">Grid Format</span><ul><li><a class="tocitem" href="../../GridFormat/">Grid Format</a></li></ul></li><li><span class="tocitem">Single Block Grid Input</span><ul><li><a class="tocitem" href="../../SingleBlock/nosplitting/">Single Block with No Splitting</a></li><li><a class="tocitem" href="../../SingleBlock/splitting/">Single Block with Splitting</a></li></ul></li><li><span class="tocitem">Multi-Block Grid Input</span><ul><li><a class="tocitem" href="../../MultiBlock/multiblock/">Multi-Block Input</a></li></ul></li><li><span class="tocitem">Theory: Elliptic Smoothing</span><ul><li><a class="tocitem" href="../steger_sorenson_theory/">Steger &amp; Sorenson Theory</a></li><li><a class="tocitem" href="../elliptic_smoothing/">Elliptic Smoothing (current)</a></li><li><a class="tocitem" href="../comparison_steger_sorenson/">Comparison with Steger &amp; Sorenson</a></li><li class="is-active"><a class="tocitem" href>Line Gauss-Seidel Spec (planned)</a><ul class="internal"><li><a class="tocitem" href="#1.-Scope-and-Interface"><span>1. Scope and Interface</span></a></li><li><a class="tocitem" href="#2.-Parameters-Struct"><span>2. Parameters Struct</span></a></li><li><a class="tocitem" href="#3.-Metric-Computation"><span>3. Metric Computation</span></a></li><li><a class="tocitem" href="#4.-Control-Function-Computation-(Wall-Forcing)"><span>4. Control Function Computation (Wall Forcing)</span></a></li><li><a class="tocitem" href="#5.-Thomas-Algorithm-(Tridiagonal-Solver)"><span>5. Thomas Algorithm (Tridiagonal Solver)</span></a></li><li><a class="tocitem" href="#6.-Line-Gauss-Seidel-Sweeps"><span>6. Line Gauss-Seidel Sweeps</span></a></li><li><a class="tocitem" href="#7.-Main-Solver-Loop"><span>7. Main Solver Loop</span></a></li><li><a class="tocitem" href="#8.-Wrapper-for-SmoothBlocks-Integration"><span>8. Wrapper for SmoothBlocks Integration</span></a></li><li><a class="tocitem" href="#9.-Complete-File-Structure"><span>9. Complete File Structure</span></a></li><li><a class="tocitem" href="#10.-Testing-Strategy"><span>10. Testing Strategy</span></a></li><li><a class="tocitem" href="#11.-Equation-Quick-Reference"><span>11. Equation Quick Reference</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Theory: Elliptic Smoothing</a></li><li class="is-active"><a href>Line Gauss-Seidel Spec (planned)</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Line Gauss-Seidel Spec (planned)</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/MarvynBailly/GridGeneration.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/MarvynBailly/GridGeneration.jl/blob/main/docs/src/pages/Theory/steger_sorenson_implementation_spec.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Implementation-Specification:-Steger-and-Sorenson-Elliptic-Grid-Smoother"><a class="docs-heading-anchor" href="#Implementation-Specification:-Steger-and-Sorenson-Elliptic-Grid-Smoother">Implementation Specification: Steger &amp; Sorenson Elliptic Grid Smoother</a><a id="Implementation-Specification:-Steger-and-Sorenson-Elliptic-Grid-Smoother-1"></a><a class="docs-heading-anchor-permalink" href="#Implementation-Specification:-Steger-and-Sorenson-Elliptic-Grid-Smoother" title="Permalink"></a></h1><div class="admonition is-info" id="Planned-design-543fa57f4fb8f482"><header class="admonition-header">Planned design<a class="admonition-anchor" href="#Planned-design-543fa57f4fb8f482" title="Permalink"></a></header><div class="admonition-body"><p>This is a design specification for a line Gauss-Seidel Steger &amp; Sorenson smoother. It is not implemented yet; the functions and <code>SSParams</code> type it describes do not exist in the package. The current smoother is described in the elliptic smoothing page.</p></div></div><p>A complete, self-contained specification for implementing the Steger &amp; Sorenson elliptic grid smoothing method in Julia. This document contains every equation, algorithm, data structure, and function signature needed to produce a working implementation for a single-block structured grid.</p><hr/><h2 id="1.-Scope-and-Interface"><a class="docs-heading-anchor" href="#1.-Scope-and-Interface">1. Scope and Interface</a><a id="1.-Scope-and-Interface-1"></a><a class="docs-heading-anchor-permalink" href="#1.-Scope-and-Interface" title="Permalink"></a></h2><h3 id="1.1-What-This-Solver-Does"><a class="docs-heading-anchor" href="#1.1-What-This-Solver-Does">1.1 What This Solver Does</a><a id="1.1-What-This-Solver-Does-1"></a><a class="docs-heading-anchor-permalink" href="#1.1-What-This-Solver-Does" title="Permalink"></a></h3><p>Takes a structured 2D grid (from TFI, edge solving, or any other source) and smooths the interior points by solving an elliptic PDE system. Boundary points are held fixed. Optionally enforces grid orthogonality at selected boundaries.</p><h3 id="1.2-Function-Signature"><a class="docs-heading-anchor" href="#1.2-Function-Signature">1.2 Function Signature</a><a id="1.2-Function-Signature-1"></a><a class="docs-heading-anchor-permalink" href="#1.2-Function-Signature" title="Permalink"></a></h3><pre><code class="language-julia hljs">function StegerSorensonSolver(
+    x::Matrix{Float64},       # Ni x Nj matrix of x-coordinates
+    y::Matrix{Float64};       # Ni x Nj matrix of y-coordinates
+    params::SSParams           # Parameters struct (see Section 2)
+) -&gt; (x, y, error, iterations)</code></pre><p><strong>Input grid format</strong>:</p><ul><li><code>x[i, j]</code> and <code>y[i, j]</code> are <span>$N_i \times N_j$</span> matrices</li><li><span>$i$</span> indexes the <span>$\xi$</span>-direction (<span>$i = 1$</span> is the left boundary, <span>$i = N_i$</span> is the right)</li><li><span>$j$</span> indexes the <span>$\eta$</span>-direction (<span>$j = 1$</span> is the bottom boundary, <span>$j = N_j$</span> is the top)</li><li>Boundary points (<span>$i = 1$</span>, <span>$i = N_i$</span>, <span>$j = 1$</span>, <span>$j = N_j$</span>) are <strong>fixed</strong> throughout the solve</li></ul><p><strong>Output</strong>:</p><ul><li><code>x, y</code>: the smoothed coordinate matrices (same size, boundaries unchanged)</li><li><code>error</code>: final convergence error (Float64)</li><li><code>iterations</code>: number of iterations performed (Int)</li></ul><h3 id="1.3-Integration-with-GridGeneration.jl"><a class="docs-heading-anchor" href="#1.3-Integration-with-GridGeneration.jl">1.3 Integration with GridGeneration.jl</a><a id="1.3-Integration-with-GridGeneration.jl-1"></a><a class="docs-heading-anchor-permalink" href="#1.3-Integration-with-GridGeneration.jl" title="Permalink"></a></h3><p>The solver replaces the inner call in <code>SmoothBlocks</code> (<code>src/smoothing/SmoothBlocks.jl</code>). The 3D block format <code>blocks[k][2, Ni, Nj]</code> is unpacked to 2D matrices before calling this solver:</p><pre><code class="language-julia hljs">x = blocks[k][1, :, :]    # Ni x Nj
+y = blocks[k][2, :, :]    # Ni x Nj
+x, y, err, iters = StegerSorensonSolver(x, y; params=params[k])
+blocks[k] = permutedims(cat(x, y, dims=3), (3,1,2))  # back to [2, Ni, Nj]</code></pre><hr/><h2 id="2.-Parameters-Struct"><a class="docs-heading-anchor" href="#2.-Parameters-Struct">2. Parameters Struct</a><a id="2.-Parameters-Struct-1"></a><a class="docs-heading-anchor-permalink" href="#2.-Parameters-Struct" title="Permalink"></a></h2><pre><code class="language-julia hljs">struct SSParams
+    # Iteration control
+    max_iter::Int              # Maximum iterations (default: 5000)
+    tol::Float64               # Convergence tolerance (default: 1e-6)
+    omega::Float64             # SOR relaxation factor (default: 1.2)
+
+    # Wall orthogonality forcing
+    useBottomWall::Bool        # Enforce orthogonality at j = 1 (default: false)
+    useTopWall::Bool           # Enforce orthogonality at j = Nj (default: false)
+    useLeftWall::Bool          # Enforce orthogonality at i = 1 (default: false)
+    useRightWall::Bool         # Enforce orthogonality at i = Ni (default: false)
+
+    # Forcing decay rates (one per wall)
+    decay_bottom::Float64      # Exponential decay rate for bottom wall (default: 0.4)
+    decay_top::Float64         # Exponential decay rate for top wall (default: 0.4)
+    decay_left::Float64        # Exponential decay rate for left wall (default: 0.4)
+    decay_right::Float64       # Exponential decay rate for right wall (default: 0.4)
+
+    # Diagnostics
+    verbose::Bool              # Print convergence info (default: false)
+    print_interval::Int        # Iterations between status prints (default: 500)
+
+    # Skip flag
+    skipBlock::Bool            # If true, return the input grid unchanged (default: false)
+end</code></pre><p><strong>Default constructor</strong>:</p><pre><code class="language-julia hljs">function SSParams(;
+    max_iter=5000, tol=1e-6, omega=1.2,
+    useBottomWall=false, useTopWall=false,
+    useLeftWall=false, useRightWall=false,
+    decay_bottom=0.4, decay_top=0.4,
+    decay_left=0.4, decay_right=0.4,
+    verbose=false, print_interval=500,
+    skipBlock=false
+)
+    return SSParams(
+        max_iter, tol, omega,
+        useBottomWall, useTopWall, useLeftWall, useRightWall,
+        decay_bottom, decay_top, decay_left, decay_right,
+        verbose, print_interval, skipBlock
+    )
+end</code></pre><h3 id="2.1-Parameter-Guidance"><a class="docs-heading-anchor" href="#2.1-Parameter-Guidance">2.1 Parameter Guidance</a><a id="2.1-Parameter-Guidance-1"></a><a class="docs-heading-anchor-permalink" href="#2.1-Parameter-Guidance" title="Permalink"></a></h3><table><tr><th style="text-align: right">Parameter</th><th style="text-align: right">Conservative</th><th style="text-align: right">Moderate</th><th style="text-align: right">Aggressive</th></tr><tr><td style="text-align: right"><span>$\omega$</span></td><td style="text-align: right"><span>$0.8 - 1.0$</span></td><td style="text-align: right"><span>$1.0 - 1.4$</span></td><td style="text-align: right"><span>$1.4 - 1.8$</span></td></tr><tr><td style="text-align: right">decay</td><td style="text-align: right"><span>$0.1$</span></td><td style="text-align: right"><span>$0.4$</span></td><td style="text-align: right"><span>$1.0$</span></td></tr><tr><td style="text-align: right">tol</td><td style="text-align: right"><span>$10^{-8}$</span></td><td style="text-align: right"><span>$10^{-6}$</span></td><td style="text-align: right"><span>$10^{-4}$</span></td></tr></table><ul><li>Start with <span>$\omega = 1.0$</span> (pure Gauss-Seidel). Increase toward 1.4 once convergence is confirmed.</li><li>If diverging, reduce <span>$\omega$</span> toward 0.8.</li><li><span>$\text{decay} \sim 0.1$</span> forces orthogonality deep into the domain; <span>$\text{decay} \sim 1.0$</span> only near the wall.</li></ul><hr/><h2 id="3.-Metric-Computation"><a class="docs-heading-anchor" href="#3.-Metric-Computation">3. Metric Computation</a><a id="3.-Metric-Computation-1"></a><a class="docs-heading-anchor-permalink" href="#3.-Metric-Computation" title="Permalink"></a></h2><h3 id="3.1-Function:-compute_metrics"><a class="docs-heading-anchor" href="#3.1-Function:-compute_metrics">3.1 Function: <code>compute_metrics</code></a><a id="3.1-Function:-compute_metrics-1"></a><a class="docs-heading-anchor-permalink" href="#3.1-Function:-compute_metrics" title="Permalink"></a></h3><p>Computes first derivatives and metric coefficients at every grid point.</p><pre><code class="language-julia hljs">function compute_metrics(x::Matrix, y::Matrix)
+    Ni, Nj = size(x)
+
+    x_xi  = zeros(Ni, Nj);  y_xi  = zeros(Ni, Nj)
+    x_eta = zeros(Ni, Nj);  y_eta = zeros(Ni, Nj)
+
+    # --- xi-derivatives ---
+    for j in 1:Nj
+        # Left boundary: forward difference
+        x_xi[1, j] = x[2, j] - x[1, j]
+        y_xi[1, j] = y[2, j] - y[1, j]
+        # Right boundary: backward difference
+        x_xi[Ni, j] = x[Ni, j] - x[Ni-1, j]
+        y_xi[Ni, j] = y[Ni, j] - y[Ni-1, j]
+        # Interior: central difference
+        for i in 2:Ni-1
+            x_xi[i, j] = (x[i+1, j] - x[i-1, j]) / 2.0
+            y_xi[i, j] = (y[i+1, j] - y[i-1, j]) / 2.0
+        end
+    end
+
+    # --- eta-derivatives ---
+    for i in 1:Ni
+        # Bottom boundary: forward difference
+        x_eta[i, 1] = x[i, 2] - x[i, 1]
+        y_eta[i, 1] = y[i, 2] - y[i, 1]
+        # Top boundary: backward difference
+        x_eta[i, Nj] = x[i, Nj] - x[i, Nj-1]
+        y_eta[i, Nj] = y[i, Nj] - y[i, Nj-1]
+        # Interior: central difference
+        for j in 2:Nj-1
+            x_eta[i, j] = (x[i, j+1] - x[i, j-1]) / 2.0
+            y_eta[i, j] = (y[i, j+1] - y[i, j-1]) / 2.0
+        end
+    end
+
+    # --- Metric coefficients ---
+    alpha = x_eta.^2 + y_eta.^2
+    beta  = x_xi .* x_eta + y_xi .* y_eta
+    gamma = x_xi.^2 + y_xi.^2
+    J     = x_xi .* y_eta - x_eta .* y_xi
+
+    return alpha, beta, gamma, J, x_xi, y_xi, x_eta, y_eta
+end</code></pre><p>The metric coefficients are:</p><p class="math-container">\[\alpha_{i,j} = (x_\eta)_{i,j}^2 + (y_\eta)_{i,j}^2\]</p><p class="math-container">\[\beta_{i,j} = (x_\xi)_{i,j}\,(x_\eta)_{i,j} + (y_\xi)_{i,j}\,(y_\eta)_{i,j}\]</p><p class="math-container">\[\gamma_{i,j} = (x_\xi)_{i,j}^2 + (y_\xi)_{i,j}^2\]</p><p class="math-container">\[J_{i,j} = (x_\xi)_{i,j}\,(y_\eta)_{i,j} - (x_\eta)_{i,j}\,(y_\xi)_{i,j}\]</p><p><strong>Note</strong>: This function returns the first-derivative arrays (<code>x_xi</code>, <code>y_xi</code>, <code>x_eta</code>, <code>y_eta</code>) in addition to the metric coefficients. The wall-forcing computation needs these derivatives, so returning them avoids redundant computation.</p><hr/><h2 id="4.-Control-Function-Computation-(Wall-Forcing)"><a class="docs-heading-anchor" href="#4.-Control-Function-Computation-(Wall-Forcing)">4. Control Function Computation (Wall Forcing)</a><a id="4.-Control-Function-Computation-(Wall-Forcing)-1"></a><a class="docs-heading-anchor-permalink" href="#4.-Control-Function-Computation-(Wall-Forcing)" title="Permalink"></a></h2><p>This section implements the core Steger &amp; Sorenson innovation: automatic computation of control functions <span>$P$</span> and <span>$Q$</span> from boundary orthogonality conditions.</p><h3 id="4.1-Function:-compute_control_functions"><a class="docs-heading-anchor" href="#4.1-Function:-compute_control_functions">4.1 Function: <code>compute_control_functions</code></a><a id="4.1-Function:-compute_control_functions-1"></a><a class="docs-heading-anchor-permalink" href="#4.1-Function:-compute_control_functions" title="Permalink"></a></h3><p>Computes <span>$P_{i,j}$</span> and <span>$Q_{i,j}$</span> arrays over the entire domain by evaluating boundary conditions at each enabled wall and decaying into the interior.</p><pre><code class="language-julia hljs">function compute_control_functions(
+    x::Matrix, y::Matrix,
+    alpha::Matrix, beta::Matrix, gamma::Matrix, J::Matrix,
+    x_xi::Matrix, y_xi::Matrix, x_eta::Matrix, y_eta::Matrix;
+    params::SSParams
+)
+    Ni, Nj = size(x)
+    P = zeros(Ni, Nj)
+    Q = zeros(Ni, Nj)
+
+    if params.useBottomWall
+        Pb, Qb = compute_PQ_eta_wall(x, y, x_xi, y_xi, x_eta, y_eta; wall=1)
+        for j in 1:Nj
+            decay = exp(-params.decay_bottom * abs(j - 1))
+            for i in 1:Ni
+                P[i,j] += Pb[i] * decay
+                Q[i,j] += Qb[i] * decay
+            end
+        end
+    end
+
+    if params.useTopWall
+        Pt, Qt = compute_PQ_eta_wall(x, y, x_xi, y_xi, x_eta, y_eta; wall=Nj)
+        for j in 1:Nj
+            decay = exp(-params.decay_top * abs(j - Nj))
+            for i in 1:Ni
+                P[i,j] += Pt[i] * decay
+                Q[i,j] += Qt[i] * decay
+            end
+        end
+    end
+
+    if params.useLeftWall
+        Pl, Ql = compute_PQ_xi_wall(x, y, x_xi, y_xi, x_eta, y_eta; wall=1)
+        for i in 1:Ni
+            decay = exp(-params.decay_left * abs(i - 1))
+            for j in 1:Nj
+                P[i,j] += Pl[j] * decay
+                Q[i,j] += Ql[j] * decay
+            end
+        end
+    end
+
+    if params.useRightWall
+        Pr, Qr = compute_PQ_xi_wall(x, y, x_xi, y_xi, x_eta, y_eta; wall=Ni)
+        for i in 1:Ni
+            decay = exp(-params.decay_right * abs(i - Ni))
+            for j in 1:Nj
+                P[i,j] += Pr[j] * decay
+                Q[i,j] += Qr[j] * decay
+            end
+        end
+    end
+
+    return P, Q
+end</code></pre><p>The decay propagation for each wall is:</p><p class="math-container">\[P_{i,j} = \sum_{\text{walls}} P_{\text{wall}} \cdot e^{-c\,|\,\text{dist from wall}\,|}\]</p><h3 id="4.2-Function:-compute_PQ_eta_wall"><a class="docs-heading-anchor" href="#4.2-Function:-compute_PQ_eta_wall">4.2 Function: <code>compute_PQ_eta_wall</code></a><a id="4.2-Function:-compute_PQ_eta_wall-1"></a><a class="docs-heading-anchor-permalink" href="#4.2-Function:-compute_PQ_eta_wall" title="Permalink"></a></h3><p>Computes <span>$P$</span> and <span>$Q$</span> at a bottom (<span>$j{=}1$</span>) or top (<span>$j{=}N_j$</span>) wall.</p><p><strong>Algorithm at each interior wall point <span>$i = 2, \ldots, N_i{-}1$</span>:</strong></p><p><strong>Step 1</strong> – Wall tangent derivatives (central differences along wall):</p><p class="math-container">\[(x_\xi)_w = \frac{x_{i+1,w} - x_{i-1,w}}{2}, \qquad (x_{\xi\xi})_w = x_{i+1,w} - 2\,x_{i,w} + x_{i-1,w}\]</p><p><strong>Step 2</strong> – Wall-normal spacing (linear interpolation of corner spacings):</p><p class="math-container">\[s_1 = \left\|\mathbf{r}_{1,w} - \mathbf{r}_{1,w+\text{dir}}\right\|, \qquad s_{N_i} = \left\|\mathbf{r}_{N_i,w} - \mathbf{r}_{N_i,w+\text{dir}}\right\|\]</p><p class="math-container">\[s = s_1 + (s_{N_i} - s_1)\,\frac{i - 1}{N_i - 1}\]</p><p><strong>Step 3</strong> – Desired <span>$\eta$</span>-derivatives (orthogonal + prescribed spacing):</p><p class="math-container">\[(x_\eta)_d = \frac{-s\,(y_\xi)_w}{\sqrt{(x_\xi)_w^2 + (y_\xi)_w^2}}, \qquad (y_\eta)_d = \frac{s\,(x_\xi)_w}{\sqrt{(x_\xi)_w^2 + (y_\xi)_w^2}}\]</p><p><strong>Step 4</strong> – Second normal derivatives (one-sided, using desired first derivative):</p><p class="math-container">\[x_{\eta\eta} = \frac{1}{2}\!\left(-7\,x_{i,w} + 8\,x_{i,w+\text{dir}} - x_{i,w+2\text{dir}}\right) - \text{dir}\cdot 3\,(x_\eta)_d\]</p><p class="math-container">\[y_{\eta\eta} = \frac{1}{2}\!\left(-7\,y_{i,w} + 8\,y_{i,w+\text{dir}} - y_{i,w+2\text{dir}}\right) - \text{dir}\cdot 3\,(y_\eta)_d\]</p><p><strong>Step 5</strong> – Boundary metrics (with desired derivatives):</p><p class="math-container">\[\alpha_b = (x_\eta)_d^2 + (y_\eta)_d^2 = s^2, \qquad \gamma_b = (x_\xi)_w^2 + (y_\xi)_w^2\]</p><p class="math-container">\[J_b = (x_\xi)_w\,(y_\eta)_d - (x_\eta)_d\,(y_\xi)_w = s\,\|(x_\xi, y_\xi)_w\|\]</p><p><strong>Step 6</strong> – Solve <span>$2 \times 2$</span> system for <span>$P$</span>, <span>$Q$</span>:</p><p class="math-container">\[\begin{bmatrix} (x_\xi)_w &amp; (x_\eta)_d \\ (y_\xi)_w &amp; (y_\eta)_d \end{bmatrix} \begin{bmatrix} P \\ Q \end{bmatrix} = \frac{-1}{J_b^2} \begin{bmatrix} \alpha_b\,(x_{\xi\xi})_w + \gamma_b\,x_{\eta\eta} \\ \alpha_b\,(y_{\xi\xi})_w + \gamma_b\,y_{\eta\eta} \end{bmatrix}\]</p><p>Solve via Cramer&#39;s rule with <span>$\det = J_b$</span>:</p><p class="math-container">\[P = \frac{1}{J_b}\left(\frac{R_x}{J_b^2}\,(y_\eta)_d - \frac{R_y}{J_b^2}\,(x_\eta)_d\right), \qquad Q = \frac{1}{J_b}\left(\frac{R_y}{J_b^2}\,(x_\xi)_w - \frac{R_x}{J_b^2}\,(y_\xi)_w\right)\]</p><p>where <span>$R_x = -\!\left(\alpha_b\,(x_{\xi\xi})_w + \gamma_b\,x_{\eta\eta}\right)$</span> and <span>$R_y = -\!\left(\alpha_b\,(y_{\xi\xi})_w + \gamma_b\,y_{\eta\eta}\right)$</span>.</p><pre><code class="language-julia hljs">function compute_PQ_eta_wall(
+    x::Matrix, y::Matrix,
+    x_xi::Matrix, y_xi::Matrix,
+    x_eta::Matrix, y_eta::Matrix;
+    wall::Int
+)
+    Ni, Nj = size(x)
+    P_wall = zeros(Ni)
+    Q_wall = zeros(Ni)
+
+    # Direction: +1 for bottom (j=1), -1 for top (j=Nj)
+    dir = wall == 1 ? 1 : -1
+    w = wall
+
+    for i in 2:Ni-1
+        # Step 1: Wall tangent derivatives
+        xxi  = (x[i+1, w] - x[i-1, w]) / 2.0
+        yxi  = (y[i+1, w] - y[i-1, w]) / 2.0
+        xxixi = x[i+1, w] - 2.0*x[i, w] + x[i-1, w]
+        yxixi = y[i+1, w] - 2.0*y[i, w] + y[i-1, w]
+
+        # Step 2: Wall-normal spacing
+        s1 = sqrt((x[1, w] - x[1, w + dir])^2 + (y[1, w] - y[1, w + dir])^2)
+        s2 = sqrt((x[Ni, w] - x[Ni, w + dir])^2 + (y[Ni, w] - y[Ni, w + dir])^2)
+        s = s1 + (s2 - s1) * (i - 1) / (Ni - 1)
+
+        # Step 3: Desired eta-derivatives
+        tangent_mag = sqrt(xxi^2 + yxi^2)
+        xeta_d = -s * yxi / tangent_mag
+        yeta_d =  s * xxi / tangent_mag
+
+        # Step 4: Second normal derivatives
+        xetaeta = 0.5*(-7.0*x[i,w] + 8.0*x[i,w+dir] - x[i,w+2*dir]) - dir*3.0*xeta_d
+        yetaeta = 0.5*(-7.0*y[i,w] + 8.0*y[i,w+dir] - y[i,w+2*dir]) - dir*3.0*yeta_d
+
+        # Step 5: Boundary metrics
+        alpha_b = xeta_d^2 + yeta_d^2
+        gamma_b = xxi^2 + yxi^2
+        J_b     = xxi * yeta_d - xeta_d * yxi
+
+        # Step 6: Solve 2x2 system
+        rhs_x = -(alpha_b * xxixi + gamma_b * xetaeta)
+        rhs_y = -(alpha_b * yxixi + gamma_b * yetaeta)
+
+        J_b_sq = J_b^2
+        if abs(J_b_sq) &lt; 1e-30
+            continue  # Degenerate point, skip
+        end
+
+        det_M = J_b
+        P_wall[i] = (rhs_x/J_b_sq * yeta_d - rhs_y/J_b_sq * xeta_d) / det_M
+        Q_wall[i] = (rhs_y/J_b_sq * xxi    - rhs_x/J_b_sq * yxi   ) / det_M
+    end
+
+    return P_wall, Q_wall
+end</code></pre><h3 id="4.3-Function:-compute_PQ_xi_wall"><a class="docs-heading-anchor" href="#4.3-Function:-compute_PQ_xi_wall">4.3 Function: <code>compute_PQ_xi_wall</code></a><a id="4.3-Function:-compute_PQ_xi_wall-1"></a><a class="docs-heading-anchor-permalink" href="#4.3-Function:-compute_PQ_xi_wall" title="Permalink"></a></h3><p>Computes <span>$P$</span> and <span>$Q$</span> at a left (<span>$i{=}1$</span>) or right (<span>$i{=}N_i$</span>) wall. Same logic as the <span>$\eta$</span>-wall version but with <span>$\xi$</span> and <span>$\eta$</span> roles swapped.</p><p><strong>Desired <span>$\xi$</span>-derivatives</strong> (orthogonal to <span>$\eta$</span>-tangent at wall):</p><p class="math-container">\[(x_\xi)_d = \frac{-s\,(y_\eta)_w}{\sqrt{(x_\eta)_w^2 + (y_\eta)_w^2}}, \qquad (y_\xi)_d = \frac{s\,(x_\eta)_w}{\sqrt{(x_\eta)_w^2 + (y_\eta)_w^2}}\]</p><p><strong>Second normal derivatives</strong> (note sign difference from <span>$\eta$</span>-wall):</p><p class="math-container">\[x_{\xi\xi} = \frac{1}{2}\!\left(-7\,x_{w,j} + 8\,x_{w+\text{dir},j} - x_{w+2\text{dir},j}\right) + \text{dir}\cdot 3\,(x_\xi)_d\]</p><p class="math-container">\[y_{\xi\xi} = \frac{1}{2}\!\left(-7\,y_{w,j} + 8\,y_{w+\text{dir},j} - y_{w+2\text{dir},j}\right) + \text{dir}\cdot 3\,(y_\xi)_d\]</p><pre><code class="language-julia hljs">function compute_PQ_xi_wall(
+    x::Matrix, y::Matrix,
+    x_xi::Matrix, y_xi::Matrix,
+    x_eta::Matrix, y_eta::Matrix;
+    wall::Int
+)
+    Ni, Nj = size(x)
+    P_wall = zeros(Nj)
+    Q_wall = zeros(Nj)
+
+    dir = wall == 1 ? 1 : -1
+    w = wall
+
+    for j in 2:Nj-1
+        # Step 1: Wall tangent derivatives
+        xeta    = (x[w, j+1] - x[w, j-1]) / 2.0
+        yeta    = (y[w, j+1] - y[w, j-1]) / 2.0
+        xetaeta = x[w, j+1] - 2.0*x[w, j] + x[w, j-1]
+        yetaeta = y[w, j+1] - 2.0*y[w, j] + y[w, j-1]
+
+        # Step 2: Wall-normal spacing
+        s1 = sqrt((x[w, 1] - x[w+dir, 1])^2 + (y[w, 1] - y[w+dir, 1])^2)
+        s2 = sqrt((x[w, Nj] - x[w+dir, Nj])^2 + (y[w, Nj] - y[w+dir, Nj])^2)
+        s = s1 + (s2 - s1) * (j - 1) / (Nj - 1)
+
+        # Step 3: Desired xi-derivatives
+        tangent_mag = sqrt(xeta^2 + yeta^2)
+        xxi_d = -s * yeta / tangent_mag
+        yxi_d =  s * xeta / tangent_mag
+
+        # Step 4: Second normal derivatives (NOTE: +dir*3 for xi-walls)
+        xxixi = 0.5*(-7.0*x[w,j] + 8.0*x[w+dir,j] - x[w+2*dir,j]) + dir*3.0*xxi_d
+        yxixi = 0.5*(-7.0*y[w,j] + 8.0*y[w+dir,j] - y[w+2*dir,j]) + dir*3.0*yxi_d
+
+        # Step 5: Boundary metrics
+        alpha_b = xeta^2 + yeta^2
+        gamma_b = xxi_d^2 + yxi_d^2
+        J_b     = xxi_d * yeta - xeta * yxi_d
+
+        # Step 6: Solve 2x2 system
+        rhs_x = -(alpha_b * xxixi + gamma_b * xetaeta)
+        rhs_y = -(alpha_b * yxixi + gamma_b * yetaeta)
+
+        J_b_sq = J_b^2
+        if abs(J_b_sq) &lt; 1e-30
+            continue
+        end
+
+        det_M = J_b
+        P_wall[j] = (rhs_x/J_b_sq * yeta  - rhs_y/J_b_sq * xeta ) / det_M
+        Q_wall[j] = (rhs_y/J_b_sq * xxi_d - rhs_x/J_b_sq * yxi_d) / det_M
+    end
+
+    return P_wall, Q_wall
+end</code></pre><h3 id="4.4-Sign-Convention-for-the-One-Sided-Second-Derivative"><a class="docs-heading-anchor" href="#4.4-Sign-Convention-for-the-One-Sided-Second-Derivative">4.4 Sign Convention for the One-Sided Second Derivative</a><a id="4.4-Sign-Convention-for-the-One-Sided-Second-Derivative-1"></a><a class="docs-heading-anchor-permalink" href="#4.4-Sign-Convention-for-the-One-Sided-Second-Derivative" title="Permalink"></a></h3><p>The sign difference between the <span>$\eta$</span>-wall and <span>$\xi$</span>-wall formulas warrants explanation.</p><p><strong><span>$\eta$</span>-wall (bottom, <span>$\text{dir}{=}{+}1$</span>)</strong>: The one-sided first-derivative formula pointing into the domain is:</p><p class="math-container">\[f&#39;_{\text{forward}} = \frac{-3\,f_{j=1} + 4\,f_{j=2} - f_{j=3}}{2}\]</p><p>The second derivative consistent with the desired <span>$f&#39;_d$</span> is:</p><p class="math-container">\[f&#39;&#39; = \frac{1}{2}\!\left(-7\,f_1 + 8\,f_2 - f_3\right) - 3\,f&#39;_d\]</p><p><strong><span>$\xi$</span>-wall (left, <span>$\text{dir}{=}{+}1$</span>)</strong>: Same structure but:</p><p class="math-container">\[f&#39;&#39; = \frac{1}{2}\!\left(-7\,f_1 + 8\,f_2 - f_3\right) + 3\,f&#39;_d\]</p><p>The sign rule: use <span>$-\text{dir}\cdot 3\,f&#39;_d$</span> for <strong><span>$\eta$</span>-walls</strong> and <span>$+\text{dir}\cdot 3\,f&#39;_d$</span> for <strong><span>$\xi$</span>-walls</strong>. This matches the existing code in <code>EllipticSolver.jl</code> and arises from the orientation convention of the outward normal relative to the coordinate direction.</p><hr/><h2 id="5.-Thomas-Algorithm-(Tridiagonal-Solver)"><a class="docs-heading-anchor" href="#5.-Thomas-Algorithm-(Tridiagonal-Solver)">5. Thomas Algorithm (Tridiagonal Solver)</a><a id="5.-Thomas-Algorithm-(Tridiagonal-Solver)-1"></a><a class="docs-heading-anchor-permalink" href="#5.-Thomas-Algorithm-(Tridiagonal-Solver)" title="Permalink"></a></h2><h3 id="5.1-Function:-thomas_solve!"><a class="docs-heading-anchor" href="#5.1-Function:-thomas_solve!">5.1 Function: <code>thomas_solve!</code></a><a id="5.1-Function:-thomas_solve!-1"></a><a class="docs-heading-anchor-permalink" href="#5.1-Function:-thomas_solve!" title="Permalink"></a></h3><p>Solves the tridiagonal system:</p><p class="math-container">\[a_i\,u_{i-1} + b_i\,u_i + c_i\,u_{i+1} = d_i \qquad \text{for } i = 1, \ldots, n\]</p><p>in <span>$O(n)$</span> operations. Arrays <code>a</code>, <code>b</code>, <code>c</code>, <code>d</code> are <strong>modified in place</strong>.</p><pre><code class="language-julia hljs">function thomas_solve!(a::Vector, b::Vector, c::Vector, d::Vector, u::Vector)
+    n = length(b)
+
+    # Forward elimination
+    for i in 2:n
+        w = a[i] / b[i-1]
+        b[i] -= w * c[i-1]
+        d[i] -= w * d[i-1]
+    end
+
+    # Back substitution
+    u[n] = d[n] / b[n]
+    for i in n-1:-1:1
+        u[i] = (d[i] - c[i] * u[i+1]) / b[i]
+    end
+end</code></pre><h3 id="5.2-Numerical-Stability"><a class="docs-heading-anchor" href="#5.2-Numerical-Stability">5.2 Numerical Stability</a><a id="5.2-Numerical-Stability-1"></a><a class="docs-heading-anchor-permalink" href="#5.2-Numerical-Stability" title="Permalink"></a></h3><p>The Thomas algorithm is stable when the system is diagonally dominant:</p><p class="math-container">\[|b_i| \geq |a_i| + |c_i| \qquad \forall\; i\]</p><p>For our elliptic system: <span>$|b_i| = 2(\alpha + \gamma)$</span> and <span>$|a_i| + |c_i| = 2\alpha + |J^2 P|$</span>. This is diagonally dominant as long as <span>$|J^2 P| \leq 2\gamma$</span>, which is satisfied for reasonable grids and moderate <span>$P$</span> values.</p><hr/><h2 id="6.-Line-Gauss-Seidel-Sweeps"><a class="docs-heading-anchor" href="#6.-Line-Gauss-Seidel-Sweeps">6. Line Gauss-Seidel Sweeps</a><a id="6.-Line-Gauss-Seidel-Sweeps-1"></a><a class="docs-heading-anchor-permalink" href="#6.-Line-Gauss-Seidel-Sweeps" title="Permalink"></a></h2><h3 id="6.1-Xi-Line-Sweep-(sweep-along-constant-j-lines)"><a class="docs-heading-anchor" href="#6.1-Xi-Line-Sweep-(sweep-along-constant-j-lines)">6.1 Xi-Line Sweep (sweep along constant-<span>$j$</span> lines)</a><a id="6.1-Xi-Line-Sweep-(sweep-along-constant-j-lines)-1"></a><a class="docs-heading-anchor-permalink" href="#6.1-Xi-Line-Sweep-(sweep-along-constant-j-lines)" title="Permalink"></a></h3><p>For each <span>$j$</span>-level from <span>$j{=}2$</span> to <span>$j{=}N_j{-}1$</span>, form and solve a tridiagonal system for <span>$x_{2:N_i-1,\,j}$</span> (and separately for <span>$y$</span>).</p><p><strong>Tridiagonal coefficients</strong> at each interior point <span>$i$</span>:</p><p class="math-container">\[a_i = \alpha_{i,j} - \frac{J_{i,j}^2\,P_{i,j}}{2}, \qquad b_i = -2\!\left(\alpha_{i,j} + \gamma_{i,j}\right), \qquad c_i = \alpha_{i,j} + \frac{J_{i,j}^2\,P_{i,j}}{2}\]</p><p class="math-container">\[d_i = -\gamma_{i,j}\!\left(x_{i,j+1} + x_{i,j-1}\right) - \frac{J_{i,j}^2\,Q_{i,j}}{2}\!\left(x_{i,j+1} - x_{i,j-1}\right) + \frac{\beta_{i,j}}{2}\!\left(x_{i+1,j+1} - x_{i-1,j+1} - x_{i+1,j-1} + x_{i-1,j-1}\right)\]</p><p>Boundary terms are moved to the RHS: <span>$d_1 \mathrel{{-}{=}} a_1 \cdot x_{1,j}$</span> and <span>$d_n \mathrel{{-}{=}} c_n \cdot x_{N_i,j}$</span>.</p><p>After solving with Thomas algorithm, apply SOR:</p><p class="math-container">\[x_{i,j} \leftarrow (1 - \omega)\,x_{i,j} + \omega\,u_i^{\text{Thomas}}\]</p><pre><code class="language-julia hljs">function xi_line_sweep!(
+    x::Matrix, y::Matrix,
+    alpha::Matrix, beta::Matrix, gamma::Matrix, J::Matrix,
+    P::Matrix, Q::Matrix,
+    omega::Float64
+)
+    Ni, Nj = size(x)
+    n = Ni - 2
+
+    # Pre-allocate work arrays
+    a = zeros(n);  b = zeros(n);  c = zeros(n);  d = zeros(n);  u = zeros(n)
+
+    for j in 2:Nj-1
+        # --- Solve for x-coordinates ---
+        for k in 1:n
+            i = k + 1
+            a[k] = alpha[i,j] - J[i,j]^2 * P[i,j] / 2.0
+            b[k] = -2.0 * (alpha[i,j] + gamma[i,j])
+            c[k] = alpha[i,j] + J[i,j]^2 * P[i,j] / 2.0
+            d[k] = -gamma[i,j] * (x[i,j+1] + x[i,j-1]) -
+                    J[i,j]^2 * Q[i,j] / 2.0 * (x[i,j+1] - x[i,j-1]) +
+                    beta[i,j] / 2.0 * (x[i+1,j+1] - x[i-1,j+1] - x[i+1,j-1] + x[i-1,j-1])
+        end
+        d[1] -= a[1] * x[1, j];   a[1] = 0.0
+        d[n] -= c[n] * x[Ni, j];  c[n] = 0.0
+
+        thomas_solve!(a, b, c, d, u)
+        for k in 1:n
+            i = k + 1
+            x[i, j] = (1.0 - omega) * x[i, j] + omega * u[k]
+        end
+
+        # --- Solve for y-coordinates (identical structure) ---
+        for k in 1:n
+            i = k + 1
+            a[k] = alpha[i,j] - J[i,j]^2 * P[i,j] / 2.0
+            b[k] = -2.0 * (alpha[i,j] + gamma[i,j])
+            c[k] = alpha[i,j] + J[i,j]^2 * P[i,j] / 2.0
+            d[k] = -gamma[i,j] * (y[i,j+1] + y[i,j-1]) -
+                    J[i,j]^2 * Q[i,j] / 2.0 * (y[i,j+1] - y[i,j-1]) +
+                    beta[i,j] / 2.0 * (y[i+1,j+1] - y[i-1,j+1] - y[i+1,j-1] + y[i-1,j-1])
+        end
+        d[1] -= a[1] * y[1, j];   a[1] = 0.0
+        d[n] -= c[n] * y[Ni, j];  c[n] = 0.0
+
+        thomas_solve!(a, b, c, d, u)
+        for k in 1:n
+            i = k + 1
+            y[i, j] = (1.0 - omega) * y[i, j] + omega * u[k]
+        end
+    end
+end</code></pre><h3 id="6.2-Eta-Line-Sweep-(sweep-along-constant-i-lines)"><a class="docs-heading-anchor" href="#6.2-Eta-Line-Sweep-(sweep-along-constant-i-lines)">6.2 Eta-Line Sweep (sweep along constant-<span>$i$</span> lines)</a><a id="6.2-Eta-Line-Sweep-(sweep-along-constant-i-lines)-1"></a><a class="docs-heading-anchor-permalink" href="#6.2-Eta-Line-Sweep-(sweep-along-constant-i-lines)" title="Permalink"></a></h3><p>For each <span>$i$</span>-level from <span>$i{=}2$</span> to <span>$i{=}N_i{-}1$</span>, form and solve a tridiagonal system for <span>$x_{i,\,2:N_j-1}$</span> (and separately for <span>$y$</span>).</p><p><strong>Tridiagonal coefficients</strong> at each interior point <span>$j$</span>:</p><p class="math-container">\[a_j = \gamma_{i,j} - \frac{J_{i,j}^2\,Q_{i,j}}{2}, \qquad b_j = -2\!\left(\alpha_{i,j} + \gamma_{i,j}\right), \qquad c_j = \gamma_{i,j} + \frac{J_{i,j}^2\,Q_{i,j}}{2}\]</p><p class="math-container">\[d_j = -\alpha_{i,j}\!\left(x_{i+1,j} + x_{i-1,j}\right) - \frac{J_{i,j}^2\,P_{i,j}}{2}\!\left(x_{i+1,j} - x_{i-1,j}\right) + \frac{\beta_{i,j}}{2}\!\left(x_{i+1,j+1} - x_{i-1,j+1} - x_{i+1,j-1} + x_{i-1,j-1}\right)\]</p><pre><code class="language-julia hljs">function eta_line_sweep!(
+    x::Matrix, y::Matrix,
+    alpha::Matrix, beta::Matrix, gamma::Matrix, J::Matrix,
+    P::Matrix, Q::Matrix,
+    omega::Float64
+)
+    Ni, Nj = size(x)
+    n = Nj - 2
+
+    a = zeros(n);  b = zeros(n);  c = zeros(n);  d = zeros(n);  u = zeros(n)
+
+    for i in 2:Ni-1
+        # --- Solve for x-coordinates ---
+        for k in 1:n
+            j = k + 1
+            a[k] = gamma[i,j] - J[i,j]^2 * Q[i,j] / 2.0
+            b[k] = -2.0 * (alpha[i,j] + gamma[i,j])
+            c[k] = gamma[i,j] + J[i,j]^2 * Q[i,j] / 2.0
+            d[k] = -alpha[i,j] * (x[i+1,j] + x[i-1,j]) -
+                    J[i,j]^2 * P[i,j] / 2.0 * (x[i+1,j] - x[i-1,j]) +
+                    beta[i,j] / 2.0 * (x[i+1,j+1] - x[i-1,j+1] - x[i+1,j-1] + x[i-1,j-1])
+        end
+        d[1] -= a[1] * x[i, 1];   a[1] = 0.0
+        d[n] -= c[n] * x[i, Nj];  c[n] = 0.0
+
+        thomas_solve!(a, b, c, d, u)
+        for k in 1:n
+            j = k + 1
+            x[i, j] = (1.0 - omega) * x[i, j] + omega * u[k]
+        end
+
+        # --- Solve for y-coordinates ---
+        for k in 1:n
+            j = k + 1
+            a[k] = gamma[i,j] - J[i,j]^2 * Q[i,j] / 2.0
+            b[k] = -2.0 * (alpha[i,j] + gamma[i,j])
+            c[k] = gamma[i,j] + J[i,j]^2 * Q[i,j] / 2.0
+            d[k] = -alpha[i,j] * (y[i+1,j] + y[i-1,j]) -
+                    J[i,j]^2 * P[i,j] / 2.0 * (y[i+1,j] - y[i-1,j]) +
+                    beta[i,j] / 2.0 * (y[i+1,j+1] - y[i-1,j+1] - y[i+1,j-1] + y[i-1,j-1])
+        end
+        d[1] -= a[1] * y[i, 1];   a[1] = 0.0
+        d[n] -= c[n] * y[i, Nj];  c[n] = 0.0
+
+        thomas_solve!(a, b, c, d, u)
+        for k in 1:n
+            j = k + 1
+            y[i, j] = (1.0 - omega) * y[i, j] + omega * u[k]
+        end
+    end
+end</code></pre><h3 id="6.3-Derivation-of-the-Tridiagonal-Coefficients"><a class="docs-heading-anchor" href="#6.3-Derivation-of-the-Tridiagonal-Coefficients">6.3 Derivation of the Tridiagonal Coefficients</a><a id="6.3-Derivation-of-the-Tridiagonal-Coefficients-1"></a><a class="docs-heading-anchor-permalink" href="#6.3-Derivation-of-the-Tridiagonal-Coefficients" title="Permalink"></a></h3><p>The discrete governing equation at interior point <span>$(i,j)$</span> is (equation 7 from the theory document):</p><p class="math-container">\[\alpha\!\left(x_{i+1,j} - 2x_{i,j} + x_{i-1,j}\right) - \frac{\beta}{2}\!\left(x_{i+1,j+1} - x_{i-1,j+1} - x_{i+1,j-1} + x_{i-1,j-1}\right) + \gamma\!\left(x_{i,j+1} - 2x_{i,j} + x_{i,j-1}\right)\]</p><p class="math-container">\[+ \;\frac{J^2 P}{2}\!\left(x_{i+1,j} - x_{i-1,j}\right) + \frac{J^2 Q}{2}\!\left(x_{i,j+1} - x_{i,j-1}\right) = 0\]</p><p><strong>For the <span>$\xi$</span>-line sweep</strong> (unknowns at <span>$j$</span>-level: <span>$x_{i-1,j}$</span>, <span>$x_{i,j}$</span>, <span>$x_{i+1,j}$</span>):</p><p>Collecting terms by unknown:</p><table><tr><th style="text-align: right">Unknown</th><th style="text-align: right">Coefficient</th></tr><tr><td style="text-align: right"><span>$x_{i-1,j}$</span></td><td style="text-align: right"><span>$\alpha - J^2 P/2 \;=\; a_i$</span></td></tr><tr><td style="text-align: right"><span>$x_{i,j}$</span></td><td style="text-align: right"><span>$-2(\alpha + \gamma) \;=\; b_i$</span></td></tr><tr><td style="text-align: right"><span>$x_{i+1,j}$</span></td><td style="text-align: right"><span>$\alpha + J^2 P/2 \;=\; c_i$</span></td></tr></table><p>Everything else goes to <span>$d_i$</span> (the RHS).</p><p><strong>For the <span>$\eta$</span>-line sweep</strong> (unknowns at <span>$i$</span>-level: <span>$x_{i,j-1}$</span>, <span>$x_{i,j}$</span>, <span>$x_{i,j+1}$</span>):</p><table><tr><th style="text-align: right">Unknown</th><th style="text-align: right">Coefficient</th></tr><tr><td style="text-align: right"><span>$x_{i,j-1}$</span></td><td style="text-align: right"><span>$\gamma - J^2 Q/2 \;=\; a_j$</span></td></tr><tr><td style="text-align: right"><span>$x_{i,j}$</span></td><td style="text-align: right"><span>$-2(\alpha + \gamma) \;=\; b_j$</span></td></tr><tr><td style="text-align: right"><span>$x_{i,j+1}$</span></td><td style="text-align: right"><span>$\gamma + J^2 Q/2 \;=\; c_j$</span></td></tr></table><h3 id="6.4-Treatment-of-Cross-Derivative-Terms"><a class="docs-heading-anchor" href="#6.4-Treatment-of-Cross-Derivative-Terms">6.4 Treatment of Cross-Derivative Terms</a><a id="6.4-Treatment-of-Cross-Derivative-Terms-1"></a><a class="docs-heading-anchor-permalink" href="#6.4-Treatment-of-Cross-Derivative-Terms" title="Permalink"></a></h3><p>The cross-derivative terms (involving <span>$\beta$</span>) reference <strong>corner neighbors</strong> like <span>$x_{i+1,j+1}$</span>. These always use the <strong>most recently computed values</strong> (Gauss-Seidel ordering):</p><ul><li>In the <span>$\xi$</span>-line sweep at <span>$j$</span>-level <span>$j$</span>: <span>$j{-}1$</span> values are already updated (sweeping upward), <span>$j{+}1$</span> values are from the previous iteration</li><li>In the <span>$\eta$</span>-line sweep at <span>$i$</span>-level <span>$i$</span>: <span>$i{-}1$</span> values are already updated (sweeping rightward), <span>$i{+}1$</span> values are from the previous <span>$\xi$</span>-sweep</li></ul><hr/><h2 id="7.-Main-Solver-Loop"><a class="docs-heading-anchor" href="#7.-Main-Solver-Loop">7. Main Solver Loop</a><a id="7.-Main-Solver-Loop-1"></a><a class="docs-heading-anchor-permalink" href="#7.-Main-Solver-Loop" title="Permalink"></a></h2><h3 id="7.1-Function:-StegerSorensonSolver"><a class="docs-heading-anchor" href="#7.1-Function:-StegerSorensonSolver">7.1 Function: <code>StegerSorensonSolver</code></a><a id="7.1-Function:-StegerSorensonSolver-1"></a><a class="docs-heading-anchor-permalink" href="#7.1-Function:-StegerSorensonSolver" title="Permalink"></a></h3><pre><code class="language-julia hljs">using LinearAlgebra
+
+function StegerSorensonSolver(x::Matrix{Float64}, y::Matrix{Float64}; params::SSParams)
+    if params.skipBlock
+        return x, y, 0.0, 0
+    end
+
+    Ni, Nj = size(x)
+    @assert size(y) == (Ni, Nj) &quot;x and y must have the same dimensions&quot;
+    @assert Ni &gt;= 4 &amp;&amp; Nj &gt;= 4 &quot;Grid must be at least 4x4 for wall forcing stencils&quot;
+
+    x = copy(x)   # Don&#39;t modify input
+    y = copy(y)
+
+    final_error = 0.0
+    final_iter = 0
+
+    for iter in 1:params.max_iter
+        final_iter = iter
+
+        # Save old grid for convergence check
+        x_old = copy(x)
+        y_old = copy(y)
+
+        # --- Step 1: Compute metrics from current grid ---
+        alpha, beta, gamma, J, x_xi, y_xi, x_eta, y_eta = compute_metrics(x, y)
+
+        # --- Step 2: Compute control functions P, Q ---
+        P, Q = compute_control_functions(
+            x, y, alpha, beta, gamma, J,
+            x_xi, y_xi, x_eta, y_eta;
+            params=params
+        )
+
+        # --- Step 3: Xi-line sweep ---
+        xi_line_sweep!(x, y, alpha, beta, gamma, J, P, Q, params.omega)
+
+        # --- Step 4: Eta-line sweep (recompute metrics after xi-sweep) ---
+        alpha, beta, gamma, J, _, _, _, _ = compute_metrics(x, y)
+        eta_line_sweep!(x, y, alpha, beta, gamma, J, P, Q, params.omega)
+
+        # --- Step 5: Convergence check (L-infinity norm) ---
+        err_x = maximum(abs.(x .- x_old))
+        err_y = maximum(abs.(y .- y_old))
+        final_error = max(err_x, err_y)
+
+        if params.verbose &amp;&amp; (iter % params.print_interval == 0)
+            println(&quot;  Iter $iter: error = $final_error&quot;)
+        end
+
+        if final_error &lt; params.tol
+            if params.verbose
+                println(&quot;  Converged at iteration $iter, error = $final_error&quot;)
+            end
+            break
+        end
+
+        if iter == params.max_iter &amp;&amp; params.verbose
+            println(&quot;  WARNING: Max iterations ($iter) reached, error = $final_error&quot;)
+        end
+    end
+
+    return x, y, final_error, final_iter
+end</code></pre><h3 id="7.2-Design-Notes"><a class="docs-heading-anchor" href="#7.2-Design-Notes">7.2 Design Notes</a><a id="7.2-Design-Notes-1"></a><a class="docs-heading-anchor-permalink" href="#7.2-Design-Notes" title="Permalink"></a></h3><p><strong>Metric recomputation between sweeps</strong> (Step 4): The metrics are recomputed after the <span>$\xi$</span>-line sweep and before the <span>$\eta$</span>-line sweep. The <span>$P$</span>, <span>$Q$</span> values are NOT recomputed between sweeps (they change slowly and recomputing them is expensive).</p><p><strong>Minimum grid size</strong>: The wall-forcing stencil requires three points into the domain from each wall. Grids smaller than <span>$4 \times 4$</span> cannot use wall forcing.</p><hr/><h2 id="8.-Wrapper-for-SmoothBlocks-Integration"><a class="docs-heading-anchor" href="#8.-Wrapper-for-SmoothBlocks-Integration">8. Wrapper for SmoothBlocks Integration</a><a id="8.-Wrapper-for-SmoothBlocks-Integration-1"></a><a class="docs-heading-anchor-permalink" href="#8.-Wrapper-for-SmoothBlocks-Integration" title="Permalink"></a></h2><p>To integrate with the existing <code>SmoothBlocks</code> function in <code>src/smoothing/SmoothBlocks.jl</code>, add a new solver branch:</p><pre><code class="language-julia hljs">function SmoothBlocks(blocks; solver=:stegerSorenson, params)
+    smoothBlocks = Vector{Array{Float64,3}}(undef, length(blocks))
+    finalErrors = Vector{Float64}(undef, length(blocks))
+    finalIterations = Vector{Int}(undef, length(blocks))
+
+    for i in eachindex(blocks)
+        if params[i].skipBlock
+            @info &quot;Skipping block $i&quot;
+            smoothBlocks[i] = blocks[i]
+            finalErrors[i] = 0.0
+            finalIterations[i] = 0
+            continue
+        end
+
+        xr, yr, err, iters = StegerSorensonSolver(
+            blocks[i][1, :, :],
+            blocks[i][2, :, :];
+            params=params[i]
+        )
+
+        smoothBlocks[i] = permutedims(cat(xr, yr, dims=3), (3, 1, 2))
+        finalErrors[i] = err
+        finalIterations[i] = iters
+    end
+
+    @info &quot;Smoothing convergence: $finalErrors&quot;
+    @info &quot;Smoothing iterations: $finalIterations&quot;
+    return smoothBlocks, finalErrors, finalIterations
+end</code></pre><hr/><h2 id="9.-Complete-File-Structure"><a class="docs-heading-anchor" href="#9.-Complete-File-Structure">9. Complete File Structure</a><a id="9.-Complete-File-Structure-1"></a><a class="docs-heading-anchor-permalink" href="#9.-Complete-File-Structure" title="Permalink"></a></h2><pre><code class="nohighlight hljs">src/
+  numerics/
+    StegerSorensonSolver.jl    # Contains ALL of the following:
+                                #   - compute_metrics()      (Section 3)
+                                #   - compute_PQ_eta_wall()  (Section 4.2)
+                                #   - compute_PQ_xi_wall()   (Section 4.3)
+                                #   - compute_control_functions()  (Section 4.1)
+                                #   - thomas_solve!()        (Section 5)
+                                #   - xi_line_sweep!()       (Section 6.1)
+                                #   - eta_line_sweep!()      (Section 6.2)
+                                #   - StegerSorensonSolver() (Section 7)
+  types.jl                     # Add SSParams struct (Section 2)
+  smoothing/
+    SmoothBlocks.jl            # Add :stegerSorenson branch (Section 8)</code></pre><hr/><h2 id="10.-Testing-Strategy"><a class="docs-heading-anchor" href="#10.-Testing-Strategy">10. Testing Strategy</a><a id="10.-Testing-Strategy-1"></a><a class="docs-heading-anchor-permalink" href="#10.-Testing-Strategy" title="Permalink"></a></h2><h3 id="10.1-Unit-Grid-(Trivial-Test)"><a class="docs-heading-anchor" href="#10.1-Unit-Grid-(Trivial-Test)">10.1 Unit Grid (Trivial Test)</a><a id="10.1-Unit-Grid-(Trivial-Test)-1"></a><a class="docs-heading-anchor-permalink" href="#10.1-Unit-Grid-(Trivial-Test)" title="Permalink"></a></h3><p>A uniform rectangular grid should be unchanged by the smoother (it already satisfies the Laplace equation exactly):</p><pre><code class="language-julia hljs">Ni, Nj = 20, 10
+x = repeat(LinRange(0, 1, Ni), 1, Nj)
+y = repeat(LinRange(0, 1, Nj)&#39;, Ni, 1)
+params = SSParams(max_iter=100, tol=1e-10, omega=1.0, verbose=true)
+x_out, y_out, err, iters = StegerSorensonSolver(x, y; params=params)
+@assert err &lt; 1e-10 &quot;Uniform grid should converge in 1 iteration&quot;
+@assert maximum(abs.(x_out - x)) &lt; 1e-12 &quot;Grid should not move&quot;</code></pre><h3 id="10.2-Perturbed-Grid"><a class="docs-heading-anchor" href="#10.2-Perturbed-Grid">10.2 Perturbed Grid</a><a id="10.2-Perturbed-Grid-1"></a><a class="docs-heading-anchor-permalink" href="#10.2-Perturbed-Grid" title="Permalink"></a></h3><p>Start with a uniform grid, add random perturbation to interior points, and verify the smoother recovers something close to uniform:</p><pre><code class="language-julia hljs">x_pert = copy(x)
+x_pert[2:Ni-1, 2:Nj-1] .+= 0.01 * randn(Ni-2, Nj-2)
+params = SSParams(max_iter=5000, tol=1e-8, omega=1.2, verbose=true)
+x_out, y_out, err, iters = StegerSorensonSolver(x_pert, y; params=params)
+# Should converge and produce a smooth grid</code></pre><h3 id="10.3-Curved-Domain"><a class="docs-heading-anchor" href="#10.3-Curved-Domain">10.3 Curved Domain</a><a id="10.3-Curved-Domain-1"></a><a class="docs-heading-anchor-permalink" href="#10.3-Curved-Domain" title="Permalink"></a></h3><p>Test with a curved boundary (e.g., quarter annulus) generated by TFI:</p><pre><code class="language-julia hljs">params = SSParams(
+    omega=1.2, tol=1e-6,
+    useBottomWall=true, useTopWall=true,
+    useLeftWall=true, useRightWall=true,
+    decay_bottom=0.4, decay_top=0.4,
+    decay_left=0.4, decay_right=0.4,
+    verbose=true
+)
+x_out, y_out, err, iters = StegerSorensonSolver(x_tfi, y_tfi; params=params)
+# Verify orthogonality at walls: beta should be near zero at boundaries</code></pre><h3 id="10.4-Orthogonality-Verification"><a class="docs-heading-anchor" href="#10.4-Orthogonality-Verification">10.4 Orthogonality Verification</a><a id="10.4-Orthogonality-Verification-1"></a><a class="docs-heading-anchor-permalink" href="#10.4-Orthogonality-Verification" title="Permalink"></a></h3><p>After smoothing with wall forcing, measure the angle between grid lines at each boundary. The dot product of tangent and normal grid-line directions should be near zero:</p><pre><code class="language-julia hljs"># At bottom wall (j=1), check orthogonality:
+for i in 2:Ni-1
+    t = [x_out[i+1,1] - x_out[i-1,1], y_out[i+1,1] - y_out[i-1,1]]  # tangent
+    n = [x_out[i,2] - x_out[i,1], y_out[i,2] - y_out[i,1]]            # normal
+    angle = acosd(abs(dot(t, n) / (norm(t) * norm(n))))
+    @assert abs(90.0 - angle) &lt; 2.0 &quot;Orthogonality error &gt; 2 degrees at i=$i&quot;
+end</code></pre><h3 id="10.5-Convergence-Rate-Test"><a class="docs-heading-anchor" href="#10.5-Convergence-Rate-Test">10.5 Convergence Rate Test</a><a id="10.5-Convergence-Rate-Test-1"></a><a class="docs-heading-anchor-permalink" href="#10.5-Convergence-Rate-Test" title="Permalink"></a></h3><p>Compare convergence rates at different <span>$\omega$</span> values to find the optimal relaxation:</p><pre><code class="language-julia hljs">for omega in [0.8, 1.0, 1.2, 1.4, 1.6]
+    params = SSParams(omega=omega, max_iter=10000, tol=1e-8, verbose=false)
+    _, _, err, iters = StegerSorensonSolver(x_test, y_test; params=params)
+    println(&quot;omega=$omega: $iters iterations, error=$err&quot;)
+end</code></pre><hr/><h2 id="11.-Equation-Quick-Reference"><a class="docs-heading-anchor" href="#11.-Equation-Quick-Reference">11. Equation Quick Reference</a><a id="11.-Equation-Quick-Reference-1"></a><a class="docs-heading-anchor-permalink" href="#11.-Equation-Quick-Reference" title="Permalink"></a></h2><p>All equations in one place for fast implementation reference.</p><p><strong>Metric coefficients</strong> (compute at all grid points):</p><p class="math-container">\[\alpha = x_\eta^2 + y_\eta^2, \qquad \beta = x_\xi\,x_\eta + y_\xi\,y_\eta, \qquad \gamma = x_\xi^2 + y_\xi^2, \qquad J = x_\xi\,y_\eta - x_\eta\,y_\xi\]</p><p><strong>Desired derivatives for orthogonality</strong> (bottom/top wall):</p><p class="math-container">\[(x_\eta)_d = \frac{-s\,y_\xi}{\sqrt{x_\xi^2 + y_\xi^2}}, \qquad (y_\eta)_d = \frac{s\,x_\xi}{\sqrt{x_\xi^2 + y_\xi^2}}\]</p><p><strong>Desired derivatives for orthogonality</strong> (left/right wall):</p><p class="math-container">\[(x_\xi)_d = \frac{-s\,y_\eta}{\sqrt{x_\eta^2 + y_\eta^2}}, \qquad (y_\xi)_d = \frac{s\,x_\eta}{\sqrt{x_\eta^2 + y_\eta^2}}\]</p><p><strong>One-sided second derivative with desired first derivative</strong>:</p><p class="math-container">\[f&#39;&#39; = \frac{1}{2}\!\left(-7\,f_{\text{wall}} + 8\,f_{\text{wall}+\text{dir}} - f_{\text{wall}+2\text{dir}}\right) + \sigma \cdot 3\,f&#39;_d\]</p><p>where <span>$\sigma = -\text{dir}$</span> for <span>$\eta$</span>-walls, <span>$\sigma = +\text{dir}$</span> for <span>$\xi$</span>-walls.</p><p><strong><span>$2 \times 2$</span> system for <span>$P$</span>, <span>$Q$</span> at boundary</strong>:</p><p class="math-container">\[J_b^2\!\left(P\,t_x + Q\,n_x\right) = -\!\left(\alpha_b\,f_{tt} + \gamma_b\,f_{nn}\right)\]</p><p class="math-container">\[J_b^2\!\left(P\,t_y + Q\,n_y\right) = -\!\left(\alpha_b\,g_{tt} + \gamma_b\,g_{nn}\right)\]</p><p><strong>Exponential decay</strong>:</p><p class="math-container">\[P_{i,j} = \sum_{\text{walls}} P_{\text{wall}} \cdot e^{-c\,|\text{dist}|}, \qquad Q_{i,j} = \sum_{\text{walls}} Q_{\text{wall}} \cdot e^{-c\,|\text{dist}|}\]</p><p><strong><span>$\xi$</span>-line tridiagonal coefficients</strong>:</p><p class="math-container">\[a_i = \alpha - \frac{J^2 P}{2}, \qquad b_i = -2(\alpha + \gamma), \qquad c_i = \alpha + \frac{J^2 P}{2}\]</p><p class="math-container">\[d_i = -\gamma\!\left(x_{i,j+1}+x_{i,j-1}\right) - \frac{J^2 Q}{2}\!\left(x_{i,j+1}-x_{i,j-1}\right) + \frac{\beta}{2}\!\left(x_{i+1,j+1}-x_{i-1,j+1}-x_{i+1,j-1}+x_{i-1,j-1}\right)\]</p><p><strong><span>$\eta$</span>-line tridiagonal coefficients</strong>:</p><p class="math-container">\[a_j = \gamma - \frac{J^2 Q}{2}, \qquad b_j = -2(\alpha + \gamma), \qquad c_j = \gamma + \frac{J^2 Q}{2}\]</p><p class="math-container">\[d_j = -\alpha\!\left(x_{i+1,j}+x_{i-1,j}\right) - \frac{J^2 P}{2}\!\left(x_{i+1,j}-x_{i-1,j}\right) + \frac{\beta}{2}\!\left(x_{i+1,j+1}-x_{i-1,j+1}-x_{i+1,j-1}+x_{i-1,j-1}\right)\]</p><p><strong>SOR relaxation</strong>:</p><p class="math-container">\[x_{i,j} \leftarrow (1 - \omega)\,x_{i,j}^{\text{old}} + \omega\,x_{i,j}^{\text{Thomas}}\]</p><p><strong>Convergence</strong>:</p><p class="math-container">\[\varepsilon = \max\!\left(\max_{i,j}|x_{i,j}^{\text{new}} - x_{i,j}^{\text{old}}|,\;\max_{i,j}|y_{i,j}^{\text{new}} - y_{i,j}^{\text{old}}|\right) &lt; \text{tol}\]</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../comparison_steger_sorenson/">« Comparison with Steger &amp; Sorenson</a><a class="docs-footer-nextpage" href="../../api/">API Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Sunday 4 October 2026 01:43">Sunday 4 October 2026</span>. Using Julia version 1.10.12.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
