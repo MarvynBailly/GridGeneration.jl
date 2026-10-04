@@ -73,15 +73,16 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Getting Started" => "pages/GettingStarted.md",
+        "Examples" => Any[
+            "Gallery" => "pages/Examples/gallery.md",
+            "Airfoil" => "pages/Examples/airfoil.md",
+        ],
+
         "Ordinary Differential Equations" => Any[
             "ODE Formulation" => "pages/ODE/ODEFormulation.md",
             "Mathematical Work" => "pages/ODE/MathematicalWork.md",
             ],
 
-        "Examples" => Any[
-            "Airfoil" => "pages/Examples/airfoil.md",
-        ],
-        
         "Numerical Methods" => Any[
             "First Order System" => "pages/NumericalMethods/FirstOrderSystem.md",
             "Second Order BVP ODE" => "pages/NumericalMethods/SecondOrderBVP.md",

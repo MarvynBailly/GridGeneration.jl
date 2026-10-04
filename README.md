@@ -112,10 +112,29 @@ Sweeping a metric hotspot along an airfoil: points cluster wherever the metric i
   <img src="docs/src/assets/gifs/SingleBlockns/hotspot_along_airfoil_dense1.gif" alt="Grid adapting to a metric hotspot moving along an airfoil" width="800">
 </p>
 
+## Gallery
+
+The same block layout adapted to four different metrics: uniform, two hotspots, an oblique
+shock, and a circular front.
+
+![One block layout, four metrics](docs/src/assets/images/gallery/square_metrics.png)
+
+A backward-facing step given as three blocks. Splits requested on two blocks propagate across
+the interfaces, and the metric resolves the walls, the step corner, the shear layer and the
+reattachment region.
+
+![Backward-facing step](docs/src/assets/images/gallery/backward_step.png)
+
+More cases (a bump channel with anisotropic wall layers, an annulus, a wavy channel, and a
+comparison of smoothing options) are in the
+[example gallery](https://marvyn.com/GridGeneration.jl/dev/pages/Examples/gallery/), produced by
+[`examples/gallery/`](examples/gallery).
+
 ## Examples and GUI
 
 | | |
 |---|---|
+| [`examples/gallery/`](examples/gallery) | Gallery of domains and metrics; `run_gallery.jl` regenerates every figure |
 | [`examples/generalExample.jl`](examples/generalExample.jl) | Full airfoil pipeline (C-grid, splitting, metric, smoothing) with before/after plots |
 | [`examples/generalExample_blank.jl`](examples/generalExample_blank.jl) | Template for regenerating a Tortuga grid from its metric field |
 | [`examples/plotting/`](examples/plotting) | Plots.jl helpers for grids, connectivity, metric fields and angle deviation |

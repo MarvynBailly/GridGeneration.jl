@@ -13,6 +13,7 @@ julia --project=examples -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()
 | Script | What it does |
 |---|---|
 | `generalExample.jl` | Full pipeline on a built-in case: builds an initial grid (`case = :airfoil` or `:rectangle`), splits it, redistributes the block edges according to a metric, smooths the blocks, and saves a before/after plot to `examples/output/`. Takes about a minute for the airfoil case. |
+| `gallery/run_gallery.jl` | Regenerates the figures of the [example gallery](../docs/src/pages/Examples/gallery.md): a bump channel, an annulus, a wavy channel, a multi-block backward-facing step, one layout with four metrics, and a smoothing comparison. Each case is a short file in `gallery/cases/`, and the shared helpers (domains from boundary curves, metric ingredients, figure layout) are in `gallery/gallery_tools.jl`. |
 | `generalExample_blank.jl` | Template for regenerating an existing Tortuga (`.grid` + `.metric`) grid. Fill in `metricFile` and `gridFile` at the top; the result is written to `examples/output/regenerated.grid`. |
 
 Run either with:

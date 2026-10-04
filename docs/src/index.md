@@ -16,8 +16,11 @@ user-supplied metric field. Starting from an initial single- or multi-block grid
 [`GenerateGrid`](@ref) runs the whole pipeline. Grids can be read from and written to the
 Tortuga (`.grid`) format.
 
-New here? Start with [Getting Started](./pages/GettingStarted.md), then see the
-[airfoil example](./pages/Examples/airfoil.md) and the [API Reference](./pages/api.md).
+New here? Start with [Getting Started](./pages/GettingStarted.md), browse the
+[example gallery](./pages/Examples/gallery.md) for a range of domains and metrics, and see the
+[API Reference](./pages/api.md).
+
+![One block layout adapted to four metrics](assets/images/gallery/square_metrics.png)
 
 ## Overview of the method
 
