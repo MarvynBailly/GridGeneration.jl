@@ -29,7 +29,13 @@ using GridGeneration
         for m in (25.0, 100.0, 400.0)
             x = collect(range(0, 1, length=201))
             N = G.ComputeOptimalNumberofPoints(x, s -> m)
-            @test N == floor(Int, sqrt(m))
+            @test N == round(Int, sqrt(m)) + 1     # √m intervals of length 1/√m
+        end
+        # short edges get the right spacing too (previously one interval short)
+        for (m, L) in ((900.0, 0.125), (400.0, 0.25))
+            x = collect(range(0, L, length=41))
+            N = G.ComputeOptimalNumberofPoints(x, s -> m)
+            @test N == round(Int, sqrt(m) * L) + 1
         end
         # Never fewer than 3 points
         x = collect(range(0, 1, length=11))

@@ -1,7 +1,9 @@
 """
 Compute optimal number of grid points based on metric field.
 Uses trapezoidal integration to evaluate σ_opt = sqrt(∫p ds / ∫p² ds).
-Returns floor(1/σ_opt).
+`1/σ_opt` is the optimal number of *intervals* (for a constant metric `m` on an edge of
+length `L` it is `√m L`, i.e. spacing `1/√m`), so this returns `round(1/σ_opt) + 1` points,
+and at least 3.
 """
 function ComputeOptimalNumberofPoints(x, M)
     Nn = length(x)
@@ -32,6 +34,6 @@ function ComputeOptimalNumberofPoints(x, M)
 
     sigma_opt = sqrt(numer / denom)
     # at least 3 points so one-sided second-order stencils remain valid
-    N_opt = max(3, floor(Int, 1/(sigma_opt)))
+    N_opt = max(3, round(Int, 1/(sigma_opt)) + 1)
     return N_opt
 end
