@@ -4,3 +4,4 @@ GridGeneration = "a45aac3a-c828-4b24-bd97-84998539262e"
 
 [compat]
 Documenter = "1"
+GridGeneration = "3"
